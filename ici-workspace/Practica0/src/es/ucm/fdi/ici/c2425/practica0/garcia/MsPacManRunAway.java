@@ -7,25 +7,30 @@ import pacman.game.Constants;
 import pacman.game.Game;
 
 public final class MsPacManRunAway extends PacmanController {
-	GHOST nearGhost;
-	Double minDistance=Double.MAX_VALUE, distance=Double.MAX_VALUE;
+	GHOST nearGhost = null;
+
+	int distance, minDistance;
 
 	@Override
 	public MOVE getMove(Game game, long timeDue) {
+		minDistance = Integer.MAX_VALUE;
 
 		for (GHOST ghostType : GHOST.values()) {
-			if (game.doesGhostRequireAction(ghostType))
-			distance = game.getDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(ghostType),
-					game.getPacmanLastMoveMade(), Constants.DM.PATH);
 
+			distance = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
+					game.getGhostCurrentNodeIndex(ghostType), game.getPacmanLastMoveMade());
 			if (minDistance > distance) {
 				minDistance = distance;
 				nearGhost = ghostType;
 			}
+
 		}
 
-		return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(),
-				game.getGhostCurrentNodeIndex(nearGhost), game.getPacmanLastMoveMade(), Constants.DM.PATH);
+		if (nearGhost != null)
+			return game.getApproximateNextMoveAwayFromTarget(game.getPacmanCurrentNodeIndex(),
+					game.getGhostCurrentNodeIndex(nearGhost), game.getPacmanLastMoveMade(), Constants.DM.PATH);
+
+		return MOVE.NEUTRAL;
 
 	}
 
