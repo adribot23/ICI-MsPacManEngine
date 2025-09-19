@@ -31,7 +31,7 @@ public final class Ghosts extends GhostController {
 				ghostIndex = game.getGhostCurrentNodeIndex(ghostType);
 				ghostMove = game.getGhostLastMoveMade(ghostType);
 
-				if (game.isGhostEdible(ghostType)||pacmanCloseToPowerPill(game)) {
+				if (game.isGhostEdible(ghostType) || pacmanCloseToPowerPill(game)) {
 
 					moves.put(ghostType, game.getApproximateNextMoveAwayFromTarget(ghostIndex, pacmanIndex, ghostMove,
 							Constants.DM.PATH));
