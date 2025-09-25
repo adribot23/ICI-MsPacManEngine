@@ -9,7 +9,7 @@ import pacman.game.Game;
 public final class MsPacMan extends PacmanController {
 
 	
-	int minDistance,distance,limit=20;
+	int minDistance,distance,limit=50;
 	GHOST nearGhost;
 	@Override
 	public MOVE getMove(Game game, long timeDue) {
