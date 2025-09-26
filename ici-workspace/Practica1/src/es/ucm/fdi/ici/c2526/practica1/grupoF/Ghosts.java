@@ -17,6 +17,11 @@ public class Ghosts extends GhostController {
 	private static final int POWER_PILL_DISTANCE = 10;
 	private Random rnd = new Random();
 
+	
+	// 1∫ Cuando estan comestibles huyen a sus esquinas mas cercanas excluyendo la que esta el pacman
+	// 2∫ Cuando no estan comestibles hacer  nextJunction(Game game) de 2 fanstasmas y los otros 2 normal 
+
+	
 	@Override
 	public EnumMap<GHOST, MOVE> getMove(Game game, long timeDue) {
 		EnumMap<GHOST, MOVE> ghostMove = new EnumMap<GHOST, MOVE>(GHOST.class);
@@ -32,6 +37,7 @@ public class Ghosts extends GhostController {
             if (dist > maxDist) {
                 maxDist = dist;
                 farthestPP = pp;
+              
             }
         }
         // 2. Obtener las otras dos power pills
@@ -43,13 +49,13 @@ public class Ghosts extends GhostController {
             }
         }
 
-        // 3. Asignar fantasmas a esquinas seg√∫n cercan√≠a
+        // 3. Asignar fantasmas a esquinas segn cercan≠a
         GHOST[] ghosts = GHOST.values();
         boolean[] assigned = new boolean[4];
-        int[] ghostToTarget = new int[4]; // √çndice de power pill objetivo para cada fantasma (-1 si no asignado)
+        int[] ghostToTarget = new int[4]; // ndice de power pill objetivo para cada fantasma (-1 si no asignado)
         for (int i = 0; i < 4; i++) ghostToTarget[i] = -1;
 
-        // Contar cu√°ntos fantasmas comestibles hay
+        // Contar cu°ntos fantasmas comestibles hay
         int edibleCount = 0;
         for (int i = 0; i < 4; i++) {
             if (game.isGhostEdible(ghosts[i])) edibleCount++;
@@ -57,7 +63,7 @@ public class Ghosts extends GhostController {
 
         // Solo si hay al menos dos fantasmas comestibles, aplica la estrategia de esquinas
         if (edibleCount >= 2) {
-            // Asignar los dos fantasmas comestibles m√°s cercanos a la esquina m√°s lejana
+            // Asignar los dos fantasmas comestibles m°s cercanos a la esquina m√°s lejana
             int[] distToFarthestPP = new int[4];
             for (int i = 0; i < 4; i++) {
                 distToFarthestPP[i] = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghosts[i]), farthestPP);
@@ -177,4 +183,16 @@ public class Ghosts extends GhostController {
         }
 		return ghostMove;
 	}
+	
+	int nextJunction(Game game) {
+		int node = game.getPacmanCurrentNodeIndex();
+	
+		while(!game.isJunction(node)) {
+			node = game.getNeighbour(node , game.getPacmanLastMoveMade());
+		
+		}
+		return node;
+	}
+	
+
 }
