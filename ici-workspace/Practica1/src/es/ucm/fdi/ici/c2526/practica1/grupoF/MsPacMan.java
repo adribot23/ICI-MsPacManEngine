@@ -18,6 +18,8 @@ public class MsPacMan extends PacmanController{
 	//private static final Color[] colours = {Color.RED, Color.PINK, Color.CYAN, Color.ORANGE};
 	Queue<Integer> q = new LinkedList<>();
 	Set<Integer> s = new HashSet<>();
+	
+	// No huye de las power pills cuando hay menos de 3 fantasmas fuera
 
     @Override
     public MOVE getMove(Game game, long timeDue) {
