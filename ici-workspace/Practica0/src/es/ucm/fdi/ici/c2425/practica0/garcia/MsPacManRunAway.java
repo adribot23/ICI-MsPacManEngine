@@ -18,9 +18,9 @@ public final class MsPacManRunAway extends PacmanController {
 		for (GHOST ghostType : GHOST.values()) {
 
 			if (game.getGhostLairTime(ghostType) == 0) {
-				
-				distance = game.getShortestPathDistance( game.getPacmanCurrentNodeIndex() ,game.getGhostCurrentNodeIndex(ghostType),
-						game.getPacmanLastMoveMade());
+
+				distance = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
+						game.getGhostCurrentNodeIndex(ghostType), game.getPacmanLastMoveMade());
 
 				if (minDistance > distance) {
 					minDistance = distance;
