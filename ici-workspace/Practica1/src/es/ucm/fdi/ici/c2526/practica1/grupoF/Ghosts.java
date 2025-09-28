@@ -50,7 +50,7 @@ public class Ghosts extends GhostController {
 					} else {
 						// Si tiene esquina asignada, va hacia ella
 						if (ghostToTarget[i] != -1) {
-							GameView.addLines(game, Color.BLUE, game.getGhostCurrentNodeIndex(ghostType),
+							GameView.addLines(game, Color.WHITE, game.getGhostCurrentNodeIndex(ghostType),
 									ghostToTarget[i]);
 							move = game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghostType),
 									ghostToTarget[i], game.getGhostLastMoveMade(ghostType), Constants.DM.PATH);
@@ -90,7 +90,7 @@ public class Ghosts extends GhostController {
 		return ghostMove;
 	}
 
-	int nextJunction(Game game) {
+	private int nextJunction(Game game) {
 		int node = game.getPacmanCurrentNodeIndex();
 
 		while (node != -1 && !game.isJunction(node)) {
@@ -120,13 +120,11 @@ public class Ghosts extends GhostController {
 			// posPacman);
 			// int nearestPos = (junctionPath <= pacmanPath) ? nextJunction : posPacman;
 			int nearestPos = nextJunction;
-			GameView.addPoints(game, Color.GREEN,
-					game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPos));
+			//GameView.addPoints(game, Color.WHITE, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPos));
 			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), nearestPos,
 					game.getGhostLastMoveMade(ghost), chaseMethod);
 		} else {
-			GameView.addPoints(game, Color.WHITE,
-					game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), posPacman));
+			//GameView.addPoints(game, Color.YELLOW, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), posPacman));
 			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), posPacman,
 					game.getGhostLastMoveMade(ghost), chaseMethod);
 		}
@@ -175,8 +173,7 @@ public class Ghosts extends GhostController {
 				edibleCount++;
 		}
 
-		// Solo si hay al menos dos fantasmas comestibles, aplica la estrategia de
-		// esquinas
+		// Solo si hay al menos dos fantasmas comestibles, aplica la estrategia de esquinas
 		if (edibleCount > 1) {
 			// Guardamos las distancias de cada fantasma a la pp mas lejana
 			int[] distToFarthestPP = new int[4];
