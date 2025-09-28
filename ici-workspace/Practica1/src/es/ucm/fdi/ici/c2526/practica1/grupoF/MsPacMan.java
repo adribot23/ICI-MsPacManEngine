@@ -7,9 +7,9 @@ import java.util.Queue;
 import java.util.Set;
 
 import pacman.controllers.PacmanController;
+import pacman.game.Constants;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
-import pacman.game.Constants;
 import pacman.game.Game;
 import pacman.game.GameView;
 
@@ -19,11 +19,12 @@ public class MsPacMan extends PacmanController {
 	private static final int DANGER_DISTANCE = 15;
 	private static final int TOO_CLOSE_DISTANCE = 50;
 	private static final int MIN_POWER_PILL_DISTANCE = 20;
-	//private static final int TOO_NEAR_TO_CORNER = 48;
+	// private static final int TOO_NEAR_TO_CORNER = 48;
 
 	/*
 	 * Pacman busca al fantasma mas cercano, si esta muy cerca y no es comestible
-	 * huye de el, en cambio si es combestible y le quedan mas de tres segundos en
+	 * huye de el por el camino que tenga la pill mas cercana y que no contenga
+	 * fantasmas , en cambio si es combestible y le quedan mas de tres segundos en
 	 * ese modo va a por el. Si no se da ninguno de estos casos el pacman va a la
 	 * powerpill mas cercana solo si hay mas de dos fantasmas afuera y si no hay
 	 * fantasmas en el path hacia la powerpill. En caso negativo pacman va hacia la
@@ -32,10 +33,12 @@ public class MsPacMan extends PacmanController {
 	 * restricciones
 	 */
 
-	// Para que no de la vuelta a la esquina, se me ocurre que si no hay power pill en esa esquina, 
-	// intente huir de la posicion donde deberia estar la power pill, es decir, que si se acerca a menos de 10 casillas
+	// Para que no de la vuelta a la esquina, se me ocurre que si no hay power pill
+	// en esa esquina,
+	// intente huir de la posicion donde deberia estar la power pill, es decir, que
+	// si se acerca a menos de 10 casillas
 	// o asi huya y asi no daria la vuelta
-	
+
 	@Override
 	public MOVE getMove(Game game, long timeDue) {
 
@@ -62,35 +65,49 @@ public class MsPacMan extends PacmanController {
 		// Huir del fantasma si esta muy cerca y no es comestible
 		if (closestGhost != null && minDistance < TOO_CLOSE_DISTANCE && !ghostIsEdible) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
-			//GameView.addPoints(game, Color.RED, game.getShortestPath(posGhost, posPacman));
-			return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
+			// return getEscapeMove(game, posPacman, posGhost, lastMove);
+			int pill = getNearestPill(game);
+			boolean safe = true;
+			for (int node : game.getShortestPath(posPacman, pill, lastMove)) {
+				for (GHOST g : GHOST.values()) {
+					if (game.getGhostCurrentNodeIndex(g) == node) {
+						safe = false;
+						break;
+					}
+				}
+				if (!safe)
+					break;
+			}
+			if (safe) {
+				GameView.addLines(game, Color.YELLOW, posPacman, pill);
+				game.getApproximateNextMoveTowardsTarget(posPacman, pill, lastMove, Constants.DM.PATH);
+			} else {
+				GameView.addLines(game, Color.RED, posPacman, posGhost);
+				return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
+			}
 		}
 
 		// Perseguir el fantasma si es comestible
-		if (closestGhost != null && ghostIsEdible && game.getGhostEdibleTime(closestGhost) > 3) {
+		if (closestGhost != null && ghostIsEdible && game.getGhostEdibleTime(closestGhost) > 50) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
-			//GameView.addPoints(game, Color.BLUE, game.getShortestPath(posGhost, posPacman));
+			GameView.addLines(game, Color.BLUE, posPacman, posGhost);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
 		}
 
-		/* Si en la esquina mas cercana no hay power pill, huir de ella
-		int[] inactivePowerPills = getInactivePowerPills(game);
-		int nearestCorner = -1;
-		minDistance = Integer.MAX_VALUE;
-		for(int pp : inactivePowerPills) {
-			int[] path = game.getShortestPath(posPacman, pp, lastMove);
-			if (path.length < minDistance) {
-				minDistance = path.length;
-				nearestCorner = pp;
-			}
-		}
-		if(nearestCorner != -1 && minDistance < TOO_NEAR_TO_CORNER) {
-			GameView.addPoints(game, Color.RED, game.getShortestPath(posPacman, nearestCorner));
-			return game.getApproximateNextMoveAwayFromTarget(posPacman, nearestCorner, lastMove, Constants.DM.PATH);
-		}
-		*/
-		
+		/*
+		 * Si en la esquina mas cercana no hay power pill, huir de ella int[]
+		 * inactivePowerPills = getInactivePowerPills(game); int nearestCorner = -1;
+		 * minDistance = Integer.MAX_VALUE; for(int pp : inactivePowerPills) { int[]
+		 * path = game.getShortestPath(posPacman, pp, lastMove); if (path.length <
+		 * minDistance) { minDistance = path.length; nearestCorner = pp; } }
+		 * if(nearestCorner != -1 && minDistance < TOO_NEAR_TO_CORNER) {
+		 * GameView.addPoints(game, Color.RED, game.getShortestPath(posPacman,
+		 * nearestCorner)); return game.getApproximateNextMoveAwayFromTarget(posPacman,
+		 * nearestCorner, lastMove, Constants.DM.PATH); }
+		 */
+
 		// Contar fantasmas no comestibles fuera de la guarida
+
 		int nonEdibleOut = 0;
 		for (GHOST ghost : GHOST.values()) {
 			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
@@ -154,6 +171,28 @@ public class MsPacMan extends PacmanController {
 		return safestPill;
 	}
 
+	private MOVE getEscapeMove(Game game, int posPacman, int posGhost, MOVE lastMove) {
+		MOVE[] moves = game.getPossibleMoves(posPacman, lastMove);
+		MOVE bestMove = MOVE.NEUTRAL;
+		int maxDist = -1;
+
+		for (MOVE m : moves) {
+			int next = game.getNeighbour(posPacman, m);
+			if (next != -1) {
+				// Distancia desde ese siguiente nodo al fantasma
+				int dist = game.getShortestPathDistance(next, posGhost);
+
+				// Si es mayor que lo que teníamos, elegimos esta dirección
+				if (dist > maxDist) {
+					maxDist = dist;
+					bestMove = m;
+				}
+			}
+		}
+
+		return bestMove;
+	}
+
 	private int getNearestSafePowerPill(Game game, int posPacman, int dangerDistance, boolean avoidPowerPillZone,
 			MOVE lastMove) {
 
@@ -205,58 +244,60 @@ public class MsPacMan extends PacmanController {
 		return true;
 	}
 	/*
-	private int[] getInactivePowerPills(Game game) {
-		int[] activePowerPills = game.getActivePowerPillsIndices();
-		int[] allPowerPills = game.getPowerPillIndices();
-		
-		int[] aux = new int[allPowerPills.length];
-	    int count = 0;
-	    
-		for (int p : allPowerPills) {
-	        boolean found = false;
-	        for (int a : activePowerPills) {
-	            if (a == p) {
-	                found = true;
-	                break;
-	            }
-	        }
-	        if (!found) {
-	            aux[count] = p;
-	            count++;
-	        }
-	    }
-		
-		int[] result = new int[count];
-	    for (int i = 0; i < count; i++) result[i] = aux[i];
-	    return result;
-	}
+	 * private int[] getInactivePowerPills(Game game) { int[] activePowerPills =
+	 * game.getActivePowerPillsIndices(); int[] allPowerPills =
+	 * game.getPowerPillIndices();
+	 * 
+	 * int[] aux = new int[allPowerPills.length]; int count = 0;
+	 * 
+	 * for (int p : allPowerPills) { boolean found = false; for (int a :
+	 * activePowerPills) { if (a == p) { found = true; break; } } if (!found) {
+	 * aux[count] = p; count++; } }
+	 * 
+	 * int[] result = new int[count]; for (int i = 0; i < count; i++) result[i] =
+	 * aux[i]; return result; }
 	 */
-	int getNearestPill(Game game) {
-		q.clear();
-		s.clear();
 
-		int current, index;
+	private int getNearestPill(Game game) {
+		Queue<Integer> q = new LinkedList<>();
+		Set<Integer> visited = new HashSet<>();
 
-		q.add(game.getPacmanCurrentNodeIndex());
-		s.add(game.getPacmanCurrentNodeIndex());
+		int pacmanPos = game.getPacmanCurrentNodeIndex();
+		q.add(pacmanPos);
+		visited.add(pacmanPos);
 
 		while (!q.isEmpty()) {
+			int current = q.poll();
 
-			current = q.poll();
-
-			if (game.isPillStillAvailable(current) || game.isPowerPillStillAvailable(current))
+			if (isPillNode(game, current)) {
 				return current;
+			}
 
+			// Expando vecinos (sin MOVE.NEUTRAL)
 			for (MOVE m : MOVE.values()) {
-				index = game.getNeighbour(current, m);
-				if (index != -1 && !s.contains(index)) {
-					q.add(index);
-					s.add(index);
+				int next = game.getNeighbour(current, m);
+				if (next != -1 && !visited.contains(next)) {
+					q.add(next);
+					visited.add(next);
 				}
 			}
 		}
 
 		return -1;
+	}
 
+	// Comprueba si un nodo corresponde a una pill o power pill disponible
+	private boolean isPillNode(Game game, int node) {
+		for (int p : game.getActivePillsIndices()) {
+			if (p == node && game.isPillStillAvailable(game.getPillIndex(p))) {
+				return true;
+			}
+		}
+		for (int pp : game.getActivePowerPillsIndices()) {
+			if (pp == node && game.isPowerPillStillAvailable(game.getPowerPillIndex(pp))) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

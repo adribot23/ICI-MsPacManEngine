@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.util.EnumMap;
 
 import pacman.controllers.GhostController;
+import pacman.game.Constants;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
-import pacman.game.Constants;
 import pacman.game.Game;
 import pacman.game.GameView;
 
@@ -120,11 +120,13 @@ public class Ghosts extends GhostController {
 			// posPacman);
 			// int nearestPos = (junctionPath <= pacmanPath) ? nextJunction : posPacman;
 			int nearestPos = nextJunction;
-			//GameView.addPoints(game, Color.WHITE, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPos));
+			// GameView.addPoints(game, Color.WHITE,
+			// game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPos));
 			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), nearestPos,
 					game.getGhostLastMoveMade(ghost), chaseMethod);
 		} else {
-			//GameView.addPoints(game, Color.YELLOW, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), posPacman));
+			// GameView.addPoints(game, Color.YELLOW,
+			// game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), posPacman));
 			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), posPacman,
 					game.getGhostLastMoveMade(ghost), chaseMethod);
 		}
@@ -173,7 +175,8 @@ public class Ghosts extends GhostController {
 				edibleCount++;
 		}
 
-		// Solo si hay al menos dos fantasmas comestibles, aplica la estrategia de esquinas
+		// Solo si hay al menos dos fantasmas comestibles, aplica la estrategia de
+		// esquinas
 		if (edibleCount > 1) {
 			// Guardamos las distancias de cada fantasma a la pp mas lejana
 			int[] distToFarthestPP = new int[4];
