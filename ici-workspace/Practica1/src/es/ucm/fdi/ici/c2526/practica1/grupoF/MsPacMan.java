@@ -32,7 +32,6 @@ public class MsPacMan extends PacmanController {
 	 * restricciones
 	 */
 
-
 	@Override
 	public MOVE getMove(Game game, long timeDue) {
 
@@ -54,7 +53,6 @@ public class MsPacMan extends PacmanController {
 			}
 		}
 
-		
 		int nonEdibleOut = 0;
 		for (GHOST ghost : GHOST.values()) {
 			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
@@ -67,25 +65,11 @@ public class MsPacMan extends PacmanController {
 		// Huir del fantasma si esta muy cerca y no es comestible
 		if (closestGhost != null && minDistance < TOO_CLOSE_DISTANCE && !ghostIsEdible) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
-			// return getEscapeMove(game, posPacman, posGhost, lastMove);
-			
-			/*
-			int pill = getNearestPill(game);
-			
-			boolean safe = true;
-			for (int node : game.getShortestPath(posPacman, pill, lastMove)) {
-				for (GHOST g : GHOST.values()) {
-					if (game.getGhostCurrentNodeIndex(g) == node) {
-						safe = false;
-						break;
-					}
-				}
-				if (!safe)
-					break;
-			}
-			*/
-			 int pill = getNearestSafePill(game,posPacman, MIN_POWER_PILL_DISTANCE ,DANGER_DISTANCE,avoidPowerPillZone,lastMove);
-			if (pill !=-1) {
+
+			int pill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE, avoidPowerPillZone,
+					lastMove);
+
+			if (pill != -1) {
 				GameView.addLines(game, Color.YELLOW, posPacman, pill);
 				game.getApproximateNextMoveTowardsTarget(posPacman, pill, lastMove, Constants.DM.PATH);
 			} else {
@@ -100,8 +84,6 @@ public class MsPacMan extends PacmanController {
 			GameView.addLines(game, Color.BLUE, posPacman, posGhost);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
 		}
-
-	
 
 		// Buscar power pill solo si hay 3 o mas fantasmas fuera
 		int safestPowerPill = getNearestSafePowerPill(game, posPacman, DANGER_DISTANCE, avoidPowerPillZone, lastMove);
@@ -158,7 +140,6 @@ public class MsPacMan extends PacmanController {
 		return safestPill;
 	}
 
-
 	private int getNearestSafePowerPill(Game game, int posPacman, int dangerDistance, boolean avoidPowerPillZone,
 			MOVE lastMove) {
 
@@ -209,20 +190,6 @@ public class MsPacMan extends PacmanController {
 		}
 		return true;
 	}
-	/*
-	 * private int[] getInactivePowerPills(Game game) { int[] activePowerPills =
-	 * game.getActivePowerPillsIndices(); int[] allPowerPills =
-	 * game.getPowerPillIndices();
-	 * 
-	 * int[] aux = new int[allPowerPills.length]; int count = 0;
-	 * 
-	 * for (int p : allPowerPills) { boolean found = false; for (int a :
-	 * activePowerPills) { if (a == p) { found = true; break; } } if (!found) {
-	 * aux[count] = p; count++; } }
-	 * 
-	 * int[] result = new int[count]; for (int i = 0; i < count; i++) result[i] =
-	 * aux[i]; return result; }
-	 */
 
 	private int getNearestPill(Game game) {
 		Queue<Integer> q = new LinkedList<>();

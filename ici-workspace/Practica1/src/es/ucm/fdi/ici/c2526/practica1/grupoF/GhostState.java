@@ -5,5 +5,5 @@ import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
 public interface GhostState {
-    MOVE action(Game game, GHOST ghost, int posPacman);
+	MOVE action(Game game, GHOST ghost, int posPacman);
 }

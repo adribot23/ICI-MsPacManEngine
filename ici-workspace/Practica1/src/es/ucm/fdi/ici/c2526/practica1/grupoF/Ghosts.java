@@ -12,10 +12,9 @@ import pacman.game.GameView;
 
 public class Ghosts extends GhostController {
 	EnumMap<GHOST, MOVE> ghostMove = new EnumMap<GHOST, MOVE>(GHOST.class);
-	private static final int POWER_PILL_DISTANCE = 20;
-	GHOST[] ghosts = GHOST.values();
-
 	EnumMap<GHOST, GhostState> strategies = new EnumMap<>(GHOST.class);
+	GHOST[] ghosts = GHOST.values();
+	private static final int POWER_PILL_DISTANCE = 20;
 
 	public Ghosts() {
 		strategies.put(GHOST.BLINKY, new Blinky());
@@ -51,7 +50,7 @@ public class Ghosts extends GhostController {
 				if (game.isGhostEdible(ghostType)) {
 					// Si le quedan menos de 5 seg en estado comestible, empieza a perseguir al
 					// pacman
-					if (game.getGhostEdibleTime(ghostType) < 5) {
+					if (game.getGhostEdibleTime(ghostType) < 20) {
 						move = game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghostType),
 								posPacman, game.getGhostLastMoveMade(ghostType), Constants.DM.PATH);
 
@@ -73,31 +72,38 @@ public class Ghosts extends GhostController {
 					}
 				} else {
 					// NO COMESTIBLE
-					int[] powerPills = game.getActivePowerPillsIndices();
-					boolean pacmanNearPP = false;
-					for (int pp : powerPills) {
-						int dist = game.getShortestPathDistance(posPacman, pp);
-						// Comprueba si el pacman esta a punto de comerse una pp
-						if (dist != -1 && dist < POWER_PILL_DISTANCE) {
-							pacmanNearPP = true;
-							break;
-						}
-					}
 
 					// Si el fantasma no es comestible y el pacman esta cerca de una pp, huye del
 					// pacman
-					if (pacmanNearPP)
+					if (pacmanNearPowerPill(game)) {
 						move = game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghostType),
 								posPacman, game.getGhostLastMoveMade(ghostType), Constants.DM.PATH);
-
-					g = strategies.get(ghostType);
-					move = g.action(game, ghostType, posPacman);
+					} else {
+						g = strategies.get(ghostType);
+						move = g.action(game, ghostType, posPacman);
+					}
 				}
 
 				ghostMove.put(ghostType, move);
 			}
 		}
 		return ghostMove;
+	}
+
+	boolean pacmanNearPowerPill(Game game) {
+
+		int[] powerPills = game.getActivePowerPillsIndices();
+
+		for (int pp : powerPills) {
+			int dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), pp);
+
+			if (dist != -1 && dist < POWER_PILL_DISTANCE) {
+				return true;
+			}
+		}
+
+		return false;
+
 	}
 
 	// Funcion para dispersar a los fantasmas en modo comestible

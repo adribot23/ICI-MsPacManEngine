@@ -12,56 +12,55 @@ import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 import pacman.game.GameView;
 
-public class Sue implements GhostState{
+public class Sue implements GhostState {
 
 	@Override
 	public MOVE action(Game game, GHOST ghost, int posPacman) {
-	
-	
+
 		int nextJunction = nextJunction(game);
 
-		GameView.addPoints(game, Color.ORANGE,game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nextJunction));
-		
-		return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), nextJunction,
+		if (nextJunction != -1) {
+			GameView.addPoints(game, Color.ORANGE,
+					game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nextJunction));
+			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), nextJunction,
 					game.getGhostLastMoveMade(ghost), Constants.DM.PATH);
-		
+
+		}
+		return MOVE.NEUTRAL;
+
 	}
-	
+
 	private int nextJunction(Game game) {
-	    int start = game.getPacmanCurrentNodeIndex();
-	    MOVE lastMove = game.getPacmanLastMoveMade();
+		int start = game.getPacmanCurrentNodeIndex();
+		MOVE lastMove = game.getPacmanLastMoveMade();
 
-	    Set<Integer> visited = new HashSet<>();
-	    Queue<Integer> queue = new LinkedList<>();
+		Set<Integer> visited = new HashSet<>();
+		Queue<Integer> queue = new LinkedList<>();
 
-	    queue.add(start);
-	    visited.add(start);
+		queue.add(start);
+		visited.add(start);
 
-	    while (!queue.isEmpty()) {
-	        int current = queue.poll();
+		while (!queue.isEmpty()) {
+			int current = queue.poll();
 
-	     
-	        if (current != start && game.isJunction(current)) {
-	            return current;
-	        }
+			if (current != start && game.isJunction(current)) {
+				return current;
+			}
 
-	        for (MOVE move : MOVE.values()) {
-	            if (move == MOVE.NEUTRAL) continue;
+			for (MOVE move : MOVE.values()) {
 
-	           
-	            if (current == start && move == lastMove.opposite()) {
-	                continue;
-	            }
+				if (move != MOVE.NEUTRAL && !(current == start && move == lastMove.opposite())) {
 
-	            int next = game.getNeighbour(current, move);
-	            if (next != -1 && !visited.contains(next)) {
-	                visited.add(next);
-	                queue.add(next);
-	            }
-	        }
-	    }
+					int next = game.getNeighbour(current, move);
+					if (next != -1 && !visited.contains(next)) {
+						visited.add(next);
+						queue.add(next);
+					}
+				}
+			}
+		}
 
-	  
-	    return -1;
+		return -1;
 	}
+
 }
