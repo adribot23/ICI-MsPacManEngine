@@ -15,6 +15,14 @@ public class Ghosts extends GhostController {
 	private static final int POWER_PILL_DISTANCE = 20;
 	GHOST[] ghosts = GHOST.values();
 
+	EnumMap<GHOST, GhostState> strategies = new EnumMap<>(GHOST.class);
+
+	public Ghosts() {
+		strategies.put(GHOST.BLINKY, new Blinky());
+		strategies.put(GHOST.PINKY, new Pinky());
+		strategies.put(GHOST.INKY, new Inky());
+		strategies.put(GHOST.SUE, new Sue());
+	}
 	/*
 	 * 1º Cuando son comestibles, si les queda menos de 5 segundos para que vuelvan
 	 * a la normalidad van hacia el pacman, en caso contrario huyen a sus esquinas
@@ -33,10 +41,12 @@ public class Ghosts extends GhostController {
 		int posPacman = game.getPacmanCurrentNodeIndex();
 		int[] ghostToTarget = scatter(game);
 
+		GhostState g;
 		for (int i = 0; i < 4; i++) {
 			GHOST ghostType = ghosts[i];
 			if (game.doesGhostRequireAction(ghostType)) {
 				// COMESTIBLE
+
 				MOVE move;
 				if (game.isGhostEdible(ghostType)) {
 					// Si le quedan menos de 5 seg en estado comestible, empieza a perseguir al
@@ -73,63 +83,21 @@ public class Ghosts extends GhostController {
 							break;
 						}
 					}
+
 					// Si el fantasma no es comestible y el pacman esta cerca de una pp, huye del
 					// pacman
 					if (pacmanNearPP)
 						move = game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghostType),
 								posPacman, game.getGhostLastMoveMade(ghostType), Constants.DM.PATH);
-					// Si el fantasma no es comestible y el pacman no esta cerca de pp, se persigue
-					// al pacman normal
-					else
-						move = pacmanOrJunction(game, ghostType);
+
+					g = strategies.get(ghostType);
+					move = g.action(game, ghostType, posPacman);
 				}
 
 				ghostMove.put(ghostType, move);
 			}
 		}
 		return ghostMove;
-	}
-
-	private int nextJunction(Game game) {
-		int node = game.getPacmanCurrentNodeIndex();
-
-		while (node != -1 && !game.isJunction(node)) {
-			node = game.getNeighbour(node, game.getPacmanLastMoveMade());
-
-		}
-		return node;
-	}
-
-	// Funcion para saber que fantasmas van a por el pacman y cuales a por el
-	// siguiente cruce
-	MOVE pacmanOrJunction(Game game, GHOST ghost) {
-		// MIRAR SI RENTA USAR UNA FORMA DISTINTA DE IR PARA CADA FANTASMA
-		Constants.DM[] routes = { Constants.DM.PATH, Constants.DM.MANHATTAN, Constants.DM.EUCLID, Constants.DM.PATH };
-		int ghostId = ghost.ordinal();
-		Constants.DM chaseMethod = routes[ghostId % routes.length];
-
-		int posPacman = game.getPacmanCurrentNodeIndex();
-		int nextJunction = nextJunction(game);
-
-		if (nextJunction != -1) {
-			// int junctionPath =
-			// game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost),
-			// nextJunction);
-			// int pacmanPath =
-			// game.getShortestPathDistance(game.getGhostCurrentNodeIndex(ghost),
-			// posPacman);
-			// int nearestPos = (junctionPath <= pacmanPath) ? nextJunction : posPacman;
-			int nearestPos = nextJunction;
-			// GameView.addPoints(game, Color.WHITE,
-			// game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPos));
-			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), nearestPos,
-					game.getGhostLastMoveMade(ghost), chaseMethod);
-		} else {
-			// GameView.addPoints(game, Color.YELLOW,
-			// game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), posPacman));
-			return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), posPacman,
-					game.getGhostLastMoveMade(ghost), chaseMethod);
-		}
 	}
 
 	// Funcion para dispersar a los fantasmas en modo comestible

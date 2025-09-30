@@ -16,10 +16,9 @@ import pacman.game.GameView;
 public class MsPacMan extends PacmanController {
 	Queue<Integer> q = new LinkedList<>();
 	Set<Integer> s = new HashSet<>();
-	private static final int DANGER_DISTANCE = 15;
+	private static final int DANGER_DISTANCE = 30;
 	private static final int TOO_CLOSE_DISTANCE = 50;
 	private static final int MIN_POWER_PILL_DISTANCE = 20;
-	// private static final int TOO_NEAR_TO_CORNER = 48;
 
 	/*
 	 * Pacman busca al fantasma mas cercano, si esta muy cerca y no es comestible
@@ -33,11 +32,6 @@ public class MsPacMan extends PacmanController {
 	 * restricciones
 	 */
 
-	// Para que no de la vuelta a la esquina, se me ocurre que si no hay power pill
-	// en esa esquina,
-	// intente huir de la posicion donde deberia estar la power pill, es decir, que
-	// si se acerca a menos de 10 casillas
-	// o asi huya y asi no daria la vuelta
 
 	@Override
 	public MOVE getMove(Game game, long timeDue) {
@@ -60,13 +54,24 @@ public class MsPacMan extends PacmanController {
 			}
 		}
 
+		
+		int nonEdibleOut = 0;
+		for (GHOST ghost : GHOST.values()) {
+			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
+				nonEdibleOut++;
+			}
+		}
+		boolean avoidPowerPillZone = nonEdibleOut < 3;
 		int posGhost = -1;
 
 		// Huir del fantasma si esta muy cerca y no es comestible
 		if (closestGhost != null && minDistance < TOO_CLOSE_DISTANCE && !ghostIsEdible) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
 			// return getEscapeMove(game, posPacman, posGhost, lastMove);
+			
+			/*
 			int pill = getNearestPill(game);
+			
 			boolean safe = true;
 			for (int node : game.getShortestPath(posPacman, pill, lastMove)) {
 				for (GHOST g : GHOST.values()) {
@@ -78,7 +83,9 @@ public class MsPacMan extends PacmanController {
 				if (!safe)
 					break;
 			}
-			if (safe) {
+			*/
+			 int pill = getNearestSafePill(game,posPacman, MIN_POWER_PILL_DISTANCE ,DANGER_DISTANCE,avoidPowerPillZone,lastMove);
+			if (pill !=-1) {
 				GameView.addLines(game, Color.YELLOW, posPacman, pill);
 				game.getApproximateNextMoveTowardsTarget(posPacman, pill, lastMove, Constants.DM.PATH);
 			} else {
@@ -94,27 +101,7 @@ public class MsPacMan extends PacmanController {
 			return game.getApproximateNextMoveTowardsTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
 		}
 
-		/*
-		 * Si en la esquina mas cercana no hay power pill, huir de ella int[]
-		 * inactivePowerPills = getInactivePowerPills(game); int nearestCorner = -1;
-		 * minDistance = Integer.MAX_VALUE; for(int pp : inactivePowerPills) { int[]
-		 * path = game.getShortestPath(posPacman, pp, lastMove); if (path.length <
-		 * minDistance) { minDistance = path.length; nearestCorner = pp; } }
-		 * if(nearestCorner != -1 && minDistance < TOO_NEAR_TO_CORNER) {
-		 * GameView.addPoints(game, Color.RED, game.getShortestPath(posPacman,
-		 * nearestCorner)); return game.getApproximateNextMoveAwayFromTarget(posPacman,
-		 * nearestCorner, lastMove, Constants.DM.PATH); }
-		 */
-
-		// Contar fantasmas no comestibles fuera de la guarida
-
-		int nonEdibleOut = 0;
-		for (GHOST ghost : GHOST.values()) {
-			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
-				nonEdibleOut++;
-			}
-		}
-		boolean avoidPowerPillZone = nonEdibleOut < 3;
+	
 
 		// Buscar power pill solo si hay 3 o mas fantasmas fuera
 		int safestPowerPill = getNearestSafePowerPill(game, posPacman, DANGER_DISTANCE, avoidPowerPillZone, lastMove);
@@ -171,27 +158,6 @@ public class MsPacMan extends PacmanController {
 		return safestPill;
 	}
 
-	private MOVE getEscapeMove(Game game, int posPacman, int posGhost, MOVE lastMove) {
-		MOVE[] moves = game.getPossibleMoves(posPacman, lastMove);
-		MOVE bestMove = MOVE.NEUTRAL;
-		int maxDist = -1;
-
-		for (MOVE m : moves) {
-			int next = game.getNeighbour(posPacman, m);
-			if (next != -1) {
-				// Distancia desde ese siguiente nodo al fantasma
-				int dist = game.getShortestPathDistance(next, posGhost);
-
-				// Si es mayor que lo que teníamos, elegimos esta dirección
-				if (dist > maxDist) {
-					maxDist = dist;
-					bestMove = m;
-				}
-			}
-		}
-
-		return bestMove;
-	}
 
 	private int getNearestSafePowerPill(Game game, int posPacman, int dangerDistance, boolean avoidPowerPillZone,
 			MOVE lastMove) {
