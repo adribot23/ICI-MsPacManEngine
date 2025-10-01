@@ -60,54 +60,42 @@ public class MsPacMan extends PacmanController {
 			}
 		}
 		boolean avoidPowerPillZone = nonEdibleOut < 3;
+
+	
 		int posGhost = -1;
 
 		// Huir del fantasma si esta muy cerca y no es comestible
-		if (closestGhost != null && minDistance < TOO_CLOSE_DISTANCE && !ghostIsEdible) {
-			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
-
-			int pill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE, avoidPowerPillZone,
-					lastMove);
-
-			if (pill != -1) {
-				GameView.addLines(game, Color.YELLOW, posPacman, pill);
-				game.getApproximateNextMoveTowardsTarget(posPacman, pill, lastMove, Constants.DM.PATH);
-			} else {
-				GameView.addLines(game, Color.RED, posPacman, posGhost);
-				return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
-			}
-		}
-
+		
 		// Perseguir el fantasma si es comestible
 		if (closestGhost != null && ghostIsEdible && game.getGhostEdibleTime(closestGhost) > 50) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
 			GameView.addLines(game, Color.BLUE, posPacman, posGhost);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
 		}
-
+	
 		// Buscar power pill solo si hay 3 o mas fantasmas fuera
+		// Prioridad: power pill (si permitido), si no pill normal, si no neutral
 		int safestPowerPill = getNearestSafePowerPill(game, posPacman, DANGER_DISTANCE, avoidPowerPillZone, lastMove);
 
-		// Prioridad: power pill (si permitido), si no pill normal, si no neutral
 		if (safestPowerPill != -1) {
 			GameView.addLines(game, Color.YELLOW, posPacman, safestPowerPill);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, safestPowerPill, lastMove, Constants.DM.PATH);
 		}
+		
+		int safestPill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE, avoidPowerPillZone,lastMove);
 
-		// Buscar pill normal mas segura, evitando acercarse a power pills si es
-		// necesario
-
-		int safestPill = -1;
-		safestPill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE, avoidPowerPillZone,
-				lastMove);
-
+		// Buscar pill normal mas segura, evitando acercarse a power pills si es necesario
 		if (safestPill != -1) {
 			GameView.addLines(game, Color.YELLOW, posPacman, safestPill);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, safestPill, lastMove, Constants.DM.PATH);
 		}
 
-		// return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost,
-		// lastMove, Constants.DM.PATH);
+		if (closestGhost != null && minDistance < TOO_CLOSE_DISTANCE && !ghostIsEdible) {
+			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
+				GameView.addLines(game, Color.RED, posPacman, posGhost);
+				return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
+		}
+		
 		return game.getApproximateNextMoveTowardsTarget(posPacman, getNearestPill(game), lastMove, Constants.DM.PATH);
 	}
 

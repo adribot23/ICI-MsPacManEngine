@@ -11,7 +11,7 @@ import pacman.game.GameView;
 
 public class Pinky implements GhostState {
 
-	private static final int STEPS_AHEAD = 10;
+	private static final int STEPS_AHEAD = 20;
 
 	@Override
 	public MOVE action(Game game, GHOST ghost, int posPacman) {
