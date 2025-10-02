@@ -56,7 +56,7 @@ public class Inky implements GhostState {
 			List<Integer> path = queue.poll();
 			int current = (path.isEmpty() ? start : path.get(path.size() - 1));
 
-			// Si hemos llegado al objetivo (posPacman) -> devolver camino
+			// Si hemos llegado al objetivo (posPacman) devolver camino
 			if (current == target) {
 				return path;
 			}

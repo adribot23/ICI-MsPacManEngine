@@ -16,20 +16,26 @@ import pacman.game.GameView;
 public class MsPacMan extends PacmanController {
 	Queue<Integer> q = new LinkedList<>();
 	Set<Integer> s = new HashSet<>();
-	private static final int DANGER_DISTANCE = 30;
+	private static final int DANGER_DISTANCE = 25;
 	private static final int TOO_CLOSE_DISTANCE = 50;
 	private static final int MIN_POWER_PILL_DISTANCE = 20;
 
 	/*
-	 * Pacman busca al fantasma mas cercano, si esta muy cerca y no es comestible
-	 * huye de el por el camino que tenga la pill mas cercana y que no contenga
-	 * fantasmas , en cambio si es combestible y le quedan mas de tres segundos en
-	 * ese modo va a por el. Si no se da ninguno de estos casos el pacman va a la
-	 * powerpill mas cercana solo si hay mas de dos fantasmas afuera y si no hay
-	 * fantasmas en el path hacia la powerpill. En caso negativo pacman va hacia la
-	 * pill mas cercana que no tenga fantasmas cerca ni powerpills si hay menos de
-	 * tres fantasmas fuera. Como ultmimo caso pacman va a la pill mas cercana sin
-	 * restricciones
+	 * Comportamiento del Pac-Man:
+	 *
+	 * 1. Busca el fantasma más cercano (ignorando los que están en la guarida). Si
+	 * es comestible y le quedan > 50 ticks le persigue.
+	 *
+	 * 2. Cuenta cuántos fantasmas no comestibles están fuera: - Si hay 3 o más
+	 * busca la power pill más segura y se dirige hacia ella.
+	 *
+	 * 3. Si no hay power pill disponible, busca la pill normal más segura.
+	 *
+	 * 4. Si un fantasma no comestible está demasiado cerca, huye de él.
+	 *
+	 * 5. Si nada de lo anterior aplica, ir hacia la pill más cercana sin
+	 * restricciones.
+	 * 
 	 */
 
 	@Override
@@ -61,41 +67,40 @@ public class MsPacMan extends PacmanController {
 		}
 		boolean avoidPowerPillZone = nonEdibleOut < 3;
 
-	
 		int posGhost = -1;
 
-		// Huir del fantasma si esta muy cerca y no es comestible
-		
 		// Perseguir el fantasma si es comestible
 		if (closestGhost != null && ghostIsEdible && game.getGhostEdibleTime(closestGhost) > 50) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
 			GameView.addLines(game, Color.BLUE, posPacman, posGhost);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
 		}
-	
+
 		// Buscar power pill solo si hay 3 o mas fantasmas fuera
-		// Prioridad: power pill (si permitido), si no pill normal, si no neutral
+		// Prioridad: power pill (si permitido), si no pill normal
 		int safestPowerPill = getNearestSafePowerPill(game, posPacman, DANGER_DISTANCE, avoidPowerPillZone, lastMove);
 
 		if (safestPowerPill != -1) {
 			GameView.addLines(game, Color.YELLOW, posPacman, safestPowerPill);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, safestPowerPill, lastMove, Constants.DM.PATH);
 		}
-		
-		int safestPill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE, avoidPowerPillZone,lastMove);
 
-		// Buscar pill normal mas segura, evitando acercarse a power pills si es necesario
+		int safestPill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE,
+				avoidPowerPillZone, lastMove);
+
+		// Buscar pill normal mas segura, evitando acercarse a power pills si es
+		// necesario
 		if (safestPill != -1) {
 			GameView.addLines(game, Color.YELLOW, posPacman, safestPill);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, safestPill, lastMove, Constants.DM.PATH);
 		}
-
+		// Huir del fantasma si esta muy cerca y no es comestible
 		if (closestGhost != null && minDistance < TOO_CLOSE_DISTANCE && !ghostIsEdible) {
 			posGhost = game.getGhostCurrentNodeIndex(closestGhost);
-				GameView.addLines(game, Color.RED, posPacman, posGhost);
-				return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
+			GameView.addLines(game, Color.RED, posPacman, posGhost);
+			return game.getApproximateNextMoveAwayFromTarget(posPacman, posGhost, lastMove, Constants.DM.PATH);
 		}
-		
+
 		return game.getApproximateNextMoveTowardsTarget(posPacman, getNearestPill(game), lastMove, Constants.DM.PATH);
 	}
 
@@ -114,7 +119,6 @@ public class MsPacMan extends PacmanController {
 
 			// Si hay que evitar zonas de power pills, descartar caminos que pasen cerca de
 			// ellas
-
 			if (isPathSafeFromGhosts(game, path, dangerDistance)) {
 				if (avoidPowerPillZone)
 					safe = isPathSafeFromPowerPills(game, path, powerPills, minPowerPillDist);
@@ -194,7 +198,6 @@ public class MsPacMan extends PacmanController {
 				return current;
 			}
 
-			// Expando vecinos (sin MOVE.NEUTRAL)
 			for (MOVE m : MOVE.values()) {
 				int next = game.getNeighbour(current, m);
 				if (next != -1 && !visited.contains(next)) {

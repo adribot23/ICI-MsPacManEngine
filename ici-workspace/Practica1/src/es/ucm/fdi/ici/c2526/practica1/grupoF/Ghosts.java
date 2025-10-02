@@ -22,17 +22,26 @@ public class Ghosts extends GhostController {
 		strategies.put(GHOST.INKY, new Inky());
 		strategies.put(GHOST.SUE, new Sue());
 	}
+
 	/*
-	 * 1º Cuando son comestibles, si les queda menos de 5 segundos para que vuelvan
-	 * a la normalidad van hacia el pacman, en caso contrario huyen a sus esquinas
-	 * mas cercanas excluyendo en la que esta el pacman (scatter), si no tienen
-	 * asignada una esquina huyen directamente del pacman.
 	 * 
-	 * 2º Cuando no son cometibles se comprueba si pacman esta cerca de una
-	 * powerPill, en caso afirmativo los fantasmas huyen del pacman, en caso
-	 * contrario los fantasmas eligen entre ir al siguiente cruce al que va a llegar
-	 * Pac-Man siguiendo su dirección actual (nextJunction) o ir directamente hacia
-	 * el pacman
+	 * Comportamiento de los fantasmas:
+	 *
+	 * 1º Cuando son comestibles: Si les queda menos de 5 segundos para volver a
+	 * la normalidad, van hacia Pac-Man. En caso contrario, huyen hacia sus
+	 * esquinas más cercanas (modo scatter), excluyendo la esquina donde se
+	 * encuentra Pac-Man. Si no tienen asignada una esquina, simplemente huyen
+	 * directamente de Pac-Man.
+	 *
+	 * 2º Cuando no son comestibles: Se comprueba si Pac-Man está cerca de una
+	 * power pill. Si es así, los fantasmas huyen de Pac-Man. Si no, el
+	 * comportamiento depende del tipo de fantasma:
+	 *
+	 * - Blinky (Rojo): persigue directamente a Pac-Man. 
+	 * - Pinky (Rosa): busca la Pill o powerPill más cercana para interceptar a Pac-Man.
+	 * - Inky (Azul): persigue a Pac-Man evitando nodos ocupados por otros fantasmas. 
+	 * - Sue (Naranja): se dirige al siguiente cruce más cercano al Pac-Man.
+	 * 
 	 */
 
 	@Override
