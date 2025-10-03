@@ -222,4 +222,7 @@ public class MsPacMan extends PacmanController {
 		}
 		return false;
 	}
+	public String getName() {
+		return "Los cazaPacman";
+	}
 }

@@ -202,5 +202,9 @@ public class Ghosts extends GhostController {
 		}
 		return ghostToTarget;
 	}
+	
+	public String getName() {
+		return "Los cazaPacman";
+	}
 
 }
