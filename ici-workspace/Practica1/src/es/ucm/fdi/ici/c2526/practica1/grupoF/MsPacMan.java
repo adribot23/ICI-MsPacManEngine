@@ -26,7 +26,7 @@ public class MsPacMan extends PacmanController {
 	 * 1. Busca el fantasma más cercano (ignorando los que están en la guarida). Si
 	 * es comestible y le quedan > 50 ticks le persigue.
 	 *
-	 * 2. Cuenta cuántos fantasmas no comestibles están fuera: - Si hay 3 o más
+	 * 2. Cuenta cuántos fantasmas no comestibles están fuera: Si hay 3 o más
 	 * busca la power pill más segura y se dirige hacia ella.
 	 *
 	 * 3. Si no hay power pill disponible, busca la pill normal más segura.
@@ -88,8 +88,7 @@ public class MsPacMan extends PacmanController {
 		int safestPill = getNearestSafePill(game, posPacman, MIN_POWER_PILL_DISTANCE, DANGER_DISTANCE,
 				avoidPowerPillZone, lastMove);
 
-		// Buscar pill normal mas segura, evitando acercarse a power pills si es
-		// necesario
+		// Buscar pill normal mas segura, evitando acercarse a power pills si es necesario
 		if (safestPill != -1) {
 			GameView.addLines(game, Color.YELLOW, posPacman, safestPill);
 			return game.getApproximateNextMoveTowardsTarget(posPacman, safestPill, lastMove, Constants.DM.PATH);
@@ -117,8 +116,7 @@ public class MsPacMan extends PacmanController {
 			int[] path = game.getShortestPath(posPacman, pill, lastMove);
 			boolean safe = true;
 
-			// Si hay que evitar zonas de power pills, descartar caminos que pasen cerca de
-			// ellas
+			// Si hay que evitar zonas de power pills, descartar caminos que pasen cerca de ellas
 			if (isPathSafeFromGhosts(game, path, dangerDistance)) {
 				if (avoidPowerPillZone)
 					safe = isPathSafeFromPowerPills(game, path, powerPills, minPowerPillDist);
@@ -206,19 +204,19 @@ public class MsPacMan extends PacmanController {
 				}
 			}
 		}
-
+		
 		return -1;
 	}
 
 	// Comprueba si un nodo corresponde a una pill o power pill disponible
 	private boolean isPillNode(Game game, int node) {
 		for (int p : game.getActivePillsIndices()) {
-			if (p == node && game.isPillStillAvailable(game.getPillIndex(p))) {
+			if (p == node) {
 				return true;
 			}
 		}
 		for (int pp : game.getActivePowerPillsIndices()) {
-			if (pp == node && game.isPowerPillStillAvailable(game.getPowerPillIndex(pp))) {
+			if (pp == node) {
 				return true;
 			}
 		}

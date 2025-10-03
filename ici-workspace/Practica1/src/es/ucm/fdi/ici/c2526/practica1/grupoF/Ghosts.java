@@ -15,6 +15,7 @@ public class Ghosts extends GhostController {
 	EnumMap<GHOST, GhostState> strategies = new EnumMap<>(GHOST.class);
 	GHOST[] ghosts = GHOST.values();
 	private static final int POWER_PILL_DISTANCE = 20;
+	private static final int MAX_EDIBLE_TICKS = 40;
 
 	public Ghosts() {
 		strategies.put(GHOST.BLINKY, new Blinky());
@@ -27,7 +28,7 @@ public class Ghosts extends GhostController {
 	 * 
 	 * Comportamiento de los fantasmas:
 	 *
-	 * 1º Cuando son comestibles: Si les queda menos de 5 segundos para volver a
+	 * 1º Cuando son comestibles: Si les queda menos de MAX_EDIBLE_TICKS segundos para volver a
 	 * la normalidad, van hacia Pac-Man. En caso contrario, huyen hacia sus
 	 * esquinas más cercanas (modo scatter), excluyendo la esquina donde se
 	 * encuentra Pac-Man. Si no tienen asignada una esquina, simplemente huyen
@@ -57,14 +58,12 @@ public class Ghosts extends GhostController {
 
 				MOVE move;
 				if (game.isGhostEdible(ghostType)) {
-					// Si le quedan menos de 5 seg en estado comestible, empieza a perseguir al
-					// pacman
-					if (game.getGhostEdibleTime(ghostType) < 20) {
+					// Si le quedan menos de  MAX_EDIBLE_TICKS  en estado comestible, empieza a perseguir al pacman
+					if (game.getGhostEdibleTime(ghostType) <  MAX_EDIBLE_TICKS) {
 						move = game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghostType),
 								posPacman, game.getGhostLastMoveMade(ghostType), Constants.DM.PATH);
 
-						// Si le quedan mas de 5 seg en estado comestible, se comprueba si tiene esquina
-						// asignada
+						// Si le quedan mas de MAX_EDIBLE_TICKS seg en estado comestible, se comprueba si tiene esquina asignada
 					} else {
 						// Si tiene esquina asignada, va hacia ella
 						if (ghostToTarget[i] != -1) {
@@ -82,8 +81,7 @@ public class Ghosts extends GhostController {
 				} else {
 					// NO COMESTIBLE
 
-					// Si el fantasma no es comestible y el pacman esta cerca de una pp, huye del
-					// pacman
+					// Si el fantasma no es comestible y el pacman esta cerca de una pp, huye del pacman
 					if (pacmanNearPowerPill(game)) {
 						move = game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghostType),
 								posPacman, game.getGhostLastMoveMade(ghostType), Constants.DM.PATH);
