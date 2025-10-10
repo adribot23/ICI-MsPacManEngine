@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import pacman.game.Constants;
 import pacman.game.Game;
 import pacman.game.GameView;
 
