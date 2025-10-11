@@ -9,7 +9,7 @@ import es.ucm.fdi.ici.fsm.CompoundState;
 import es.ucm.fdi.ici.fsm.FSM;
 import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.MsPacManInput;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.RandomAction;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERandomAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.RandomTransition;
 import es.ucm.fdi.ici.fsm.SimpleState;
 import es.ucm.fdi.ici.fsm.Transition;
@@ -32,9 +32,9 @@ public class MsPacMan extends PacmanController {
     	GraphFSMObserver observer = new GraphFSMObserver(fsm.toString());
     	fsm.addObserver(observer);
     	
-    	SimpleState state1 = new SimpleState("state1", new RandomAction());
-    	SimpleState state2 = new SimpleState("state2", new RandomAction());
-    	SimpleState state3 = new SimpleState("state3", new RandomAction());
+    	SimpleState state1 = new SimpleState("state1", new ERandomAction());
+    	SimpleState state2 = new SimpleState("state2", new ERandomAction());
+    	SimpleState state3 = new SimpleState("state3", new ERandomAction());
     	
     	Transition tran1 = new RandomTransition(.3);
     	Transition tran2 = new RandomTransition(.2);
@@ -45,8 +45,8 @@ public class MsPacMan extends PacmanController {
     	GraphFSMObserver c1observer = new GraphFSMObserver(cfsm1.toString());
     	cfsm1.addObserver(c1observer);
     	
-    	SimpleState cstate1 = new SimpleState("cstate1", new RandomAction());
-    	SimpleState cstate2 = new SimpleState("cstate2", new RandomAction());
+    	SimpleState cstate1 = new SimpleState("cstate1", new ERandomAction());
+    	SimpleState cstate2 = new SimpleState("cstate2", new ERandomAction());
     	Transition ctran1 = new RandomTransition(.35);
     	Transition ctran2 = new RandomTransition(.25);
     	cfsm1.add(cstate1, ctran1, cstate2);

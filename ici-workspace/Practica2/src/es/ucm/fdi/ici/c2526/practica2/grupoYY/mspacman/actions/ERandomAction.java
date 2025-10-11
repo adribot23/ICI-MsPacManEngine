@@ -6,9 +6,9 @@ import es.ucm.fdi.ici.Action;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
-public class RandomAction implements Action {
+public class ERandomAction implements Action {
 
-	public RandomAction() {
+	public ERandomAction() {
 		// TODO Auto-generated constructor stub
 	}
 
