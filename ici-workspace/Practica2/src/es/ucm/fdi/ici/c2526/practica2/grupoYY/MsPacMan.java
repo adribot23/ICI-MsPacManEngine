@@ -22,7 +22,6 @@ import pacman.game.Game;
  * The Class NearestPillPacMan.
  */
 public class MsPacMan extends PacmanController {
-
 	FSM fsm;
 	public MsPacMan() {
 		setName("MsPacMan XX");

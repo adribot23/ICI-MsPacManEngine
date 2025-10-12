@@ -8,10 +8,7 @@ import pacman.game.Game;
 
 public class ERandomAction implements Action {
 
-	public ERandomAction() {
-		// TODO Auto-generated constructor stub
-	}
-
+	
     private Random rnd = new Random();
     private MOVE[] allMoves = MOVE.values();
 	

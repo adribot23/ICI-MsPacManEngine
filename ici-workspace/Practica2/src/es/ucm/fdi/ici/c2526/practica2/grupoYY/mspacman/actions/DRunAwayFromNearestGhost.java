@@ -6,8 +6,9 @@ import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
-public class AChaseNearestEdibleAction implements Action {
+public class DRunAwayFromNearestGhost implements Action {
 
+	
 	@Override
 	public MOVE execute(Game game) {
 		int posPacman = game.getPacmanCurrentNodeIndex();
@@ -15,7 +16,7 @@ public class AChaseNearestEdibleAction implements Action {
 		GHOST closestGhost = null;
 
 		for (GHOST ghost : GHOST.values()) {
-			if (game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
+			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
 				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
 						game.getGhostLastMoveMade(ghost));
 				if (dist < minDistance) {
@@ -25,14 +26,16 @@ public class AChaseNearestEdibleAction implements Action {
 			}
 		}
 
-		return game.getApproximateNextMoveTowardsTarget(posPacman, game.getGhostCurrentNodeIndex(closestGhost),
+		return game.getApproximateNextMoveAwayFromTarget(posPacman, game.getGhostCurrentNodeIndex(closestGhost),
 				game.getGhostLastMoveMade(closestGhost), DM.PATH);
 
 	}
 
 	@Override
 	public String getActionId() {
-		return "Chase Nearest Edible Ghost";
+		// TODO Auto-generated method stub
+		return "Run Away From Nearest Ghost";
 	}
 
+	
 }
