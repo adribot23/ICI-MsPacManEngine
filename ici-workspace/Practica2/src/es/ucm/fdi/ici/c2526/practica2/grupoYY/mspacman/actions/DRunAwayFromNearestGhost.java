@@ -8,7 +8,6 @@ import pacman.game.Game;
 
 public class DRunAwayFromNearestGhost implements Action {
 
-	
 	@Override
 	public MOVE execute(Game game) {
 		int posPacman = game.getPacmanCurrentNodeIndex();
@@ -37,5 +36,4 @@ public class DRunAwayFromNearestGhost implements Action {
 		return "Run Away From Nearest Ghost";
 	}
 
-	
 }

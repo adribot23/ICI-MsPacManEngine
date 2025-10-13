@@ -9,6 +9,9 @@ import es.ucm.fdi.ici.fsm.CompoundState;
 import es.ucm.fdi.ici.fsm.FSM;
 import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.MsPacManInput;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayFromNearestGhost;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePPAction;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePillAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERandomAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.RandomTransition;
 import es.ucm.fdi.ici.fsm.SimpleState;
@@ -23,70 +26,72 @@ import pacman.game.Game;
  */
 public class MsPacMan extends PacmanController {
 	FSM fsm;
+
 	public MsPacMan() {
 		setName("MsPacMan XX");
-		
-    	fsm = new FSM("MsPacMan");
-    	
-    	GraphFSMObserver observer = new GraphFSMObserver(fsm.toString());
-    	fsm.addObserver(observer);
-    	
-    	SimpleState state1 = new SimpleState("state1", new ERandomAction());
-    	SimpleState state2 = new SimpleState("state2", new ERandomAction());
-    	SimpleState state3 = new SimpleState("state3", new ERandomAction());
-    	
-    	Transition tran1 = new RandomTransition(.3);
-    	Transition tran2 = new RandomTransition(.2);
-    	Transition tran3 = new RandomTransition(.1);
-    	Transition tran4 = new RandomTransition(.01);
-    	
-    	FSM cfsm1 = new FSM("Compound1");
-    	GraphFSMObserver c1observer = new GraphFSMObserver(cfsm1.toString());
-    	cfsm1.addObserver(c1observer);
-    	
-    	SimpleState cstate1 = new SimpleState("cstate1", new ERandomAction());
-    	SimpleState cstate2 = new SimpleState("cstate2", new ERandomAction());
-    	Transition ctran1 = new RandomTransition(.35);
-    	Transition ctran2 = new RandomTransition(.25);
-    	cfsm1.add(cstate1, ctran1, cstate2);
-    	cfsm1.add(cstate2, ctran2, cstate1);
-    	cfsm1.ready(cstate1);
-    	CompoundState compound1 = new CompoundState("compound1", cfsm1);
-    	
-    	fsm.add(state1, tran1, state2);
-    	fsm.add(state2, tran2, state3);
-    	fsm.add(state3, tran3, compound1);
-    	fsm.add(compound1, tran4, state1);
 
-    	fsm.ready(state1);
-    	
-    	
-    	JFrame frame = new JFrame();
-    	JPanel main = new JPanel();
-    	main.setLayout(new BorderLayout());
-    	main.add(observer.getAsPanel(true, null), BorderLayout.CENTER);
-    	main.add(c1observer.getAsPanel(true, null), BorderLayout.SOUTH);
-    	frame.getContentPane().add(main);
-    	frame.pack();
-    	frame.setVisible(true);
-    	
+		fsm = new FSM("MsPacMan");
+
+		GraphFSMObserver observer = new GraphFSMObserver(fsm.toString());
+		fsm.addObserver(observer);
+
+		SimpleState state1 = new SimpleState("state1", new ERandomAction());
+		SimpleState state2 = new SimpleState("state2", new ERandomAction());
+		SimpleState state3 = new SimpleState("state3", new ERandomAction());
+
+		Transition tran1 = new RandomTransition(.3);
+		Transition tran2 = new RandomTransition(.2);
+		Transition tran3 = new RandomTransition(.1);
+		Transition tran4 = new RandomTransition(.01);
+
+		FSM defenseCFSM = new FSM("Compound1");
+		GraphFSMObserver c1observer = new GraphFSMObserver(defenseCFSM.toString());
+		defenseCFSM.addObserver(c1observer);
+
+		SimpleState DGhost = new SimpleState("RunAwayFromNearestGhost", new DRunAwayFromNearestGhost());
+		SimpleState DPowerPill = new SimpleState("RunAwayToNearestSafePPAction", new DRunAwayToNearestSafePPAction());
+		SimpleState DPill = new SimpleState("RunAwayToNearestSafePillAction", new DRunAwayToNearestSafePillAction());
+
+		Transition ctran1 = new RandomTransition(.35);
+		Transition ctran2 = new RandomTransition(.25);
+
+		defenseCFSM.add(DGhost, ctran1, DPowerPill);
+		defenseCFSM.add(DPowerPill, ctran2, DPill);
+		defenseCFSM.ready(DGhost);
+
+		CompoundState defense = new CompoundState("defense", defenseCFSM);
+
+		fsm.add(state1, tran1, defense);
+		fsm.add(defense, tran2, state1);
+		fsm.add(defense, tran3, state2);
+		fsm.add(state2, tran4, defense);
+
+		fsm.ready(state1);
+
+		JFrame frame = new JFrame();
+		JPanel main = new JPanel();
+		main.setLayout(new BorderLayout());
+		main.add(observer.getAsPanel(true, null), BorderLayout.CENTER);
+		main.add(c1observer.getAsPanel(true, null), BorderLayout.SOUTH);
+		frame.getContentPane().add(main);
+		frame.pack();
+		frame.setVisible(true);
+
 	}
-	
-	
+
 	public void preCompute(String opponent) {
-    		fsm.reset();
-    }
-	
-	
-	
-    /* (non-Javadoc)
-     * @see pacman.controllers.Controller#getMove(pacman.game.Game, long)
-     */
-    @Override
-    public MOVE getMove(Game game, long timeDue) {
-    	Input in = new MsPacManInput(game); 
-    	return fsm.run(in);
-    }
-    
-    
+		fsm.reset();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pacman.controllers.Controller#getMove(pacman.game.Game, long)
+	 */
+	@Override
+	public MOVE getMove(Game game, long timeDue) {
+		Input in = new MsPacManInput(game);
+		return fsm.run(in);
+	}
+
 }

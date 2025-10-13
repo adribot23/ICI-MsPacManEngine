@@ -8,10 +8,9 @@ import pacman.game.Game;
 
 public class ERandomAction implements Action {
 
-	
-    private Random rnd = new Random();
-    private MOVE[] allMoves = MOVE.values();
-	
+	private Random rnd = new Random();
+	private MOVE[] allMoves = MOVE.values();
+
 	@Override
 	public MOVE execute(Game game) {
 		return allMoves[rnd.nextInt(allMoves.length)];

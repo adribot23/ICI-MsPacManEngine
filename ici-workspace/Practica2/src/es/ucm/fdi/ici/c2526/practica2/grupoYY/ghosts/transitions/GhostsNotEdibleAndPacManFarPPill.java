@@ -8,14 +8,15 @@ import pacman.game.Constants.GHOST;
 public class GhostsNotEdibleAndPacManFarPPill implements Transition {
 
 	GHOST ghost;
+
 	public GhostsNotEdibleAndPacManFarPPill(GHOST ghost) {
 		super();
 		this.ghost = ghost;
 	}
-	
+
 	@Override
 	public boolean evaluate(Input in) {
-		GhostsInput input = (GhostsInput)in;
+		GhostsInput input = (GhostsInput) in;
 		GhostsEdibleTransition edible = new GhostsEdibleTransition(ghost);
 		PacManNearPPillTransition near = new PacManNearPPillTransition();
 		return !edible.evaluate(input) && !near.evaluate(input);
@@ -26,6 +27,4 @@ public class GhostsNotEdibleAndPacManFarPPill implements Transition {
 		return "Ghost not edible and MsPacman far PPill";
 	}
 
-	
-	
 }

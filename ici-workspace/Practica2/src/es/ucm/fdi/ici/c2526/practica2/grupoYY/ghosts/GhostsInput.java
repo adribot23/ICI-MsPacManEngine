@@ -12,7 +12,7 @@ public class GhostsInput extends Input {
 	private boolean PINKYedible;
 	private boolean SUEedible;
 	private double minPacmanDistancePPill;
-	
+
 	public GhostsInput(Game game) {
 		super(game);
 	}
@@ -23,10 +23,10 @@ public class GhostsInput extends Input {
 		this.INKYedible = game.isGhostEdible(GHOST.INKY);
 		this.PINKYedible = game.isGhostEdible(GHOST.PINKY);
 		this.SUEedible = game.isGhostEdible(GHOST.SUE);
-	
+
 		int pacman = game.getPacmanCurrentNodeIndex();
 		this.minPacmanDistancePPill = Double.MAX_VALUE;
-		for(int ppill: game.getPowerPillIndices()) {
+		for (int ppill : game.getPowerPillIndices()) {
 			double distance = game.getDistance(pacman, ppill, DM.PATH);
 			this.minPacmanDistancePPill = Math.min(distance, this.minPacmanDistancePPill);
 		}
@@ -52,8 +52,4 @@ public class GhostsInput extends Input {
 		return minPacmanDistancePPill;
 	}
 
-
-
-	
-	
 }

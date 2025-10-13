@@ -8,19 +8,16 @@ import pacman.game.Game;
 
 public class DRunAwayToNearestSafePillAction implements Action {
 
-	
-	
 	@Override
 	public MOVE execute(Game game) {
 		PacmanMethods p = new PacmanMethods();
-		return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), 
-				p.getNearestSafePill(game), game.getPacmanLastMoveMade(), DM.PATH);
+		return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), p.getNearestSafePill(game),
+				game.getPacmanLastMoveMade(), DM.PATH);
 	}
 
 	@Override
 	public String getActionId() {
 		return "RunAway To Nearest Safe Pill";
 	}
-
 
 }

@@ -11,11 +11,10 @@ import pacman.game.Game;
 
 public class PacmanMethods {
 
-	
-	public  int getNearestSafePill(Game game) {
+	public int getNearestSafePill(Game game) {
 		int[] pills = game.getActivePillsIndices();
 		int[] powerPills = game.getActivePowerPillsIndices();
-		int posPacman= game.getPacmanCurrentNodeIndex();
+		int posPacman = game.getPacmanCurrentNodeIndex();
 		MOVE lastMove = game.getPacmanLastMoveMade();
 		int safestPill = -1;
 		int minDistance = Integer.MAX_VALUE;
@@ -37,7 +36,6 @@ public class PacmanMethods {
 		return safestPill;
 	}
 
-
 	public int getNearestSafePowerPill(Game game) {
 		if (avoidPowerPillZone(game))
 			return -1;
@@ -45,9 +43,9 @@ public class PacmanMethods {
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int safestPowerPill = -1;
 		int minDistance = Integer.MAX_VALUE;
-		int posPacman= game.getPacmanCurrentNodeIndex();
+		int posPacman = game.getPacmanCurrentNodeIndex();
 		MOVE lastMove = game.getPacmanLastMoveMade();
-		
+
 		for (int pp : powerPills) {
 			int[] path = game.getShortestPath(posPacman, pp, lastMove);
 			if (isPathSafeFromGhosts(game, path)) {
@@ -61,7 +59,6 @@ public class PacmanMethods {
 		return safestPowerPill;
 	}
 
-	
 	public int getNearestPill(Game game) {
 		Queue<Integer> q = new LinkedList<>();
 		Set<Integer> visited = new HashSet<>();
@@ -124,7 +121,7 @@ public class PacmanMethods {
 		}
 		return true;
 	}
-	
+
 	private boolean avoidPowerPillZone(Game game) {
 		int nonEdibleOut = 0;
 		for (GHOST ghost : GHOST.values()) {

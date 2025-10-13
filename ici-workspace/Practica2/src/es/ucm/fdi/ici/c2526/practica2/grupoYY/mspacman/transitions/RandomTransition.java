@@ -6,6 +6,7 @@ import es.ucm.fdi.ici.fsm.Transition;
 public class RandomTransition implements Transition {
 
 	private double probability;
+
 	public RandomTransition(double probability) {
 		this.probability = probability;
 	}

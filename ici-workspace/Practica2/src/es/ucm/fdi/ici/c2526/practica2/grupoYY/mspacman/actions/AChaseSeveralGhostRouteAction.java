@@ -4,7 +4,7 @@ import es.ucm.fdi.ici.Action;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
-public class AChaseSeveralGhostRouteAction implements Action{
+public class AChaseSeveralGhostRouteAction implements Action {
 
 	@Override
 	public MOVE execute(Game game) {
@@ -12,7 +12,6 @@ public class AChaseSeveralGhostRouteAction implements Action{
 		return null;
 	}
 
-	
 	@Override
 	public String getActionId() {
 		// TODO Auto-generated method stub

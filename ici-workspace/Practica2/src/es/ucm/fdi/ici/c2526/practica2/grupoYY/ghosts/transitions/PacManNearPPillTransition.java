@@ -7,11 +7,10 @@ import es.ucm.fdi.ici.fsm.Transition;
 public class PacManNearPPillTransition implements Transition {
 
 	public static double thresold = 30;
-	
+
 	public PacManNearPPillTransition() {
 		super();
 	}
-
 
 	@Override
 	public boolean evaluate(Input in) {
@@ -19,11 +18,9 @@ public class PacManNearPPillTransition implements Transition {
 		return input.getMinPacmanDistancePPill() < thresold;
 	}
 
-
 	@Override
 	public String toString() {
 		return "MsPacman near PPill";
 	}
-	
-}
 
+}
