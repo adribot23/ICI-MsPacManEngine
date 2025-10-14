@@ -13,10 +13,17 @@ import pacman.game.Constants.MOVE;
 
 public class MsPacManInput extends Input {
 
+	private static final int GHOST_IS_FAR = 150;
+	private static final int GHOST_IS_NEAR = 50;
+	
 	private boolean avoidPowerPills;
 	private boolean powerPillEaten;
 	private boolean edibleGhostInGame;
 	private boolean nearNotEdibleGhost;
+	private boolean onlyOneFarEdibleGhost;
+	private boolean twoOrMoreGhostsCloseEachOther;
+	private boolean ghostEaten;
+	private boolean nearToEdibleGhost;
 	private int nearestSafePill;
 	private int nearestSafePP;
 	
@@ -30,10 +37,61 @@ public class MsPacManInput extends Input {
 		avoidPowerPills = avoidPowerPillZone();
 		edibleGhostInGame=  edibleGhostInGame();
 		nearNotEdibleGhost= nearNotEdibleGhost();
+		onlyOneFarEdibleGhost = onlyOneFarEdibleGhost();
+		twoOrMoreGhostsCloseEachOther = twoOrMoreGhostsCloseEachOther();
+		ghostEaten = ghostEaten();
+		nearToEdibleGhost = nearToEdibleGhost();
 		
 		nearestSafePill = getNearestSafePill();
 		nearestSafePP = getNearestSafePowerPill();
 
+	}
+
+	public boolean nearToEdibleGhost() {
+		int dist = 0, minDist = Integer.MAX_VALUE;
+		nearToEdibleGhost = false;
+		for(GHOST g : GHOST.values()) {
+			if (game.isGhostEdible(g)) {
+				dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
+				if(minDist > dist) minDist = dist;
+			}
+		}
+		if(minDist < GHOST_IS_NEAR) nearToEdibleGhost = true;
+		
+		return nearToEdibleGhost;
+	}
+
+	public boolean ghostEaten() {
+		ghostEaten = false;
+		for(GHOST g : GHOST.values()) {
+			if (game.wasGhostEaten(g)) {
+				ghostEaten = true;
+				return ghostEaten;
+			}
+		}
+		return ghostEaten;
+	}
+
+	public boolean twoOrMoreGhostsCloseEachOther() {
+		// Implementar
+		return twoOrMoreGhostsCloseEachOther;
+	}
+
+	public boolean onlyOneFarEdibleGhost() {
+		int dist = 0, cont = 0;
+		onlyOneFarEdibleGhost = false;
+		for(GHOST g : GHOST.values()) {
+			if (game.isGhostEdible(g)) {
+				cont++;
+				if (cont == 1) 
+					dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
+				else if (cont > 1) 
+					break;
+			}
+		}
+		if (cont == 1 && dist >= GHOST_IS_FAR) onlyOneFarEdibleGhost = true;
+		
+		return onlyOneFarEdibleGhost;
 	}
 
 	public boolean avoidPowerPills() {
@@ -49,14 +107,25 @@ public class MsPacManInput extends Input {
 	}
 	
 	public boolean isNearNotEdibleGhost() {
+		int dist = 0, minDist = Integer.MAX_VALUE;
+		nearNotEdibleGhost = false;
+		for(GHOST g : GHOST.values()) {
+			if (!game.isGhostEdible(g)) {
+				dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
+				if(minDist > dist) minDist = dist;
+			}
+		}
+		if(minDist < GHOST_IS_NEAR) nearNotEdibleGhost = true;
+		
 		return nearNotEdibleGhost;
 	}
+	
 	public int getNearestSafePill() {
-		return nearestSafePill;
+		return nearestSafePill();
 	}
 
 	public int getNearestSafePowerPill() {
-		return nearestSafePP;
+		return nearestSafePowerPill();
 	}
 
 	private boolean edibleGhostInGame() {
@@ -65,7 +134,22 @@ public class MsPacManInput extends Input {
 			if(game.isGhostEdible(g)) return true;
 		
 		return false;
+	}
+	
+	private boolean nearNotEdibleGhost() {
+		int posPacman = game.getPacmanCurrentNodeIndex();
 		
+		for (GHOST ghost : GHOST.values()) {
+			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
+				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
+						game.getGhostLastMoveMade(ghost));
+				if (dist <PacmanConfig.DANGER_DISTANCE) {
+					return true;
+				}
+			}
+		}
+		return false;
+
 	}
 	
 	private int nearestSafePill() {
@@ -187,22 +271,5 @@ public class MsPacManInput extends Input {
 			}
 		}
 		return nonEdibleOut < 3;
-	}
-
-	
-	private boolean nearNotEdibleGhost() {
-		int posPacman = game.getPacmanCurrentNodeIndex();
-		
-		for (GHOST ghost : GHOST.values()) {
-			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
-				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
-						game.getGhostLastMoveMade(ghost));
-				if (dist <PacmanConfig.DANGER_DISTANCE) {
-					return true;
-				}
-			}
-		}
-		return false;
-
 	}
 }
