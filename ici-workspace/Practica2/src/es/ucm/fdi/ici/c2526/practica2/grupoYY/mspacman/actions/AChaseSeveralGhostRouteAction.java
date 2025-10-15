@@ -1,6 +1,7 @@
 package es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions;
 
 import es.ucm.fdi.ici.Action;
+import pacman.game.Constants.DM;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
@@ -8,13 +9,14 @@ public class AChaseSeveralGhostRouteAction implements Action {
 
 	@Override
 	public MOVE execute(Game game) {
-		// TODO Auto-generated method stub
-		return null;
+		PacmanMethods p = new PacmanMethods();
+		return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(),
+				p.twoOrMoreGhostsCloseEachOther(game),game.getPacmanLastMoveMade(), DM.PATH);
+		
 	}
 
 	@Override
 	public String getActionId() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Chase Several Ghost Route Action";
 	}
 }

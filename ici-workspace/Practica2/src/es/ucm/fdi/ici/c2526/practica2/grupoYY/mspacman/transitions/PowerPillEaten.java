@@ -9,7 +9,7 @@ public class PowerPillEaten implements Transition {
 	@Override
 	public boolean evaluate(Input in) {
 		MsPacManInput input = (MsPacManInput) in;
-		return input.wasPowerPillEaten();
+		return input.getWasPowerPillEaten();
 	}
 
 }

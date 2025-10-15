@@ -9,7 +9,7 @@ public class NearestPowerPillNotSafe implements Transition {
 	@Override
 	public boolean evaluate(Input in) {
 		MsPacManInput input = (MsPacManInput) in;
-		return input.avoidPowerPills() || input.getNearestSafePowerPill() == -1;
+		return input.getAvoidPowerPills() || input.getNearestSafePowerPill() == -1;
 	}
 
 }

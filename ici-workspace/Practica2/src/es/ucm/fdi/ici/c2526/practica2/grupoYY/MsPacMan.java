@@ -13,6 +13,7 @@ import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayFromNeare
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePPAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePillAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERandomAction;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.NearestPowerPillisSafeAndMoreThan2GhostsOut;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.RandomTransition;
 import es.ucm.fdi.ici.fsm.SimpleState;
 import es.ucm.fdi.ici.fsm.Transition;
@@ -44,7 +45,7 @@ public class MsPacMan extends PacmanController {
 		Transition tran3 = new RandomTransition(.1);
 		Transition tran4 = new RandomTransition(.01);
 
-		FSM defenseCFSM = new FSM("Compound1");
+		FSM defenseCFSM = new FSM("DEFENSE");
 		GraphFSMObserver c1observer = new GraphFSMObserver(defenseCFSM.toString());
 		defenseCFSM.addObserver(c1observer);
 
@@ -52,11 +53,12 @@ public class MsPacMan extends PacmanController {
 		SimpleState DPowerPill = new SimpleState("RunAwayToNearestSafePPAction", new DRunAwayToNearestSafePPAction());
 		SimpleState DPill = new SimpleState("RunAwayToNearestSafePillAction", new DRunAwayToNearestSafePillAction());
 
-		Transition ctran1 = new RandomTransition(.35);
-		Transition ctran2 = new RandomTransition(.25);
+		Transition defense = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		
 
-		defenseCFSM.add(DGhost, ctran1, DPowerPill);
-		defenseCFSM.add(DPowerPill, ctran2, DPill);
+		defenseCFSM.add(DGhost, defense, DPowerPill);
+		defenseCFSM.add(DPowerPill, defense, DPill);
+		
 		defenseCFSM.ready(DGhost);
 
 		CompoundState defense = new CompoundState("defense", defenseCFSM);

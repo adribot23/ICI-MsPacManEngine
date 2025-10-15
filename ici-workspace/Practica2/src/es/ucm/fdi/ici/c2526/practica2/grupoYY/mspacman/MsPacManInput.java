@@ -2,68 +2,106 @@ package es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
 import es.ucm.fdi.ici.Input;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.PacmanConfig;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.PacmanMethods;
+import gate.util.Pair;
 import pacman.game.Game;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 
 public class MsPacManInput extends Input {
 
-	private static final int GHOST_IS_FAR = 150;
-	private static final int GHOST_IS_NEAR = 50;
-	
 	private boolean avoidPowerPills;
 	private boolean powerPillEaten;
 	private boolean edibleGhostInGame;
 	private boolean nearNotEdibleGhost;
 	private boolean onlyOneFarEdibleGhost;
-	private boolean twoOrMoreGhostsCloseEachOther;
 	private boolean ghostEaten;
 	private boolean nearToEdibleGhost;
+	private int twoOrMoreGhostsCloseEachOther;
 	private int nearestSafePill;
 	private int nearestSafePP;
-	
+	private int safeZone;
+
+	private PacmanMethods methods;
+
 	public MsPacManInput(Game game) {
 		super(game);
+		methods = new PacmanMethods();
 	}
 
 	@Override
 	public void parseInput() {
 		powerPillEaten = game.wasPowerPillEaten();
 		avoidPowerPills = avoidPowerPillZone();
-		edibleGhostInGame=  edibleGhostInGame();
-		nearNotEdibleGhost= nearNotEdibleGhost();
+		edibleGhostInGame = edibleGhostInGame();
+		nearNotEdibleGhost = nearNotEdibleGhost();
 		onlyOneFarEdibleGhost = onlyOneFarEdibleGhost();
 		twoOrMoreGhostsCloseEachOther = twoOrMoreGhostsCloseEachOther();
 		ghostEaten = ghostEaten();
 		nearToEdibleGhost = nearToEdibleGhost();
-		
-		nearestSafePill = getNearestSafePill();
-		nearestSafePP = getNearestSafePowerPill();
+		safeZone = findSafeZone();
+		nearestSafePill = findNearestSafePill();
+		nearestSafePP = findNearestSafePowerPill();
 
 	}
 
+	public int getTwoOrMoreGhostsCloseEachOther() {
+
+		return twoOrMoreGhostsCloseEachOther;
+	}
+
+	public boolean getAvoidPowerPills() {
+		return avoidPowerPills;
+	}
+
+	public boolean getWasPowerPillEaten() {
+		return powerPillEaten;
+	}
+
+	public boolean getIsEdibleGhostInGame() {
+		return edibleGhostInGame;
+	}
+
+	public int getNearestSafePill() {
+		return nearestSafePill;
+	}
+
+	public int getNearestSafePowerPill() {
+		return nearestSafePP;
+	}
+
+	public int getSafeZone() {
+		return safeZone;
+	}
+
+	public boolean getGhostEaten() {
+		return ghostEaten;
+	}
+	
 	public boolean nearToEdibleGhost() {
 		int dist = 0, minDist = Integer.MAX_VALUE;
 		nearToEdibleGhost = false;
-		for(GHOST g : GHOST.values()) {
+		for (GHOST g : GHOST.values()) {
 			if (game.isGhostEdible(g)) {
 				dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
-				if(minDist > dist) minDist = dist;
+				if (minDist > dist)
+					minDist = dist;
 			}
 		}
-		if(minDist < GHOST_IS_NEAR) nearToEdibleGhost = true;
-		
+		if (minDist < PacmanConfig.GHOST_IS_NEAR)
+			nearToEdibleGhost = true;
+
 		return nearToEdibleGhost;
 	}
 
 	public boolean ghostEaten() {
 		ghostEaten = false;
-		for(GHOST g : GHOST.values()) {
+		for (GHOST g : GHOST.values()) {
 			if (game.wasGhostEaten(g)) {
 				ghostEaten = true;
 				return ghostEaten;
@@ -72,78 +110,58 @@ public class MsPacManInput extends Input {
 		return ghostEaten;
 	}
 
-	public boolean twoOrMoreGhostsCloseEachOther() {
-		// Implementar
-		return twoOrMoreGhostsCloseEachOther;
-	}
-
 	public boolean onlyOneFarEdibleGhost() {
 		int dist = 0, cont = 0;
 		onlyOneFarEdibleGhost = false;
-		for(GHOST g : GHOST.values()) {
+		for (GHOST g : GHOST.values()) {
 			if (game.isGhostEdible(g)) {
 				cont++;
-				if (cont == 1) 
-					dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
-				else if (cont > 1) 
+				if (cont == 1)
+					dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
+							game.getGhostCurrentNodeIndex(g));
+				else if (cont > 1)
 					break;
 			}
 		}
-		if (cont == 1 && dist >= GHOST_IS_FAR) onlyOneFarEdibleGhost = true;
-		
+		if (cont == 1 && dist >= PacmanConfig.GHOST_IS_FAR)
+			onlyOneFarEdibleGhost = true;
+
 		return onlyOneFarEdibleGhost;
 	}
 
-	public boolean avoidPowerPills() {
-		return avoidPowerPills;
-	}
-
-	public boolean wasPowerPillEaten() {
-		return powerPillEaten;
-	}
-
-	public boolean isEdibleGhostInGame() {
-		return edibleGhostInGame;
-	}
-	
 	public boolean isNearNotEdibleGhost() {
 		int dist = 0, minDist = Integer.MAX_VALUE;
 		nearNotEdibleGhost = false;
-		for(GHOST g : GHOST.values()) {
+		for (GHOST g : GHOST.values()) {
 			if (!game.isGhostEdible(g)) {
 				dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
-				if(minDist > dist) minDist = dist;
+				if (minDist > dist)
+					minDist = dist;
 			}
 		}
-		if(minDist < GHOST_IS_NEAR) nearNotEdibleGhost = true;
-		
-		return nearNotEdibleGhost;
-	}
-	
-	public int getNearestSafePill() {
-		return nearestSafePill();
-	}
+		if (minDist < PacmanConfig.GHOST_IS_NEAR)
+			nearNotEdibleGhost = true;
 
-	public int getNearestSafePowerPill() {
-		return nearestSafePowerPill();
+		return nearNotEdibleGhost;
 	}
 
 	private boolean edibleGhostInGame() {
-		
-		for(GHOST g:GHOST.values()) 
-			if(game.isGhostEdible(g)) return true;
-		
+
+		for (GHOST g : GHOST.values())
+			if (game.isGhostEdible(g))
+				return true;
+
 		return false;
 	}
-	
+
 	private boolean nearNotEdibleGhost() {
 		int posPacman = game.getPacmanCurrentNodeIndex();
-		
+
 		for (GHOST ghost : GHOST.values()) {
 			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
 				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
 						game.getGhostLastMoveMade(ghost));
-				if (dist <PacmanConfig.DANGER_DISTANCE) {
+				if (dist < PacmanConfig.DANGER_DISTANCE) {
 					return true;
 				}
 			}
@@ -151,8 +169,8 @@ public class MsPacManInput extends Input {
 		return false;
 
 	}
-	
-	private int nearestSafePill() {
+
+	private int findNearestSafePill() {
 		int[] pills = game.getActivePillsIndices();
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int posPacman = game.getPacmanCurrentNodeIndex();
@@ -177,7 +195,7 @@ public class MsPacManInput extends Input {
 		return safestPill;
 	}
 
-	private int nearestSafePowerPill() {
+	private int findNearestSafePowerPill() {
 		if (avoidPowerPillZone())
 			return -1;
 
@@ -200,7 +218,7 @@ public class MsPacManInput extends Input {
 		return safestPowerPill;
 	}
 
-	private int nearestPill() {
+	private int findNearestPill() {
 		Queue<Integer> q = new LinkedList<>();
 		Set<Integer> visited = new HashSet<>();
 
@@ -271,5 +289,57 @@ public class MsPacManInput extends Input {
 			}
 		}
 		return nonEdibleOut < 3;
+	}
+
+	private int findSafeZone() {
+		int[] esquinas = game.getPowerPillIndices();
+
+		int safeZone = -1;
+		int masCercano = Integer.MAX_VALUE;
+		for (int esquina : esquinas) {
+			int[] path = game.getShortestPath(game.getPacmanCurrentNodeIndex(), esquina, game.getPacmanLastMoveMade());
+			if (isPathSafeFromGhosts(path) && path.length < masCercano) {
+				safeZone = esquina;
+				masCercano = path.length;
+
+			}
+		}
+
+		return safeZone;
+	}
+
+	private int twoOrMoreGhostsCloseEachOther() {
+		int closestGhost = -1 ;
+		int minDist = Integer.MAX_VALUE;
+
+		for (GHOST g : GHOST.values()) {
+			boolean inGroup = false;
+
+			for (GHOST h : GHOST.values()) {
+				if (!g.equals(h)) {
+
+					int dis = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(g),
+							game.getGhostCurrentNodeIndex(h), game.getGhostLastMoveMade(g));
+
+					if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
+
+						inGroup = true;
+
+					}
+				}
+			}
+
+			if (inGroup) {
+				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
+						game.getGhostCurrentNodeIndex(g), game.getPacmanLastMoveMade());
+
+				if (pacmanDist < minDist) {
+					minDist = pacmanDist;
+					closestGhost = game.getGhostCurrentNodeIndex(g);
+				}
+			}
+		}
+
+		return closestGhost;
 	}
 }

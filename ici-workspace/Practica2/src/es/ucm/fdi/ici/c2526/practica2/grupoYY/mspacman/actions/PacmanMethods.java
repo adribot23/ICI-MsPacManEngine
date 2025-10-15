@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.PacmanConfig;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
@@ -131,4 +132,57 @@ public class PacmanMethods {
 		}
 		return nonEdibleOut < 3;
 	}
+
+	public int findSafeZone(Game game) {
+		int[] esquinas = game.getPowerPillIndices();
+
+		int safeZone = -1;
+		int masCercano = Integer.MAX_VALUE;
+		for (int esquina : esquinas) {
+			int[] path = game.getShortestPath(game.getPacmanCurrentNodeIndex(), esquina, game.getPacmanLastMoveMade());
+			if (isPathSafeFromGhosts(game, path) && path.length < masCercano) {
+				safeZone = esquina;
+				masCercano = path.length;
+
+			}
+		}
+
+		return safeZone;
+	}
+	
+	public int twoOrMoreGhostsCloseEachOther(Game game) {
+		int closestGhost = -1 ;
+		int minDist = Integer.MAX_VALUE;
+
+		for (GHOST g : GHOST.values()) {
+			boolean inGroup = false;
+
+			for (GHOST h : GHOST.values()) {
+				if (!g.equals(h)) {
+
+					int dis = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(g),
+							game.getGhostCurrentNodeIndex(h), game.getGhostLastMoveMade(g));
+
+					if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
+
+						inGroup = true;
+
+					}
+				}
+			}
+
+			if (inGroup) {
+				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
+						game.getGhostCurrentNodeIndex(g), game.getPacmanLastMoveMade());
+
+				if (pacmanDist < minDist) {
+					minDist = pacmanDist;
+					closestGhost = game.getGhostCurrentNodeIndex(g);
+				}
+			}
+		}
+
+		return closestGhost;
+	}
+
 }
