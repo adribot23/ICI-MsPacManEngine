@@ -10,7 +10,7 @@ public class NoEdibleGhosts implements Transition {
 	public boolean evaluate(Input in) {
 		MsPacManInput input = (MsPacManInput) in;
 
-		return input.getIsEdibleGhostInGame();
+		return !input.getIsEdibleGhostInGame();
 	}
 
 }

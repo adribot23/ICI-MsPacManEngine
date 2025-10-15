@@ -58,7 +58,7 @@ public class MsPacMan extends PacmanController {
 		defenseCFSM.add(DGhost, NearestePowerPillNotSafeButPillYes, DPill);
 		defenseCFSM.add(DPill, NearestPowerPillisSafeAndMoreThan2GhostsOut2, DPowerPill);
 		
-		defenseCFSM.ready(DGhost);
+		defenseCFSM.ready(DPowerPill);
 
 		CompoundState defense = new CompoundState("defense", defenseCFSM);
 		

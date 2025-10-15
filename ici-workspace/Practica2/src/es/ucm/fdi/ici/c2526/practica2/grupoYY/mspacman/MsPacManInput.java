@@ -22,21 +22,25 @@ public class MsPacManInput extends Input {
 	private boolean onlyOneFarEdibleGhost;
 	private boolean ghostEaten;
 	private boolean nearToEdibleGhost;
+	private boolean ghostOutside;
 	private int twoOrMoreGhostsCloseEachOther;
 	private int nearestSafePill;
 	private int nearestSafePP;
 	private int safeZone;
 
-	private PacmanMethods methods;
+	private PacmanMethods m;
 
 	public MsPacManInput(Game game) {
+
 		super(game);
-		methods = new PacmanMethods();
+
 	}
 
 	@Override
 	public void parseInput() {
+		PacmanMethods m= new PacmanMethods();
 		powerPillEaten = game.wasPowerPillEaten();
+		ghostOutside = ghostOutside();
 		avoidPowerPills = avoidPowerPillZone();
 		edibleGhostInGame = edibleGhostInGame();
 		nearNotEdibleGhost = nearNotEdibleGhost();
@@ -44,9 +48,10 @@ public class MsPacManInput extends Input {
 		twoOrMoreGhostsCloseEachOther = twoOrMoreGhostsCloseEachOther();
 		ghostEaten = ghostEaten();
 		nearToEdibleGhost = nearToEdibleGhost();
-		safeZone = findSafeZone();
+		safeZone = m.findSafeZone(game);
 		nearestSafePill = findNearestSafePill();
 		nearestSafePP = findNearestSafePowerPill();
+		
 
 	}
 
@@ -81,6 +86,10 @@ public class MsPacManInput extends Input {
 
 	public boolean getGhostEaten() {
 		return ghostEaten;
+	}
+	
+	public boolean getGhostOutside() {
+		return ghostOutside;
 	}
 
 	public boolean nearToEdibleGhost() {
@@ -133,7 +142,7 @@ public class MsPacManInput extends Input {
 		int dist = 0, minDist = Integer.MAX_VALUE;
 		nearNotEdibleGhost = false;
 		for (GHOST g : GHOST.values()) {
-			if (!game.isGhostEdible(g)) {
+			if (!game.isGhostEdible(g) && game.getGhostLairTime(g) == 0) {
 				dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), game.getGhostCurrentNodeIndex(g));
 				if (minDist > dist)
 					minDist = dist;
@@ -291,21 +300,13 @@ public class MsPacManInput extends Input {
 		return nonEdibleOut < 3;
 	}
 
-	private int findSafeZone() {
-		int[] esquinas = game.getPowerPillIndices();
+	private boolean ghostOutside() {
 
-		int safeZone = -1;
-		int masCercano = Integer.MAX_VALUE;
-		for (int esquina : esquinas) {
-			int[] path = game.getShortestPath(game.getPacmanCurrentNodeIndex(), esquina, game.getPacmanLastMoveMade());
-			if (isPathSafeFromGhosts(path) && path.length < masCercano) {
-				safeZone = esquina;
-				masCercano = path.length;
-
-			}
+		for (GHOST ghost : GHOST.values()) {
+			if (game.getGhostLairTime(ghost) <= 0)
+				return true;
 		}
-
-		return safeZone;
+		return false;
 	}
 
 	private int twoOrMoreGhostsCloseEachOther() {
@@ -314,31 +315,33 @@ public class MsPacManInput extends Input {
 
 		for (GHOST g : GHOST.values()) {
 			boolean inGroup = false;
+
+			int nodeG = game.getGhostCurrentNodeIndex(g);
+			if (game.getGhostLairTime(g) > 0 || nodeG == -1)
+				continue; // Fantasma en lair o sin nodo válido
+
 			for (GHOST h : GHOST.values()) {
-				if (game.getGhostLairTime(g) != 0 && game.getGhostLairTime(h) != 0 && !g.equals(h)) {
+				if (!g.equals(h) && game.getGhostLairTime(h) == 0) {
+					int nodeH = game.getGhostCurrentNodeIndex(h);
+					if (nodeH == -1)
+						continue;
 
-					int dis = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(g),
-							game.getGhostCurrentNodeIndex(h), game.getGhostLastMoveMade(g));
-
+					int dis = game.getShortestPathDistance(nodeG, nodeH, game.getGhostLastMoveMade(g));
 					if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
-
 						inGroup = true;
-
+						break;
 					}
 				}
 			}
 
 			if (inGroup) {
-				int posGhost = game.getGhostCurrentNodeIndex(g);
-				if(posGhost != -1) {
-					int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), posGhost, game.getPacmanLastMoveMade());
+				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), nodeG,
+						game.getPacmanLastMoveMade());
 
-					if (pacmanDist < minDist) {
-						minDist = pacmanDist;
-						closestGhost = game.getGhostCurrentNodeIndex(g);
-					}
+				if (pacmanDist < minDist) {
+					minDist = pacmanDist;
+					closestGhost = nodeG;
 				}
-				
 			}
 		}
 

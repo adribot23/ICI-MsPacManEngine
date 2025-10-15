@@ -137,12 +137,12 @@ public class PacmanMethods {
 		int[] esquinas = game.getPowerPillIndices();
 
 		int safeZone = -1;
-		int masCercano = Integer.MAX_VALUE;
+		int masLejano = -1;
 		for (int esquina : esquinas) {
 			int[] path = game.getShortestPath(game.getPacmanCurrentNodeIndex(), esquina, game.getPacmanLastMoveMade());
-			if (isPathSafeFromGhosts(game, path) && path.length < masCercano) {
+			if (isPathSafeFromGhosts(game, path) && path.length > masLejano) {
 				safeZone = esquina;
-				masCercano = path.length;
+				masLejano = path.length;
 
 			}
 		}
@@ -151,38 +151,43 @@ public class PacmanMethods {
 	}
 	
 	public int twoOrMoreGhostsCloseEachOther(Game game) {
-		int closestGhost = -1 ;
-		int minDist = Integer.MAX_VALUE;
+		 int closestGhost = -1;
+		    int minDist = Integer.MAX_VALUE;
 
-		for (GHOST g : GHOST.values()) {
-			boolean inGroup = false;
+		    for (GHOST g : GHOST.values()) {
+		        boolean inGroup = false;
 
-			for (GHOST h : GHOST.values()) {
-				if (!g.equals(h)) {
+		        int nodeG = game.getGhostCurrentNodeIndex(g);
+		        if (game.getGhostLairTime(g) > 0 || nodeG == -1) continue; // Fantasma en lair o sin nodo válido
 
-					int dis = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(g),
-							game.getGhostCurrentNodeIndex(h), game.getGhostLastMoveMade(g));
+		        for (GHOST h : GHOST.values()) {
+		            if (!g.equals(h) && game.getGhostLairTime(h) == 0) {
+		                int nodeH = game.getGhostCurrentNodeIndex(h);
+		                if (nodeH == -1) continue;
 
-					if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
+		                int dis = game.getShortestPathDistance(nodeG, nodeH, game.getGhostLastMoveMade(g));
+		                if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
+		                    inGroup = true;
+		                    break;
+		                }
+		            }
+		        }
 
-						inGroup = true;
+		        if (inGroup) {
+		            int pacmanDist = game.getShortestPathDistance(
+		                game.getPacmanCurrentNodeIndex(),
+		                nodeG,
+		                game.getPacmanLastMoveMade()
+		            );
 
-					}
-				}
-			}
+		            if (pacmanDist < minDist) {
+		                minDist = pacmanDist;
+		                closestGhost = nodeG;
+		            }
+		        }
+		    }
 
-			if (inGroup) {
-				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
-						game.getGhostCurrentNodeIndex(g), game.getPacmanLastMoveMade());
-
-				if (pacmanDist < minDist) {
-					minDist = pacmanDist;
-					closestGhost = game.getGhostCurrentNodeIndex(g);
-				}
-			}
-		}
-
-		return closestGhost;
+		    return closestGhost;
 	}
 
 }
