@@ -47,6 +47,7 @@ public class MsPacMan extends PacmanController {
 		SimpleState DPill = new SimpleState("RunAwayToNearestSafePillAction", new DRunAwayToNearestSafePillAction());
 
 		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut2 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition NearestPowerPillNotSafe = new NearestPowerPillNotSafe();
 		Transition NearestPillNotSafe = new NearestPillNotSafe();
 		Transition NearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
@@ -55,7 +56,7 @@ public class MsPacMan extends PacmanController {
 		defenseCFSM.add(DPowerPill, NearestPowerPillNotSafe, DPill);
 		defenseCFSM.add(DPill, NearestPillNotSafe, DGhost);
 		defenseCFSM.add(DGhost, NearestePowerPillNotSafeButPillYes, DPill);
-		defenseCFSM.add(DPill, NearestPowerPillisSafeAndMoreThan2GhostsOut, DPowerPill);
+		defenseCFSM.add(DPill, NearestPowerPillisSafeAndMoreThan2GhostsOut2, DPowerPill);
 		
 		defenseCFSM.ready(DGhost);
 
@@ -113,16 +114,18 @@ public class MsPacMan extends PacmanController {
 		CompoundState standard = new CompoundState("standard", standardCFSM);
 
 		Transition PowerPillEaten = new PowerPillEaten();
+		Transition PowerPillEaten2 = new PowerPillEaten();
 		Transition NoEdibleGhosts = new NoEdibleGhosts();
 		Transition NearToNotEdibleGhost = new NearToNotEdibleGhost();
+		Transition NearToNotEdibleGhost2 = new NearToNotEdibleGhost();
 		Transition NotNearToNotEdibleGhost = new NotNearToNotEdibleGhost();
 		
 		fsm.add(defense, PowerPillEaten, attack);
 		fsm.add(attack, NearToNotEdibleGhost, defense);
 		fsm.add(defense, NotNearToNotEdibleGhost, standard);
-		fsm.add(standard, NearToNotEdibleGhost, defense);
+		fsm.add(standard, NearToNotEdibleGhost2, defense);
 		fsm.add(attack, NoEdibleGhosts, standard);
-		fsm.add(standard, PowerPillEaten, attack);
+		fsm.add(standard, PowerPillEaten2, attack);
 
 		fsm.ready(standard);
 

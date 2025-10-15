@@ -82,7 +82,7 @@ public class MsPacManInput extends Input {
 	public boolean getGhostEaten() {
 		return ghostEaten;
 	}
-	
+
 	public boolean nearToEdibleGhost() {
 		int dist = 0, minDist = Integer.MAX_VALUE;
 		nearToEdibleGhost = false;
@@ -309,14 +309,13 @@ public class MsPacManInput extends Input {
 	}
 
 	private int twoOrMoreGhostsCloseEachOther() {
-		int closestGhost = -1 ;
+		int closestGhost = -1;
 		int minDist = Integer.MAX_VALUE;
 
 		for (GHOST g : GHOST.values()) {
 			boolean inGroup = false;
-
 			for (GHOST h : GHOST.values()) {
-				if (!g.equals(h)) {
+				if (game.getGhostLairTime(g) != 0 && game.getGhostLairTime(h) != 0 && !g.equals(h)) {
 
 					int dis = game.getShortestPathDistance(game.getGhostCurrentNodeIndex(g),
 							game.getGhostCurrentNodeIndex(h), game.getGhostLastMoveMade(g));
@@ -330,13 +329,16 @@ public class MsPacManInput extends Input {
 			}
 
 			if (inGroup) {
-				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
-						game.getGhostCurrentNodeIndex(g), game.getPacmanLastMoveMade());
+				int posGhost = game.getGhostCurrentNodeIndex(g);
+				if(posGhost != -1) {
+					int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), posGhost, game.getPacmanLastMoveMade());
 
-				if (pacmanDist < minDist) {
-					minDist = pacmanDist;
-					closestGhost = game.getGhostCurrentNodeIndex(g);
+					if (pacmanDist < minDist) {
+						minDist = pacmanDist;
+						closestGhost = game.getGhostCurrentNodeIndex(g);
+					}
 				}
+				
 			}
 		}
 
