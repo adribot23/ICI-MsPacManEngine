@@ -13,8 +13,8 @@ import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayFromNeare
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePPAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePillAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERandomAction;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.NearestPowerPillisSafeAndMoreThan2GhostsOut;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.RandomTransition;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.*;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.*;
 import es.ucm.fdi.ici.fsm.SimpleState;
 import es.ucm.fdi.ici.fsm.Transition;
 import es.ucm.fdi.ici.fsm.observers.GraphFSMObserver;
@@ -36,15 +36,8 @@ public class MsPacMan extends PacmanController {
 		GraphFSMObserver observer = new GraphFSMObserver(fsm.toString());
 		fsm.addObserver(observer);
 
-		SimpleState state1 = new SimpleState("state1", new ERandomAction());
-		SimpleState state2 = new SimpleState("state2", new ERandomAction());
-		SimpleState state3 = new SimpleState("state3", new ERandomAction());
-
-		Transition tran1 = new RandomTransition(.3);
-		Transition tran2 = new RandomTransition(.2);
-		Transition tran3 = new RandomTransition(.1);
-		Transition tran4 = new RandomTransition(.01);
-
+		// DEFENSA
+		
 		FSM defenseCFSM = new FSM("DEFENSE");
 		GraphFSMObserver c1observer = new GraphFSMObserver(defenseCFSM.toString());
 		defenseCFSM.addObserver(c1observer);
@@ -53,28 +46,93 @@ public class MsPacMan extends PacmanController {
 		SimpleState DPowerPill = new SimpleState("RunAwayToNearestSafePPAction", new DRunAwayToNearestSafePPAction());
 		SimpleState DPill = new SimpleState("RunAwayToNearestSafePillAction", new DRunAwayToNearestSafePillAction());
 
-		Transition defense = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		Transition NearestPowerPillNotSafe = new NearestPowerPillNotSafe();
+		Transition NearestPillNotSafe = new NearestPillNotSafe();
+		Transition NearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
 		
-
-		defenseCFSM.add(DGhost, defense, DPowerPill);
-		defenseCFSM.add(DPowerPill, defense, DPill);
+		defenseCFSM.add(DGhost, NearestPowerPillisSafeAndMoreThan2GhostsOut, DPowerPill);
+		defenseCFSM.add(DPowerPill, NearestPowerPillNotSafe, DPill);
+		defenseCFSM.add(DPill, NearestPillNotSafe, DGhost);
+		defenseCFSM.add(DGhost, NearestePowerPillNotSafeButPillYes, DPill);
+		defenseCFSM.add(DPill, NearestPowerPillisSafeAndMoreThan2GhostsOut, DPowerPill);
 		
 		defenseCFSM.ready(DGhost);
 
 		CompoundState defense = new CompoundState("defense", defenseCFSM);
+		
+		// ATAQUE
 
-		fsm.add(state1, tran1, defense);
-		fsm.add(defense, tran2, state1);
-		fsm.add(defense, tran3, state2);
-		fsm.add(state2, tran4, defense);
+		FSM attackCFSM = new FSM("ATTACK");
+		GraphFSMObserver c2observer = new GraphFSMObserver(attackCFSM.toString());
+		attackCFSM.addObserver(c2observer);
 
-		fsm.ready(state1);
+		SimpleState AEdible = new SimpleState("ChaseNearestEdibleAction", new AChaseNearestEdibleAction());
+		SimpleState AGroup = new SimpleState("ChaseSeveralGhostRouteAction", new AChaseSeveralGhostRouteAction());
+		SimpleState APill = new SimpleState("RunToNearestPillAction", new ARunToNearestPillAction());
+
+		Transition NearToEdibleGhost = new NearToEdibleGhost();
+		Transition OnlyOneFarEdibleGhost = new OnlyOneFarEdibleGhost();
+		Transition TwoOrMoreGhostsCloseEachOther = new TwoOrMoreGhostsCloseEachOther();
+		Transition GhostEatenOrScatterGhosts = new GhostEatenOrScatterGhosts();
+		
+		attackCFSM.add(AEdible, OnlyOneFarEdibleGhost, APill);
+		attackCFSM.add(APill, NearToEdibleGhost, AEdible);
+		attackCFSM.add(AEdible, TwoOrMoreGhostsCloseEachOther, AGroup);
+		attackCFSM.add(AGroup, GhostEatenOrScatterGhosts, AEdible);
+		
+		attackCFSM.ready(AEdible);
+
+		CompoundState attack = new CompoundState("attack", attackCFSM);
+		
+		// ESTANDAR
+		
+		FSM standardCFSM = new FSM("STANDARD");
+		GraphFSMObserver c3observer = new GraphFSMObserver(standardCFSM.toString());
+		standardCFSM.addObserver(c3observer);
+
+		SimpleState EPowerPill = new SimpleState("RunToNearestSafePPAction", new ERunToNearestSafePPAction());
+		SimpleState EPill = new SimpleState("RunToNearestSafePillAction", new ERunToNearestSafePillAction());
+		SimpleState ESafeZone = new SimpleState("RunToSafeZoneAction", new ERunToSafeZoneAction());
+		SimpleState ERandom = new SimpleState("RandomAction", new ERandomAction());
+
+		Transition NotSafeZone = new NotSafeZone();
+		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		Transition ENearestPowerPillNotSafe = new NearestPowerPillNotSafe();
+		Transition ENearestPillNotSafe = new NearestPillNotSafe();
+		Transition ENearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
+		
+		standardCFSM.add(EPowerPill, ENearestPowerPillNotSafe, EPill);
+		standardCFSM.add(EPill, ENearestPillNotSafe, ESafeZone);
+		standardCFSM.add(ESafeZone, NotSafeZone, ERandom);
+		standardCFSM.add(ERandom, ENearestePowerPillNotSafeButPillYes, EPill);
+		standardCFSM.add(ERandom, ENearestPowerPillisSafeAndMoreThan2GhostsOut, EPowerPill);
+		
+		standardCFSM.ready(EPowerPill);
+
+		CompoundState standard = new CompoundState("standard", standardCFSM);
+
+		Transition PowerPillEaten = new PowerPillEaten();
+		Transition NoEdibleGhosts = new NoEdibleGhosts();
+		Transition NearToNotEdibleGhost = new NearToNotEdibleGhost();
+		Transition NotNearToNotEdibleGhost = new NotNearToNotEdibleGhost();
+		
+		fsm.add(defense, PowerPillEaten, attack);
+		fsm.add(attack, NearToNotEdibleGhost, defense);
+		fsm.add(defense, NotNearToNotEdibleGhost, standard);
+		fsm.add(standard, NearToNotEdibleGhost, defense);
+		fsm.add(attack, NoEdibleGhosts, standard);
+		fsm.add(standard, PowerPillEaten, attack);
+
+		fsm.ready(standard);
 
 		JFrame frame = new JFrame();
 		JPanel main = new JPanel();
 		main.setLayout(new BorderLayout());
 		main.add(observer.getAsPanel(true, null), BorderLayout.CENTER);
-		main.add(c1observer.getAsPanel(true, null), BorderLayout.SOUTH);
+		main.add(c1observer.getAsPanel(true, null), BorderLayout.WEST);
+		main.add(c2observer.getAsPanel(true, null), BorderLayout.SOUTH);
+		main.add(c3observer.getAsPanel(true, null), BorderLayout.EAST);
 		frame.getContentPane().add(main);
 		frame.pack();
 		frame.setVisible(true);
