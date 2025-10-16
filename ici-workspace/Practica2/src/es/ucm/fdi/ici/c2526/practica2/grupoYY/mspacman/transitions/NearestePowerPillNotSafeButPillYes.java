@@ -10,7 +10,8 @@ public class NearestePowerPillNotSafeButPillYes implements Transition {
 	public boolean evaluate(Input in) {
 		MsPacManInput input = (MsPacManInput) in;
 
-		return (input.getAvoidPowerPills() || input.getNearestSafePowerPill() == -1) && input.getNearestSafePill() != -1;
+		return (input.getAvoidPowerPills() || input.getNearestSafePowerPill() == -1)
+				&& input.getNearestSafePill() != -1;
 
 	}
 

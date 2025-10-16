@@ -9,7 +9,7 @@ public class NearToNotEdibleGhost implements Transition {
 	@Override
 	public boolean evaluate(Input in) {
 		MsPacManInput input = (MsPacManInput) in;
-		return input.isNearNotEdibleGhost();
+		return input.getNearToNotEdibleGhost();
 	}
 
 }

@@ -4,7 +4,7 @@ import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.MsPacManInput;
 import es.ucm.fdi.ici.fsm.Transition;
 
-public class PowerPillEaten implements Transition {
+public class PowerPillEatenAndGhostOutside implements Transition {
 
 	@Override
 	public boolean evaluate(Input in) {

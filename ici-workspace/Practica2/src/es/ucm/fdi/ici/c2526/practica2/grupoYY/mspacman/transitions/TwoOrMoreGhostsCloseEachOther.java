@@ -9,7 +9,7 @@ public class TwoOrMoreGhostsCloseEachOther implements Transition {
 	@Override
 	public boolean evaluate(Input in) {
 		MsPacManInput input = (MsPacManInput) in;
-		return input.getTwoOrMoreGhostsCloseEachOther()!=-1;
+		return input.getTwoOrMoreGhostsCloseEachOther() != -1;
 	}
 
 }

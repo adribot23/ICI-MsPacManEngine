@@ -38,8 +38,6 @@ public class PacmanMethods {
 	}
 
 	public int getNearestSafePowerPill(Game game) {
-		if (avoidPowerPillZone(game))
-			return -1;
 
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int safestPowerPill = -1;
@@ -102,7 +100,22 @@ public class PacmanMethods {
 			if (game.getGhostLairTime(ghost) <= 0 && !game.isGhostEdible(ghost)) {
 				for (int node : path) {
 					int dist = game.getShortestPathDistance(ghostPos, node);
-					if (dist != -1 && dist < PacmanConfig.DANGER_DISTANCE) {
+					if (dist != -1 && dist < PacmanConfig.DANGER_PILL_DISTANCE) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean isPathSafeFromGhostsForSaveZone(Game game, int[] path) {
+		for (GHOST ghost : GHOST.values()) {
+			int ghostPos = game.getGhostCurrentNodeIndex(ghost);
+			if (game.getGhostLairTime(ghost) <= 0 && !game.isGhostEdible(ghost)) {
+				for (int node : path) {
+					int dist = game.getShortestPathDistance(ghostPos, node);
+					if (dist != -1 && dist < PacmanConfig.SAFE_ZONE_DANGER_DISTANCE) {
 						return false;
 					}
 				}
@@ -123,7 +136,7 @@ public class PacmanMethods {
 		return true;
 	}
 
-	private boolean avoidPowerPillZone(Game game) {
+	public boolean avoidPowerPillZone(Game game) {
 		int nonEdibleOut = 0;
 		for (GHOST ghost : GHOST.values()) {
 			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
@@ -140,7 +153,7 @@ public class PacmanMethods {
 		int masLejano = -1;
 		for (int esquina : esquinas) {
 			int[] path = game.getShortestPath(game.getPacmanCurrentNodeIndex(), esquina, game.getPacmanLastMoveMade());
-			if (isPathSafeFromGhosts(game, path) && path.length > masLejano) {
+			if (isPathSafeFromGhostsForSaveZone(game, path) && path.length > masLejano) {
 				safeZone = esquina;
 				masLejano = path.length;
 
@@ -149,45 +162,44 @@ public class PacmanMethods {
 
 		return safeZone;
 	}
-	
+
 	public int twoOrMoreGhostsCloseEachOther(Game game) {
-		 int closestGhost = -1;
-		    int minDist = Integer.MAX_VALUE;
+		int closestGhost = -1;
+		int minDist = Integer.MAX_VALUE;
 
-		    for (GHOST g : GHOST.values()) {
-		        boolean inGroup = false;
+		for (GHOST g : GHOST.values()) {
+			boolean inGroup = false;
 
-		        int nodeG = game.getGhostCurrentNodeIndex(g);
-		        if (game.getGhostLairTime(g) > 0 || nodeG == -1) continue; // Fantasma en lair o sin nodo válido
+			int nodeG = game.getGhostCurrentNodeIndex(g);
+			if (game.getGhostLairTime(g) > 0 || nodeG == -1)
+				continue;
 
-		        for (GHOST h : GHOST.values()) {
-		            if (!g.equals(h) && game.getGhostLairTime(h) == 0) {
-		                int nodeH = game.getGhostCurrentNodeIndex(h);
-		                if (nodeH == -1) continue;
+			for (GHOST h : GHOST.values()) {
+				if (!g.equals(h) && game.getGhostLairTime(h) == 0) {
+					int nodeH = game.getGhostCurrentNodeIndex(h);
+					if (nodeH == -1)
+						continue;
 
-		                int dis = game.getShortestPathDistance(nodeG, nodeH, game.getGhostLastMoveMade(g));
-		                if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
-		                    inGroup = true;
-		                    break;
-		                }
-		            }
-		        }
+					int dis = game.getShortestPathDistance(nodeG, nodeH, game.getGhostLastMoveMade(g));
+					if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
+						inGroup = true;
+						break;
+					}
+				}
+			}
 
-		        if (inGroup) {
-		            int pacmanDist = game.getShortestPathDistance(
-		                game.getPacmanCurrentNodeIndex(),
-		                nodeG,
-		                game.getPacmanLastMoveMade()
-		            );
+			if (inGroup) {
+				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), nodeG,
+						game.getPacmanLastMoveMade());
 
-		            if (pacmanDist < minDist) {
-		                minDist = pacmanDist;
-		                closestGhost = nodeG;
-		            }
-		        }
-		    }
+				if (pacmanDist < minDist) {
+					minDist = pacmanDist;
+					closestGhost = nodeG;
+				}
+			}
+		}
 
-		    return closestGhost;
+		return closestGhost;
 	}
 
 }

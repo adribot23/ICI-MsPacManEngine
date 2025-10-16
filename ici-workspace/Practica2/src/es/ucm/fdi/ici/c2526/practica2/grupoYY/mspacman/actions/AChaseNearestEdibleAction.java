@@ -1,10 +1,13 @@
 package es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions;
 
+import java.awt.Color;
+
 import es.ucm.fdi.ici.Action;
 import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
+import pacman.game.GameView;
 
 public class AChaseNearestEdibleAction implements Action {
 
@@ -24,6 +27,8 @@ public class AChaseNearestEdibleAction implements Action {
 				}
 			}
 		}
+
+		GameView.addLines(game, Color.RED, posPacman, game.getGhostCurrentNodeIndex(closestGhost));
 
 		return game.getApproximateNextMoveTowardsTarget(posPacman, game.getGhostCurrentNodeIndex(closestGhost),
 				game.getGhostLastMoveMade(closestGhost), DM.PATH);
