@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import es.ucm.fdi.ici.Action;
 import pacman.game.Constants.DM;
+import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 import pacman.game.GameView;
@@ -12,15 +13,25 @@ public class ERunToSafeZoneAction implements Action {
 
 	@Override
 	public MOVE execute(Game game) {
-		PacmanMethods p = new PacmanMethods();
-		int node = p.findSafeZone(game);
-		if (node != -1) {
-			GameView.addLines(game, Color.CYAN, game.getPacmanCurrentNodeIndex(), node);
-			return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), node,
-					game.getPacmanLastMoveMade(), DM.PATH);
-		}
-		return MOVE.NEUTRAL;
+		int posPacman = game.getPacmanCurrentNodeIndex();
+		int minDistance = Integer.MAX_VALUE;
+		GHOST closestGhost = null;
 
+		for (GHOST ghost : GHOST.values()) {
+			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
+				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
+						game.getGhostLastMoveMade(ghost));
+				if (dist < minDistance) {
+					minDistance = dist;
+					closestGhost = ghost;
+				}
+			}
+		}
+	
+		int farthestNode = game.getFarthestNodeIndexFromNodeIndex(game.getGhostCurrentNodeIndex(closestGhost),
+				game.getActivePillsIndices(), DM.PATH);
+		return game.getApproximateNextMoveTowardsTarget(posPacman, farthestNode,
+				game.getPacmanLastMoveMade(), DM.PATH);
 	}
 
 	@Override

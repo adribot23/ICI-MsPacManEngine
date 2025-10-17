@@ -26,7 +26,7 @@ public class DRunAwayFromNearestGhost implements Action {
 		}
 
 		return game.getApproximateNextMoveAwayFromTarget(posPacman, game.getGhostCurrentNodeIndex(closestGhost),
-				game.getGhostLastMoveMade(closestGhost), DM.PATH);
+				game.getPacmanLastMoveMade(), DM.PATH);
 
 	}
 

@@ -22,6 +22,7 @@ public class PacmanMethods {
 
 		for (int pill : pills) {
 			int[] path = game.getShortestPath(posPacman, pill, lastMove);
+			int[] pah2 = game.
 			boolean safe = true;
 
 			if (isPathSafeFromGhosts(game, path)) {
@@ -145,7 +146,7 @@ public class PacmanMethods {
 		}
 		return nonEdibleOut < 3;
 	}
-
+	
 	public int findSafeZone(Game game) {
 		int[] esquinas = game.getPowerPillIndices();
 

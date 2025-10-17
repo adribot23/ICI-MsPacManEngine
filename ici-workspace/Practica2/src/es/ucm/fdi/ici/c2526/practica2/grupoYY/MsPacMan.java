@@ -13,7 +13,7 @@ import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.MsPacManInput;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayFromNearestGhost;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePPAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePillAction;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERandomAction;
+import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERunToPillByAlternativeWayAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.*;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.*;
 import es.ucm.fdi.ici.fsm.SimpleState;
@@ -49,14 +49,18 @@ public class MsPacMan extends PacmanController {
 
 		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut2 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
-		Transition NearestPowerPillNotSafe = new NearestPowerPillNotSafe();
+		Transition NearestPowerPillAndPillNotSafe = new NearestPowerPillAndPillNotSafe();
 		Transition NearestPillNotSafe = new NearestPillNotSafe();
 		Transition NearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
+		Transition NearestePowerPillNotSafeButPillYes2 = new NearestePowerPillNotSafeButPillYes();
 
 		defenseCFSM.add(DGhost, NearestPowerPillisSafeAndMoreThan2GhostsOut, DPowerPill);
-		defenseCFSM.add(DPowerPill, NearestPowerPillNotSafe, DPill);
-		defenseCFSM.add(DPill, NearestPillNotSafe, DGhost);
 		defenseCFSM.add(DGhost, NearestePowerPillNotSafeButPillYes, DPill);
+		
+		defenseCFSM.add(DPowerPill, NearestPowerPillAndPillNotSafe, DGhost);
+		defenseCFSM.add(DPowerPill, NearestePowerPillNotSafeButPillYes2, DPill);
+		
+		defenseCFSM.add(DPill, NearestPillNotSafe, DGhost);
 		defenseCFSM.add(DPill, NearestPowerPillisSafeAndMoreThan2GhostsOut2, DPowerPill);
 
 		defenseCFSM.ready(DGhost);
@@ -79,8 +83,10 @@ public class MsPacMan extends PacmanController {
 		Transition GhostEatenOrScatterGhosts = new GhostEatenOrScatterGhosts();
 
 		attackCFSM.add(AEdible, OnlyOneFarEdibleGhost, APill);
-		attackCFSM.add(APill, NearToEdibleGhost, AEdible);
 		attackCFSM.add(AEdible, TwoOrMoreGhostsCloseEachOther, AGroup);
+		
+		attackCFSM.add(APill, NearToEdibleGhost, AEdible);
+		
 		attackCFSM.add(AGroup, GhostEatenOrScatterGhosts, AEdible);
 
 		attackCFSM.ready(AEdible);
@@ -96,14 +102,14 @@ public class MsPacMan extends PacmanController {
 		SimpleState EPowerPill = new SimpleState("RunToNearestSafePPAction", new ERunToNearestSafePPAction());
 		SimpleState EPill = new SimpleState("RunToNearestSafePillAction", new ERunToNearestSafePillAction());
 		SimpleState ESafeZone = new SimpleState("RunToSafeZoneAction", new ERunToSafeZoneAction());
-		SimpleState ERandom = new SimpleState("RandomAction", new ERandomAction());
+		SimpleState ERandom = new SimpleState("RandomAction", new ERunToPillByAlternativeWayAction());
 
 		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut1 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut2 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition ENearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
 		Transition ENearestePowerPillNotSafeButPillYes1 = new NearestePowerPillNotSafeButPillYes();
-		Transition ENearestPowerPillNotSafe = new NearestPowerPillNotSafe();
+		Transition ENearestPowerPillNotSafe = new NearestPowerPillAndPillNotSafe();
 		Transition ENearestPillNotSafe = new NearestPillNotSafe();
 		Transition NotSafeZone = new NotSafeZone();
 
