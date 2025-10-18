@@ -47,11 +47,11 @@ public class ExecutorTest {
 
         //PacmanController pacMan = new pacman.controllers.HumanController.HumanController(new pacman.controllers.HumanController.KeyBoardInput());
         //PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
-        GhostController ghosts = new es.ucm.fdi.ici.c2425.practica1.grupo08.Ghosts();
+        GhostController ghosts = new es.ucm.fdi.ici.c2324.practica2.grupo04.Ghosts();
         PacmanController pacMan = new es.ucm.fdi.ici.c2526.practica2.grupoYY.MsPacMan();
 
         System.out.println( 
-            executor.runGame(pacMan, ghosts, 70) //last parameter defines speed
+            executor.runGame(pacMan, ghosts, 1) //last parameter defines speed
         );     
     }
 	

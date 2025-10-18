@@ -1,10 +1,6 @@
 package es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions;
 
 import java.awt.Color;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
 
 import es.ucm.fdi.ici.Action;
 import pacman.game.Game;

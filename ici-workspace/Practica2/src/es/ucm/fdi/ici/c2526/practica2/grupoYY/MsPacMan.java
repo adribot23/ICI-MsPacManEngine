@@ -1,6 +1,5 @@
 package es.ucm.fdi.ici.c2526.practica2.grupoYY;
 
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
 
 import javax.swing.JFrame;
@@ -13,7 +12,6 @@ import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.MsPacManInput;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayFromNearestGhost;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePPAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.DRunAwayToNearestSafePillAction;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.ERunToPillByAlternativeWayAction;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.transitions.*;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.*;
 import es.ucm.fdi.ici.fsm.SimpleState;
@@ -47,23 +45,23 @@ public class MsPacMan extends PacmanController {
 		SimpleState DPowerPill = new SimpleState("RunAwayToNearestSafePPAction", new DRunAwayToNearestSafePPAction());
 		SimpleState DPill = new SimpleState("RunAwayToNearestSafePillAction", new DRunAwayToNearestSafePillAction());
 
-		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
-		Transition NearestPowerPillisSafeAndMoreThan2GhostsOut2 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
-		Transition NearestPowerPillAndPillNotSafe = new NearestPowerPillAndPillNotSafe();
-		Transition NearestPillNotSafe = new NearestPillNotSafe();
-		Transition NearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
-		Transition NearestePowerPillNotSafeButPillYes2 = new NearestePowerPillNotSafeButPillYes();
+		Transition DNearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		Transition DNearestPowerPillisSafeAndMoreThan2GhostsOut2 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
+		Transition DNearestPowerPillAndPillNotSafe = new NearestPowerPillAndPillNotSafe();
+		Transition DNearestPillNotSafe = new NearestPillNotSafe();
+		Transition DNearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
+		Transition DNearestePowerPillNotSafeButPillYes2 = new NearestePowerPillNotSafeButPillYes();
 
-		defenseCFSM.add(DGhost, NearestPowerPillisSafeAndMoreThan2GhostsOut, DPowerPill);
-		defenseCFSM.add(DGhost, NearestePowerPillNotSafeButPillYes, DPill);
-		
-		defenseCFSM.add(DPowerPill, NearestPowerPillAndPillNotSafe, DGhost);
-		defenseCFSM.add(DPowerPill, NearestePowerPillNotSafeButPillYes2, DPill);
-		
-		defenseCFSM.add(DPill, NearestPillNotSafe, DGhost);
-		defenseCFSM.add(DPill, NearestPowerPillisSafeAndMoreThan2GhostsOut2, DPowerPill);
+		defenseCFSM.add(DGhost, DNearestPowerPillisSafeAndMoreThan2GhostsOut, DPowerPill);
+		defenseCFSM.add(DGhost, DNearestePowerPillNotSafeButPillYes, DPill);
 
-		defenseCFSM.ready(DGhost);
+		defenseCFSM.add(DPowerPill, DNearestPowerPillAndPillNotSafe, DGhost);
+		defenseCFSM.add(DPowerPill, DNearestePowerPillNotSafeButPillYes2, DPill);
+
+		defenseCFSM.add(DPill, DNearestPillNotSafe, DGhost);
+		defenseCFSM.add(DPill, DNearestPowerPillisSafeAndMoreThan2GhostsOut2, DPowerPill);
+
+		defenseCFSM.ready(DPowerPill);
 
 		CompoundState defense = new CompoundState("defense", defenseCFSM);
 
@@ -76,18 +74,28 @@ public class MsPacMan extends PacmanController {
 		SimpleState AEdible = new SimpleState("ChaseNearestEdibleAction", new AChaseNearestEdibleAction());
 		SimpleState AGroup = new SimpleState("ChaseSeveralGhostRouteAction", new AChaseSeveralGhostRouteAction());
 		SimpleState APill = new SimpleState("RunToNearestPillAction", new ARunToNearestPillAction());
+		SimpleState APowerPill = new SimpleState("RunAwayFromNearestPowerPill", new ARunAwayFromNearestPowerPill());
 
-		Transition NearToEdibleGhost = new NearToEdibleGhost();
-		Transition OnlyOneFarEdibleGhost = new OnlyOneFarEdibleGhost();
-		Transition TwoOrMoreGhostsCloseEachOther = new TwoOrMoreGhostsCloseEachOther();
-		Transition GhostEatenOrScatterGhosts = new GhostEatenOrScatterGhosts();
+		Transition ANearToEdibleGhost = new NearToEdibleGhost();
+		Transition AOnlyOneFarEdibleGhost = new OnlyOneFarEdibleGhost();
+		Transition ATwoOrMoreGhostsCloseEachOther = new TwoOrMoreGhostsCloseEachOther();
+		Transition AGhostEatenOrScatterGhosts = new GhostEatenOrScatterGhosts();
+		Transition ANotNearToPowerPill = new NotNearToPowerPill();
+		Transition ANearToPowerPill = new NearToPowerPill();
+		Transition ANearToPowerPill1 = new NearToPowerPill();
+		Transition ANearToPowerPill2 = new NearToPowerPill();
 
-		attackCFSM.add(AEdible, OnlyOneFarEdibleGhost, APill);
-		attackCFSM.add(AEdible, TwoOrMoreGhostsCloseEachOther, AGroup);
-		
-		attackCFSM.add(APill, NearToEdibleGhost, AEdible);
-		
-		attackCFSM.add(AGroup, GhostEatenOrScatterGhosts, AEdible);
+		attackCFSM.add(AEdible, AOnlyOneFarEdibleGhost, APill);
+		attackCFSM.add(AEdible, ATwoOrMoreGhostsCloseEachOther, AGroup);
+		attackCFSM.add(AEdible, ANearToPowerPill, APowerPill);
+
+		attackCFSM.add(APill, ANearToEdibleGhost, AEdible);
+		attackCFSM.add(APill, ANearToPowerPill1, APowerPill);
+
+		attackCFSM.add(AGroup, AGhostEatenOrScatterGhosts, AEdible);
+		attackCFSM.add(AGroup, ANearToPowerPill2, APowerPill);
+
+		attackCFSM.add(APowerPill, ANotNearToPowerPill, AEdible);
 
 		attackCFSM.ready(AEdible);
 
@@ -102,28 +110,22 @@ public class MsPacMan extends PacmanController {
 		SimpleState EPowerPill = new SimpleState("RunToNearestSafePPAction", new ERunToNearestSafePPAction());
 		SimpleState EPill = new SimpleState("RunToNearestSafePillAction", new ERunToNearestSafePillAction());
 		SimpleState ESafeZone = new SimpleState("RunToSafeZoneAction", new ERunToSafeZoneAction());
-		SimpleState ERandom = new SimpleState("RandomAction", new ERunToPillByAlternativeWayAction());
 
 		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut1 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
-		Transition ENearestPowerPillisSafeAndMoreThan2GhostsOut2 = new NearestPowerPillisSafeAndMoreThan2GhostsOut();
 		Transition ENearestePowerPillNotSafeButPillYes = new NearestePowerPillNotSafeButPillYes();
 		Transition ENearestePowerPillNotSafeButPillYes1 = new NearestePowerPillNotSafeButPillYes();
-		Transition ENearestPowerPillNotSafe = new NearestPowerPillAndPillNotSafe();
+		Transition ENearestPowerPillAndPillNotSafe = new NearestPowerPillAndPillNotSafe();
 		Transition ENearestPillNotSafe = new NearestPillNotSafe();
-		Transition NotSafeZone = new NotSafeZone();
 
-		standardCFSM.add(EPowerPill, ENearestPowerPillNotSafe, EPill);
+		standardCFSM.add(EPowerPill, ENearestePowerPillNotSafeButPillYes, EPill);
+		standardCFSM.add(EPowerPill, ENearestPowerPillAndPillNotSafe, ESafeZone);
 
-		standardCFSM.add(EPill, ENearestPillNotSafe, ESafeZone);
 		standardCFSM.add(EPill, ENearestPowerPillisSafeAndMoreThan2GhostsOut, EPowerPill);
+		standardCFSM.add(EPill, ENearestPillNotSafe, ESafeZone);
 
-		standardCFSM.add(ESafeZone, NotSafeZone, ERandom);
 		standardCFSM.add(ESafeZone, ENearestPowerPillisSafeAndMoreThan2GhostsOut1, EPowerPill);
-		standardCFSM.add(ESafeZone, ENearestePowerPillNotSafeButPillYes, EPill);
-
-		standardCFSM.add(ERandom, ENearestePowerPillNotSafeButPillYes1, EPill);
-		standardCFSM.add(ERandom, ENearestPowerPillisSafeAndMoreThan2GhostsOut2, EPowerPill);
+		standardCFSM.add(ESafeZone, ENearestePowerPillNotSafeButPillYes1, EPill);
 
 		standardCFSM.ready(EPowerPill);
 
@@ -138,10 +140,10 @@ public class MsPacMan extends PacmanController {
 
 		fsm.add(defense, PowerPillEatenAndGhostOutside, attack);
 		fsm.add(defense, NotNearToNotEdibleGhost, standard);
-		
+
 		fsm.add(attack, NearToNotEdibleGhost, defense);
 		fsm.add(attack, NoEdibleGhosts, standard);
-		
+
 		fsm.add(standard, NearToNotEdibleGhost2, defense);
 		fsm.add(standard, PowerPillEatenAndGhostOutside1, attack);
 
@@ -149,8 +151,8 @@ public class MsPacMan extends PacmanController {
 
 		JFrame frame = new JFrame();
 		JPanel main = new JPanel();
-		//main.setLayout(new BorderLayout());
-		main.setLayout(new GridLayout(2,2));
+		// main.setLayout(new BorderLayout());
+		main.setLayout(new GridLayout(2, 2));
 		main.add(observer.getAsPanel(true, null));
 		main.add(c1observer.getAsPanel(true, null));
 		main.add(c2observer.getAsPanel(true, null));

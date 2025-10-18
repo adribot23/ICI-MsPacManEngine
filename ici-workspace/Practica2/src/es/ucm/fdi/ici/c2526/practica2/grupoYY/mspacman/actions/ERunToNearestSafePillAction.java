@@ -14,12 +14,10 @@ public class ERunToNearestSafePillAction implements Action {
 	public MOVE execute(Game game) {
 		PacmanMethods p = new PacmanMethods();
 		int node = p.getNearestSafePill(game);
-		if (node != -1) {
-			GameView.addLines(game, Color.CYAN, game.getPacmanCurrentNodeIndex(), node);
-			return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), node,
-					game.getPacmanLastMoveMade(), DM.PATH);
-		}
-		return MOVE.NEUTRAL;
+		GameView.addLines(game, Color.CYAN, game.getPacmanCurrentNodeIndex(), node);
+		return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(), node,
+				game.getPacmanLastMoveMade(), DM.PATH);
+
 	}
 
 	@Override

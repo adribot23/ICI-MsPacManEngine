@@ -17,7 +17,7 @@ public class DRunAwayFromNearestGhost implements Action {
 		for (GHOST ghost : GHOST.values()) {
 			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
 				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
-						game.getGhostLastMoveMade(ghost));
+						game.getPacmanLastMoveMade());
 				if (dist < minDistance) {
 					minDistance = dist;
 					closestGhost = ghost;

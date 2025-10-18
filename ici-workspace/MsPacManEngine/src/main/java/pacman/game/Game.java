@@ -2128,6 +2128,9 @@ public final class Game {
         return getShortestPathDistance(fromNodeIndex, toNodeIndex, lastMoveMade);
     }
 
+    
+    
+    
     /**
      * Similar to getShortestPath but returns the distance of the path only. It is slightly
      * more efficient.

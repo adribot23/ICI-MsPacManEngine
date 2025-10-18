@@ -22,7 +22,6 @@ public class PacmanMethods {
 
 		for (int pill : pills) {
 			int[] path = game.getShortestPath(posPacman, pill, lastMove);
-			int[] pah2 = game.
 			boolean safe = true;
 
 			if (isPathSafeFromGhosts(game, path)) {
@@ -110,21 +109,6 @@ public class PacmanMethods {
 		return true;
 	}
 
-	private boolean isPathSafeFromGhostsForSaveZone(Game game, int[] path) {
-		for (GHOST ghost : GHOST.values()) {
-			int ghostPos = game.getGhostCurrentNodeIndex(ghost);
-			if (game.getGhostLairTime(ghost) <= 0 && !game.isGhostEdible(ghost)) {
-				for (int node : path) {
-					int dist = game.getShortestPathDistance(ghostPos, node);
-					if (dist != -1 && dist < PacmanConfig.SAFE_ZONE_DANGER_DISTANCE) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
-
 	private boolean isPathSafeFromPowerPills(Game game, int[] path, int[] powerPills) {
 		for (int pp : powerPills) {
 			for (int node : path) {
@@ -146,61 +130,62 @@ public class PacmanMethods {
 		}
 		return nonEdibleOut < 3;
 	}
-	
-	public int findSafeZone(Game game) {
-		int[] esquinas = game.getPowerPillIndices();
-
-		int safeZone = -1;
-		int masLejano = -1;
-		for (int esquina : esquinas) {
-			int[] path = game.getShortestPath(game.getPacmanCurrentNodeIndex(), esquina, game.getPacmanLastMoveMade());
-			if (isPathSafeFromGhostsForSaveZone(game, path) && path.length > masLejano) {
-				safeZone = esquina;
-				masLejano = path.length;
-
-			}
-		}
-
-		return safeZone;
-	}
 
 	public int twoOrMoreGhostsCloseEachOther(Game game) {
 		int closestGhost = -1;
 		int minDist = Integer.MAX_VALUE;
 
 		for (GHOST g : GHOST.values()) {
-			boolean inGroup = false;
-
 			int nodeG = game.getGhostCurrentNodeIndex(g);
-			if (game.getGhostLairTime(g) > 0 || nodeG == -1)
-				continue;
 
-			for (GHOST h : GHOST.values()) {
-				if (!g.equals(h) && game.getGhostLairTime(h) == 0) {
+			if (game.getGhostLairTime(g) == 0 && nodeG != -1 && game.isGhostEdible(g)) {
+				boolean inGroup = false;
+
+				for (GHOST h : GHOST.values()) {
 					int nodeH = game.getGhostCurrentNodeIndex(h);
-					if (nodeH == -1)
-						continue;
 
-					int dis = game.getShortestPathDistance(nodeG, nodeH, game.getGhostLastMoveMade(g));
-					if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
-						inGroup = true;
-						break;
+					if (!g.equals(h) && game.getGhostLairTime(h) == 0 && nodeH != -1 && game.isGhostEdible(h)) {
+						int dis = game.getShortestPathDistance(nodeG, nodeH);
+
+						if (dis < PacmanConfig.GHOST_NEAR_EACH_OTHER) {
+							inGroup = true;
+							break;
+						}
 					}
 				}
-			}
 
-			if (inGroup) {
-				int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), nodeG,
-						game.getPacmanLastMoveMade());
+				if (inGroup) {
+					int pacmanDist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(), nodeG,
+							game.getPacmanLastMoveMade());
 
-				if (pacmanDist < minDist) {
-					minDist = pacmanDist;
-					closestGhost = nodeG;
+					if (pacmanDist < minDist) {
+						minDist = pacmanDist;
+						closestGhost = nodeG;
+					}
 				}
 			}
 		}
 
 		return closestGhost;
+	}
+
+	public int getNearPowerPill(Game game) {
+
+		int[] powerPills = game.getActivePowerPillsIndices();
+		int nearPowerPill = -1;
+		int minDistance = Integer.MAX_VALUE;
+		int posPacman = game.getPacmanCurrentNodeIndex();
+		MOVE lastMove = game.getPacmanLastMoveMade();
+
+		for (int pp : powerPills) {
+			int distance = game.getShortestPathDistance(posPacman, pp, lastMove);
+
+			if (distance < PacmanConfig.MIN_POWER_PILL_DISTANCE && distance < minDistance) {
+				minDistance = distance;
+				nearPowerPill = pp;
+			}
+		}
+		return nearPowerPill;
 	}
 
 }

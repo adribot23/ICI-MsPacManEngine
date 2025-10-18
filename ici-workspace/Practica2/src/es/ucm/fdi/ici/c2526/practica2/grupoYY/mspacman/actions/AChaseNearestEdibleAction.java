@@ -15,12 +15,12 @@ public class AChaseNearestEdibleAction implements Action {
 	public MOVE execute(Game game) {
 		int posPacman = game.getPacmanCurrentNodeIndex();
 		int minDistance = Integer.MAX_VALUE;
-		GHOST closestGhost = null;
+		GHOST closestGhost = GHOST.BLINKY;
 
 		for (GHOST ghost : GHOST.values()) {
 			if (game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
 				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
-						game.getGhostLastMoveMade(ghost));
+						game.getPacmanLastMoveMade());
 				if (dist < minDistance) {
 					minDistance = dist;
 					closestGhost = ghost;
@@ -31,7 +31,7 @@ public class AChaseNearestEdibleAction implements Action {
 		GameView.addLines(game, Color.RED, posPacman, game.getGhostCurrentNodeIndex(closestGhost));
 
 		return game.getApproximateNextMoveTowardsTarget(posPacman, game.getGhostCurrentNodeIndex(closestGhost),
-				game.getGhostLastMoveMade(closestGhost), DM.PATH);
+				game.getPacmanLastMoveMade(), DM.PATH);
 
 	}
 

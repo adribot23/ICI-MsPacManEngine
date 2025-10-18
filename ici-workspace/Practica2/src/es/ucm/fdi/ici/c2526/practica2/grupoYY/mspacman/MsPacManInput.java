@@ -1,17 +1,10 @@
 package es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
-
 import es.ucm.fdi.ici.Input;
 import es.ucm.fdi.ici.c2526.practica2.grupoYY.mspacman.actions.PacmanMethods;
-import gate.util.Pair;
+
 import pacman.game.Game;
 import pacman.game.Constants.GHOST;
-import pacman.game.Constants.MOVE;
 
 public class MsPacManInput extends Input {
 
@@ -26,7 +19,7 @@ public class MsPacManInput extends Input {
 	private int twoOrMoreGhostsCloseEachOther;
 	private int nearestSafePill;
 	private int nearestSafePP;
-	private int safeZone;
+	private int nearPP;
 
 	public MsPacManInput(Game game) {
 		super(game);
@@ -40,7 +33,7 @@ public class MsPacManInput extends Input {
 		nearestSafePP = m.getNearestSafePowerPill(game);
 		nearestSafePill = m.getNearestSafePill(game);
 		avoidPowerPills = m.avoidPowerPillZone(game);
-		safeZone = m.findSafeZone(game);
+		nearPP = m.getNearPowerPill(game);
 
 		powerPillEaten = game.wasPowerPillEaten();
 		onlyOneFarEdibleGhost = onlyOneFarEdibleGhost();
@@ -69,8 +62,8 @@ public class MsPacManInput extends Input {
 		return avoidPowerPills;
 	}
 
-	public int getSafeZone() {
-		return safeZone;
+	public int getNearPP() {
+		return nearPP;
 	}
 
 	public boolean getWasPowerPillEaten() {
@@ -124,6 +117,7 @@ public class MsPacManInput extends Input {
 				if (cont == 1)
 					dist = game.getShortestPathDistance(game.getPacmanCurrentNodeIndex(),
 							game.getGhostCurrentNodeIndex(g));
+
 				else if (cont > 1)
 					break;
 			}
@@ -139,8 +133,7 @@ public class MsPacManInput extends Input {
 
 		for (GHOST ghost : GHOST.values()) {
 			if (!game.isGhostEdible(ghost) && game.getGhostLairTime(ghost) <= 0) {
-				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost),
-						game.getGhostLastMoveMade(ghost));
+				int dist = game.getShortestPathDistance(posPacman, game.getGhostCurrentNodeIndex(ghost));
 				if (dist < PacmanConfig.DANGER_DISTANCE) {
 					return true;
 				}

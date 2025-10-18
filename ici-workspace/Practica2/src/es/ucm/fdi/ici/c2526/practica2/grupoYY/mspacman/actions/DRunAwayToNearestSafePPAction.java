@@ -7,7 +7,7 @@ import java.awt.Color;
 
 import es.ucm.fdi.ici.Action;
 import pacman.game.Constants.DM;
-import pacman.game.Constants.GHOST;
+
 import pacman.game.Constants.MOVE;
 
 public class DRunAwayToNearestSafePPAction implements Action {
@@ -15,7 +15,9 @@ public class DRunAwayToNearestSafePPAction implements Action {
 	@Override
 	public MOVE execute(Game game) {
 		PacmanMethods p = new PacmanMethods();
-		GameView.addLines(game, Color.YELLOW, game.getPacmanCurrentNodeIndex(), p.getNearestSafePowerPill(game));
+		int node = p.getNearestSafePowerPill(game);
+
+		GameView.addLines(game, Color.YELLOW, game.getPacmanCurrentNodeIndex(), node);
 
 		return game.getApproximateNextMoveTowardsTarget(game.getPacmanCurrentNodeIndex(),
 				p.getNearestSafePowerPill(game), game.getPacmanLastMoveMade(), DM.PATH);

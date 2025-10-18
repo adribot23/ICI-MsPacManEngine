@@ -10,7 +10,7 @@ import pacman.controllers.PacmanController;
 import pacman.game.Constants;
 import pacman.game.Game;
 import pacman.game.GameView;
-import pacman.game.Constants.GHOST;
+
 import pacman.game.Constants.MOVE;
 
 public class PacmanPrueba extends PacmanController {
