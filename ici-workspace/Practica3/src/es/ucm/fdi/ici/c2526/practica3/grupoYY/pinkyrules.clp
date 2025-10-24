@@ -11,14 +11,16 @@
 	(slot edible (type SYMBOL)))
 	
 (deftemplate MSPACMAN 
-    (slot mindistancePPill))
+    (slot mindistancePPill (type NUMBER))
+    (slot pospacman (type NUMBER)))
     
 
 ;DEFINITION OF THE ACTION FACT
 (deftemplate ACTION
 	(slot id) (slot info (default "")) (slot priority (type NUMBER) ) ; mandatory slots
-	(slot runawaystrategy (type SYMBOL)) ; Extra slot for the runaway action
+	(slot runawaystrategy (type SYMBOL)) (slot chasestrategy (type SYMBOL)) ; Extra slot for the runaway action
 ) 
+
 ;RULES 
 (defrule PINKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (mindistancePPill ?d)) (test (<= ?d 30)) 
@@ -39,10 +41,14 @@
 		)
 	)
 )
-	
-(defrule PINKYchases
-	(BLINKY (edible false)) 
-	=> 
-	(assert (ACTION (id BLINKYchases) (info "No comestible --> perseguir")  (priority 10) ))
-)	
+
+(defrule PINKYChasePacman
+	(PINKY (edible false) (distToPacman ?d)) (test (< ?d 20))
+	=>
+	(assert
+		(ACTION (id PINKYchasePacman) (info "No comestible y cerca Pacman --> perseguir") (priority 20)
+			(chasestrategy PACMAN)
+		)
+	)
+)
 	

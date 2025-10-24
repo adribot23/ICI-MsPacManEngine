@@ -1,18 +1,30 @@
 ;FACTS ASSERTED BY GAME INPUT
 (deftemplate BLINKY
-	(slot edible (type SYMBOL)))
+	(slot edible (type SYMBOL))
+	(slot edibleTime (type NUMBER))
+	(slot position (type NUMBER))
+	(slot nextJunction (type NUMBER)))
 	
 (deftemplate INKY
-	(slot edible (type SYMBOL)))
+	(slot edible (type SYMBOL))
+	(slot edibleTime (type NUMBER))
+	(slot position (type NUMBER))
+	(slot nextJunction (type NUMBER)))
 	
 (deftemplate PINKY
-	(slot edible (type SYMBOL)))
-
+	(slot edible (type SYMBOL))
+	(slot edibleTime (type NUMBER))
+	(slot position (type NUMBER))
+	(slot nextJunction (type NUMBER)))
+	
 (deftemplate SUE
-	(slot edible (type SYMBOL)))
+	(slot edible (type SYMBOL))
+	(slot edibleTime (type NUMBER))
+	(slot position (type NUMBER))
+	(slot nextJunction (type NUMBER)))
 	
 (deftemplate MSPACMAN 
-    (slot mindistancePPill (type NUMBER)) )
+    (slot mindistancePPill (type NUMBER)))
     
 ;DEFINITION OF THE ACTION FACT
 (deftemplate ACTION
