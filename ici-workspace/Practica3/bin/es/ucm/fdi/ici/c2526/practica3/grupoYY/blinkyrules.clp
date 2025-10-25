@@ -1,30 +1,18 @@
 ;FACTS ASSERTED BY GAME INPUT
 (deftemplate BLINKY
-	(slot edible (type SYMBOL))
-	(slot edibleTime (type NUMBER))
-	(slot position (type NUMBER))
-	(slot nextJunction (type NUMBER)))
+	(slot edible (type SYMBOL)))
 	
 (deftemplate INKY
-	(slot edible (type SYMBOL))
-	(slot edibleTime (type NUMBER))
-	(slot position (type NUMBER))
-	(slot nextJunction (type NUMBER)))
+	(slot edible (type SYMBOL)))
 	
 (deftemplate PINKY
-	(slot edible (type SYMBOL))
-	(slot edibleTime (type NUMBER))
-	(slot position (type NUMBER))
-	(slot nextJunction (type NUMBER)))
-	
+	(slot edible (type SYMBOL)))
+
 (deftemplate SUE
-	(slot edible (type SYMBOL))
-	(slot edibleTime (type NUMBER))
-	(slot position (type NUMBER))
-	(slot nextJunction (type NUMBER)))
+	(slot edible (type SYMBOL)))
 	
 (deftemplate MSPACMAN 
-    (slot mindistancePPill (type NUMBER)))
+    (slot mindistancePPill (type NUMBER)) )
     
 ;DEFINITION OF THE ACTION FACT
 (deftemplate ACTION
@@ -33,6 +21,7 @@
 ) 
 
 ;RULES 
+
 (defrule BLINKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (mindistancePPill ?d)) (test (<= ?d 30)) 
 	=>  
@@ -56,7 +45,7 @@
 (defrule BLINKYchases
 	(BLINKY (edible false)) 
 	=> 
-	(assert (ACTION (id BLINKYchases) (info "No comestible --> perseguir")  (priority 10) ))
+	(assert (ACTION (id BLINKYchasesJunction) (info "No comestible --> perseguir junction")  (priority 10) ))
 )	
 	
 	

@@ -1,11 +1,16 @@
 package es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 import java.util.Vector;
 
 import es.ucm.fdi.ici.rules.RulesInput;
 import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
+import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
 public class GhostsInput extends RulesInput {
@@ -15,6 +20,7 @@ public class GhostsInput extends RulesInput {
 	private boolean PINKYedible;
 	private boolean SUEedible;
 	private double minPacmanDistancePPill;
+	private int nextPacmanJuncion;
 	
 	public GhostsInput(Game game) {
 		super(game);
@@ -26,7 +32,8 @@ public class GhostsInput extends RulesInput {
 		this.INKYedible = game.isGhostEdible(GHOST.INKY);
 		this.PINKYedible = game.isGhostEdible(GHOST.PINKY);
 		this.SUEedible = game.isGhostEdible(GHOST.SUE);
-	
+		this.nextPacmanJuncion = nextPacmanJunction(game);
+		
 		int pacman = game.getPacmanCurrentNodeIndex();
 		this.minPacmanDistancePPill = Double.MAX_VALUE;
 		for(int ppill: game.getPowerPillIndices()) {
@@ -49,7 +56,38 @@ public class GhostsInput extends RulesInput {
 		return facts;
 	}
 
+	private int nextPacmanJunction(Game game) {
+		int start = game.getPacmanCurrentNodeIndex();
+		MOVE lastMove = game.getPacmanLastMoveMade();
 
+		Set<Integer> visited = new HashSet<>();
+		Queue<Integer> queue = new LinkedList<>();
+
+		queue.add(start);
+		visited.add(start);
+
+		while (!queue.isEmpty()) {
+			int current = queue.poll();
+
+			if (current != start && game.isJunction(current)) {
+				return current;
+			}
+
+			for (MOVE move : MOVE.values()) {
+
+				if (move != MOVE.NEUTRAL && !(current == start && move == lastMove.opposite())) {
+
+					int next = game.getNeighbour(current, move);
+					if (next != -1 && !visited.contains(next)) {
+						visited.add(next);
+						queue.add(next);
+					}
+				}
+			}
+		}
+
+		return -1;
+	}
 	
 	
 }

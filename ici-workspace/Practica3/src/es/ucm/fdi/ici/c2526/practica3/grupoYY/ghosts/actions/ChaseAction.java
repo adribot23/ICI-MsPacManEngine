@@ -2,8 +2,6 @@ package es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions;
 
 import es.ucm.fdi.ici.rules.RulesAction;
 import jess.Fact;
-import jess.JessException;
-import jess.Value;
 import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
@@ -12,10 +10,10 @@ import pacman.game.Game;
 public class ChaseAction implements RulesAction {
 
     GHOST ghost;
-    enum STRATEGY {NEXTJUNCTION, PACMAN};
-    STRATEGY chaseStrategy; 
+   
 	public ChaseAction( GHOST ghost) {
 		this.ghost = ghost;
+	
 	}
 
 	@Override
@@ -31,15 +29,7 @@ public class ChaseAction implements RulesAction {
 	@Override
 	public void parseFact(Fact actionFact) {
 		// Nothing to parse
-		try {
-			Value value = actionFact.getSlotValue("chasestrategy");
-			if(value == null)
-				return;
-			String strategyValue = value.stringValue(null);
-			chaseStrategy = STRATEGY.valueOf(strategyValue);
-		} catch (JessException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	@Override

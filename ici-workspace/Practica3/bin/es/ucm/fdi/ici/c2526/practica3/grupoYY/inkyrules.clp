@@ -43,7 +43,7 @@
 )
 	
 (defrule INKYchases
-	(INKY (edible true)) 
+	(INKY (edible false)) 
 	=> 
 	(assert (ACTION (id INKYchases) (info "No comestible --> perseguir")  (priority 10) ))
 )	
