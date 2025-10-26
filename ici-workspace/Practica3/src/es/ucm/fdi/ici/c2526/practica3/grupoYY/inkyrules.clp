@@ -2,6 +2,7 @@
 (deftemplate BLINKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -10,6 +11,7 @@
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -19,6 +21,7 @@
 (deftemplate PINKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -28,6 +31,7 @@
 (deftemplate SUE
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -93,6 +97,16 @@
 	)
 )
 
+(defrule INKYspread
+  (INKY (edible true) (nearToEdibleGhost true))
+  =>
+  (assert (ACTION (id INKYrunsAway)
+                  (info "Comestible --> dispersarse de otro fantasma comestible")
+                  (priority 25)
+                  (runawaystrategy SCATTER)))
+)
+
+
 (defrule INKYchasesPowerPill
     (INKY (edible false))
     (GAME (onlyOnePowerPillLeft true))
@@ -101,7 +115,7 @@
     	(ACTION 
 			(id INKYchases)
 			(info "No comestible y solo queda una PP --> perseguir PowerPill")
-			(priority 15)
+			(priority 25)
     		(chasestrategy CIRCLE_POWERPILL)
     	)
     )

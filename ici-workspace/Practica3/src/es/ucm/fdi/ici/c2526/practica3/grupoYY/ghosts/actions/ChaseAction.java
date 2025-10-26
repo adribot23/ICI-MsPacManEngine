@@ -84,21 +84,26 @@ public class ChaseAction implements RulesAction {
 	}
 
 	private int nearestNotEdibleGhost(Game game) {
-		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = 0;
-		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
-		for (GHOST g : GHOST.values()) {
-			if (g != ghost && !game.isGhostEdible(g)) {
-				int posGhost = game.getGhostCurrentNodeIndex(g);
-				if (posGhost != -1 &&  posCurrGhost!= -1) {
-					dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
-					if (dist < minDist) {
-						minDist = dist;
-						posNearNotEdible = posGhost;
-					}
-				}
-			}
-		}
-		return posNearNotEdible;
+	    int minDist = Integer.MAX_VALUE;
+	    int posNearNotEdible = -1;
+
+	    int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
+	    if (posCurrGhost == -1) return -1;  // fantasma actual en la guarida
+
+	    for (GHOST g : GHOST.values()) {
+	        if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) { // ignorar fantasmas en guarida
+	            int posGhost = game.getGhostCurrentNodeIndex(g);
+	            if (posGhost != -1) {
+	                int dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
+	                if (dist < minDist) {
+	                    minDist = dist;
+	                    posNearNotEdible = posGhost;
+	                }
+	            }
+	        }
+	    }
+
+	    return posNearNotEdible;
 	}
 
 	private int nextPacmanJunction(Game game) {

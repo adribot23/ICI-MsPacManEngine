@@ -2,6 +2,7 @@
 (deftemplate BLINKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -10,6 +11,7 @@
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -19,6 +21,7 @@
 (deftemplate PINKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -28,6 +31,7 @@
 (deftemplate SUE
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
@@ -91,6 +95,15 @@
 			(runawaystrategy PACMAN)
 		)
 	)
+)
+
+(defrule vspread
+  (SUE (edible true) (nearToEdibleGhost true))
+  =>
+  (assert (ACTION (id SUErunsAway)
+                  (info "Comestible --> dispersarse de otro fantasma comestible")
+                  (priority 25)
+                  (runawaystrategy SCATTER)))
 )
 
 (defrule SUEchasesPowerPill
