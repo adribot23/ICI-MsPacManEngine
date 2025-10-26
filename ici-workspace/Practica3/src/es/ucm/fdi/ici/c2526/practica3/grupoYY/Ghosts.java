@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 import es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.GhostsInput;
 import es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions.ChaseAction;
-import es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions.ChasePacmanNextJunction;
 import es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions.RunAwayAction;
 import es.ucm.fdi.ici.rules.RuleEngine;
 import es.ucm.fdi.ici.rules.RulesAction;
@@ -39,8 +38,6 @@ public class Ghosts  extends GhostController  {
 		RulesAction PINKYrunsAway = new RunAwayAction(GHOST.PINKY);
 		RulesAction SUErunsAway = new RunAwayAction(GHOST.SUE);
 		
-		RulesAction BLINKYchasesJunction = new ChasePacmanNextJunction(GHOST.BLINKY);
-		
 		map.put("BLINKYchases", BLINKYchases);
 		map.put("INKYchases", INKYchases);
 		map.put("PINKYchases", PINKYchases);
@@ -49,7 +46,6 @@ public class Ghosts  extends GhostController  {
 		map.put("INKYrunsAway", INKYrunsAway);
 		map.put("PINKYrunsAway", PINKYrunsAway);
 		map.put("SUErunsAway", SUErunsAway);
-		map.put("BLINKYchasesJunction", BLINKYchasesJunction);
 		
 		ghostRuleEngines = new EnumMap<GHOST,RuleEngine>(GHOST.class);
 		for(GHOST ghost: GHOST.values())

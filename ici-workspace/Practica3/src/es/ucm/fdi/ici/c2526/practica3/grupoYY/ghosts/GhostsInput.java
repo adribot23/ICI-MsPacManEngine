@@ -20,7 +20,9 @@ public class GhostsInput extends RulesInput {
 	private boolean PINKYedible;
 	private boolean SUEedible;
 	private double minPacmanDistancePPill;
-	private int nextPacmanJuncion;
+	private boolean moreNearToJunctionThanPacman;
+	private boolean moreNearToPillThanPacman;
+	private boolean moreNearToJunctionThanPill;
 	
 	public GhostsInput(Game game) {
 		super(game);
@@ -32,7 +34,6 @@ public class GhostsInput extends RulesInput {
 		this.INKYedible = game.isGhostEdible(GHOST.INKY);
 		this.PINKYedible = game.isGhostEdible(GHOST.PINKY);
 		this.SUEedible = game.isGhostEdible(GHOST.SUE);
-		this.nextPacmanJuncion = nextPacmanJunction(game);
 		
 		int pacman = game.getPacmanCurrentNodeIndex();
 		this.minPacmanDistancePPill = Double.MAX_VALUE;

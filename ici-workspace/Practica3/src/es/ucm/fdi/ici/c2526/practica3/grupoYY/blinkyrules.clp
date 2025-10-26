@@ -42,10 +42,11 @@
 	)
 )
 	
-(defrule BLINKYchases
-	(BLINKY (edible false)) 
+(defrule BLINKYchasesJunction
+	(BLINKY (edible false) (moreNearToJunctionThanPacman true))
 	=> 
-	(assert (ACTION (id BLINKYchasesJunction) (info "No comestible --> perseguir junction")  (priority 10) ))
-)	
-	
+	(assert (ACTION (id BLINKYchasesJunction) (info "No comestible --> perseguir junction")  (priority 10) 
+		(chasestrategy JUNCTION)
+	)
+)
 	

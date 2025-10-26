@@ -12,7 +12,10 @@ import pacman.game.Game;
 public class RunAwayAction implements RulesAction {
 
     GHOST ghost;
-    enum STRATEGY {RANDOM, CORNER, JAIL};
+    // PACMAN --> Si fantasma comestible, huye del pacman normal
+    // GHOST --> Si hay algun fantasma no comestible, huir hacia el
+    // POWERPILL --> Si Pacman cerca de una PP huir del Pacman o hacia el nodo mas lejano
+    enum STRATEGY {PACMAN, GHOST, POWERPILL};
     STRATEGY runAwayStrategy; 
 	public RunAwayAction(GHOST ghost) {
 		this.ghost = ghost;
@@ -40,8 +43,19 @@ public class RunAwayAction implements RulesAction {
 		
 		if (game.doesGhostRequireAction(ghost))        //if it requires an action
         {
-                return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
+			switch(runAwayStrategy) {
+        	case STRATEGY.PACMAN:
+        		return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
                         game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case STRATEGY.GHOST:
+        		return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
+        				nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+        	case STRATEGY.POWERPILL:
+        		return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
+        				getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+        	default:
+        		throw new IllegalArgumentException("Unexpected value: " + runAwayStrategy.toString());
+        	}
         }
             
         return MOVE.NEUTRAL;	
@@ -49,6 +63,42 @@ public class RunAwayAction implements RulesAction {
 	
 	@Override
 	public String getActionId() {
-		return ghost+ "runsAway";
+		return ghost + "runsAway";
+	}
+	
+	private int nearestNotEdibleGhost(Game game) {
+		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = 0;
+		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
+		for(GHOST g : GHOST.values()) {
+			if(g != ghost && !game.isGhostEdible(g)) {
+				int posGhost = game.getGhostCurrentNodeIndex(g);
+				dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
+				if(dist < minDist) {
+					minDist = dist;
+					posNearNotEdible = posGhost;
+				}
+			}
+		}
+		return posNearNotEdible;
+	}
+	
+	public int getNearPowerPill(Game game) {
+
+		int[] powerPills = game.getActivePowerPillsIndices();
+		int nearPowerPill = -1;
+		int minDistance = Integer.MAX_VALUE;
+		int posPacman = game.getPacmanCurrentNodeIndex();
+		MOVE lastMove = game.getPacmanLastMoveMade();
+
+		for (int pp : powerPills) {
+			int distance = game.getShortestPathDistance(posPacman, pp, lastMove);
+
+			// Hacer constante
+			if (distance < 30 && distance < minDistance) {
+				minDistance = distance;
+				nearPowerPill = pp;
+			}
+		}
+		return nearPowerPill;
 	}
 }

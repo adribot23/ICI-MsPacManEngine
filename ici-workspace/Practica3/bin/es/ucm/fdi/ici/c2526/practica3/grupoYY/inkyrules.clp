@@ -42,9 +42,9 @@
 	)
 )
 	
-(defrule INKYchases
-	(INKY (edible false)) 
+(defrule INKYchasesNearestEdibleGhostToPacman
+	(BLINKY (edible false)) 
 	=> 
-	(assert (ACTION (id INKYchases) (info "No comestible --> perseguir")  (priority 10) ))
+	(assert (ACTION (id INKYchasesNearestEdibleGhostToPacman) (info "No comestible --> perseguir junction")  (priority 10) ))
 )	
 	
