@@ -22,15 +22,18 @@ public class ChaseAction implements RulesAction {
 	// JUNCTION --> Perseguir siguiente cruce del Pacman
 	// PILL --> Perseguir Pill mas cercana a Pacman
 	// EDIBLE --> Perseguir fantasma comestible mas cercano a Pacman
+	// CIRCLE_POWERPILL --> Dar vueltas alrededor de la última power pill
 	enum STRATEGY {
-		PACMAN, JUNCTION, PILL, EDIBLE
+		PACMAN, JUNCTION, PILL, EDIBLE, CIRCLE_POWERPILL
 	};
 
 	STRATEGY chaseStrategy;
+	private boolean isClockwise = true; // Por defecto empieza en sentido horario
+	private static GHOST firstCirclingGhost = null; // Para identificar el primer fantasma que circula
+	private int lastPowerPillIndex = -1; // Para detectar cuando pasamos por la power pill
 
 	public ChaseAction(GHOST ghost) {
 		this.ghost = ghost;
-
 	}
 
 	@Override
@@ -63,6 +66,8 @@ public class ChaseAction implements RulesAction {
 				case EDIBLE:
 					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 							nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+				case CIRCLE_POWERPILL:
+					return circleAroundLastPowerPill(game);
 				default:
 					throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
@@ -93,9 +98,7 @@ public class ChaseAction implements RulesAction {
 			}
 
 			for (MOVE move : MOVE.values()) {
-
 				if (move != MOVE.NEUTRAL && !(current == start && move == lastMove.opposite())) {
-
 					int next = game.getNeighbour(current, move);
 					if (next != -1 && !visited.contains(next)) {
 						visited.add(next);
@@ -104,7 +107,6 @@ public class ChaseAction implements RulesAction {
 				}
 			}
 		}
-
 		return -1;
 	}
 
@@ -159,59 +161,83 @@ public class ChaseAction implements RulesAction {
 				return true;
 		return false;
 	}
-/*
-	private MOVE getCircularMove(Game game, boolean clockwise) {
-		int[] powerPills = game.getActivePowerPillsIndices();
 
-		// Get the last power pill (highest index)
+	private MOVE circleAroundLastPowerPill(Game game) {
+		int[] powerPills = game.getActivePowerPillsIndices();
+		
+		// Obtener la última power pill activa
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
 
-		// Get all possible moves except going backwards
-		MOVE[] possibleMoves = game.getPossibleMoves(ghostPos, lastMove);
-
-		if (possibleMoves.length == 0) {
-			return MOVE.NEUTRAL;
+		// Si es el primer fantasma que va a circular alrededor de la power pill
+		if (firstCirclingGhost == null) {
+			firstCirclingGhost = ghost;
+		}
+		// Si es el segundo fantasma y va en el mismo sentido que el primero, cambiar
+		// dirección
+		else if (firstCirclingGhost != ghost &&
+				game.getGhostLastMoveMade(firstCirclingGhost) == lastMove) {
+			isClockwise = !isClockwise;
 		}
 
-		// Calculate the best move that maintains circular motion
-		double bestAngle = Double.MAX_VALUE;
-		MOVE bestMove = possibleMoves[0];
+		// Detectar si acabamos de pasar por la power pill
+		if (ghostPos == targetPill) {
+			lastPowerPillIndex = targetPill;
+			// El siguiente movimiento determinará el sentido
+			return lastMove;
+		}
 
-		// Current position relative to power pill
-		double currentX = game.getNodeXCood(ghostPos) - game.getNodeXCood(targetPill);
-		double currentY = game.getNodeYCood(ghostPos) - game.getNodeYCood(targetPill);
-		double currentAngle = Math.atan2(currentY, currentX);
-
-		for (MOVE move : possibleMoves) {
-			int nextPos = game.getNeighbour(ghostPos, move);
-			if (nextPos == -1)
-				continue;
-
-			// Next position relative to power pill
-			double nextX = game.getNodeXCood(nextPos) - game.getNodeXCood(targetPill);
-			double nextY = game.getNodeYCood(nextPos) - game.getNodeYCood(targetPill);
-			double nextAngle = Math.atan2(nextY, nextX);
-
-			// Calculate angle difference
-			double angleDiff = nextAngle - currentAngle;
-			if (angleDiff > Math.PI)
-				angleDiff -= 2 * Math.PI;
-			if (angleDiff < -Math.PI)
-				angleDiff += 2 * Math.PI;
-
-			// For clockwise movement we want positive angle differences
-			// For counter-clockwise movement we want negative angle differences
-			double score = clockwise ? -angleDiff : angleDiff;
-
-			if (score < bestAngle) {
-				bestAngle = score;
-				bestMove = move;
+		// Si ya pasamos por la power pill, ajustar el sentido según el movimiento
+		if (lastPowerPillIndex == targetPill) {
+			MOVE[] possibleMoves = game.getPossibleMoves(ghostPos, lastMove);
+			// Preferir giro a la derecha para horario, izquierda para antihorario
+			for (MOVE move : possibleMoves) {
+				if (isClockwise && isRightTurn(lastMove, move) ||
+						!isClockwise && isLeftTurn(lastMove, move)) {
+					return move;
+				}
 			}
+			// Si no podemos girar en la dirección deseada, tomar cualquier movimiento
+			// válido
+			return possibleMoves.length > 0 ? possibleMoves[0] : MOVE.NEUTRAL;
 		}
 
-		return bestMove;
+		// Si aún no hemos llegado a la power pill, ir hacia ella
+		return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 	}
-	*/
+
+	// Determina si el nuevo movimiento es un giro a la derecha respecto al último
+	// movimiento
+	private boolean isRightTurn(MOVE lastMove, MOVE newMove) {
+		switch (lastMove) {
+			case UP:
+				return newMove == MOVE.RIGHT;
+			case RIGHT:
+				return newMove == MOVE.DOWN;
+			case DOWN:
+				return newMove == MOVE.LEFT;
+			case LEFT:
+				return newMove == MOVE.UP;
+			default:
+				return false;
+		}
+	}
+
+	// Determina si el nuevo movimiento es un giro a la izquierda respecto al último
+	// movimiento
+	private boolean isLeftTurn(MOVE lastMove, MOVE newMove) {
+		switch (lastMove) {
+			case UP:
+				return newMove == MOVE.LEFT;
+			case LEFT:
+				return newMove == MOVE.DOWN;
+			case DOWN:
+				return newMove == MOVE.RIGHT;
+			case RIGHT:
+				return newMove == MOVE.UP;
+			default:
+				return false;
+		}
+	}
 }
