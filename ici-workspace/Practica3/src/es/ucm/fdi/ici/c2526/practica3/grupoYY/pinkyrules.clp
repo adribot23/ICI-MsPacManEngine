@@ -1,48 +1,151 @@
+;FACTS ASSERTED BY GAME INPUT
 (deftemplate BLINKY
-	(slot edible (type SYMBOL)))
-	
+	(slot edible (type SYMBOL))
+	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToPacman (type SYMBOL))
+	(slot distToPacman (type NUMBER))
+    (slot distToPacmanJunction (type NUMBER))
+    (slot distToPacmanPowerPill (type NUMBER))
+)	
 (deftemplate INKY
-	(slot edible (type SYMBOL)))
+	(slot edible (type SYMBOL))
+	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToPacman (type SYMBOL))
+	(slot distToPacman (type NUMBER))
+    (slot distToPacmanJunction (type NUMBER))
+    (slot distToPacmanPowerPill (type NUMBER))
+)	
 	
 (deftemplate PINKY
-	(slot edible (type SYMBOL)))
+	(slot edible (type SYMBOL))
+	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToPacman (type SYMBOL))
+	(slot distToPacman (type NUMBER))
+    (slot distToPacmanJunction (type NUMBER))
+    (slot distToPacmanPowerPill (type NUMBER))
+)
 
 (deftemplate SUE
-	(slot edible (type SYMBOL)))
-	
+	(slot edible (type SYMBOL))
+	(slot nearToNotEdibleGhost (type SYMBOL))
+	(slot nearToPacman (type SYMBOL))
+	(slot distToPacman (type NUMBER))
+    (slot distToPacmanJunction (type NUMBER))
+    (slot distToPacmanPowerPill (type NUMBER))
+)
+
+
 (deftemplate MSPACMAN 
-    (slot mindistancePPill))
+    (slot nearToPowerPill (type SYMBOL))
+)
     
+(deftemplate GAME
+    (slot onlyOnePowerPillLeft (type SYMBOL))
+)
 
 ;DEFINITION OF THE ACTION FACT
 (deftemplate ACTION
-	(slot id) (slot info (default "")) (slot priority (type NUMBER) ) ; mandatory slots
+	(slot id)
+	(slot info (default ""))
+	(slot priority (type NUMBER)) ; mandatory slots
 	(slot runawaystrategy (type SYMBOL)) ; Extra slot for the runaway action
+	(slot chasestrategy (type SYMBOL)) ; Extra slot for the chase action
 ) 
+
 ;RULES 
+
 (defrule PINKYrunsAwayMSPACMANclosePPill
-	(MSPACMAN (mindistancePPill ?d)) (test (<= ?d 30)) 
+	(MSPACMAN (nearToPowerPill true))
 	=>  
 	(assert 
-		(ACTION (id PINKYrunsAway) (info "MSPacMan cerca PPill") (priority 50) 
-			(runawaystrategy RANDOM)
+		(ACTION 
+			(id PINKYrunsAway)
+			(info "MSPacMan cerca PPill")
+			(priority 50)
+			(runawaystrategy POWERPILL)
 		)
 	)
 )
 
-(defrule PINKYrunsAway
-	(PINKY (edible true)) 
+(defrule PINKYchasesNotEdibleGhost
+	(PINKY (edible true) (nearToNotEdibleGhost true))
 	=>  
 	(assert 
-		(ACTION (id PINKYrunsAway) (info "Comestible --> huir") (priority 30) 
-			(runawaystrategy CORNER)
+		(ACTION 
+			(id PINKYchases)
+			(info "Comestible --> huir hacia fantasma no comestible")
+			(priority 40)
+			(chasestrategy GHOST)
 		)
 	)
 )
-	
-(defrule PINKYchases
-	(BLINKY (edible false)) 
-	=> 
-	(assert (ACTION (id BLINKYchases) (info "No comestible --> perseguir")  (priority 10) ))
-)	
-	
+
+(defrule PINKYrunsAwayPacman
+	(PINKY (edible true) (nearToPacman true))
+	=>  
+	(assert 
+		(ACTION 
+			(id PINKYrunsAway)
+			(info "Comestible --> huir")
+			(priority 30)
+			(runawaystrategy PACMAN)
+		)
+	)
+)
+
+(defrule PINKYchasesPowerPill
+    (PINKY (edible false))
+    (GAME (onlyOnePowerPillLeft true))
+    => 
+    (assert 
+    	(ACTION 
+			(id PINKYchases)
+			(info "No comestible y solo queda una PP --> perseguir PowerPill")
+			(priority 15)
+    		(chasestrategy CIRCLE_POWERPILL)
+    	)
+    )
+)
+
+
+(defrule PINKYchasesPacman
+    (PINKY (edible false)
+             (distToPacman ?dp)
+             (distToPacmanJunction ?dj)
+             (distToPacmanPowerPill ?dpill))
+    (test (< ?dp ?dj))
+    (test (< ?dp ?dpill))
+    =>
+    (assert (ACTION (id PINKYchases)
+                    (info "Pacman es el más cercano")
+                    (priority 20)
+                    (chasestrategy PACMAN)))
+)
+
+(defrule PINKYchasesJunction
+    (PINKY (edible false)
+             (distToPacman ?dp)
+             (distToPacmanJunction ?dj)
+             (distToPacmanPowerPill ?dpill))
+    (test (< ?dj ?dp))
+    (test (< ?dj ?dpill))
+    =>
+    (assert (ACTION (id PINKYchases)
+                    (info "Junction más cercana")
+                    (priority 20)
+                    (chasestrategy JUNCTION)))
+)
+
+(defrule PINKYchasesPill
+    (PINKY (edible false)
+             (distToPacman ?dp)
+             (distToPacmanJunction ?dj)
+             (distToPacmanPowerPill ?dpill))
+    (test (< ?dpill ?dp))
+    (test (< ?dpill ?dj))
+    =>
+    (assert (ACTION (id PINKYchases)
+                    (info "Pill más cercana")
+                    (priority 20)
+                    (chasestrategy PILL)))
+)

@@ -7,5 +7,7 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/MsPacManEngine"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica1"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica2"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

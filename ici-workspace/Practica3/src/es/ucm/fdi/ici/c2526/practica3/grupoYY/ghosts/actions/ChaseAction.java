@@ -24,7 +24,7 @@ public class ChaseAction implements RulesAction {
 	// EDIBLE --> Perseguir fantasma comestible mas cercano a Pacman
 	// CIRCLE_POWERPILL --> Dar vueltas alrededor de la última power pill
 	enum STRATEGY {
-		PACMAN, JUNCTION, PILL, EDIBLE, CIRCLE_POWERPILL
+		PACMAN, JUNCTION, PILL, GHOST, EDIBLE, CIRCLE_POWERPILL
 	};
 
 	STRATEGY chaseStrategy;
@@ -54,22 +54,25 @@ public class ChaseAction implements RulesAction {
 		if (game.doesGhostRequireAction(ghost)) // if it requires an action
 		{
 			switch (chaseStrategy) {
-				case PACMAN:
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case JUNCTION:
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case PILL:
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case EDIBLE:
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case CIRCLE_POWERPILL:
-					return circleAroundLastPowerPill(game);
-				default:
-					throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
+			case PACMAN:
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case JUNCTION:
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case PILL:
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case GHOST:
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case EDIBLE:
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case CIRCLE_POWERPILL:
+				return circleAroundLastPowerPill(game);
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
 		}
 		return MOVE.NEUTRAL;
@@ -78,6 +81,24 @@ public class ChaseAction implements RulesAction {
 	@Override
 	public String getActionId() {
 		return ghost + "chases";
+	}
+
+	private int nearestNotEdibleGhost(Game game) {
+		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = 0;
+		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
+		for (GHOST g : GHOST.values()) {
+			if (g != ghost && !game.isGhostEdible(g)) {
+				int posGhost = game.getGhostCurrentNodeIndex(g);
+				if (posGhost != -1 &&  posCurrGhost!= -1) {
+					dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
+					if (dist < minDist) {
+						minDist = dist;
+						posNearNotEdible = posGhost;
+					}
+				}
+			}
+		}
+		return posNearNotEdible;
 	}
 
 	private int nextPacmanJunction(Game game) {
@@ -164,7 +185,7 @@ public class ChaseAction implements RulesAction {
 
 	private MOVE circleAroundLastPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
-		
+
 		// Obtener la última power pill activa
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
@@ -176,8 +197,7 @@ public class ChaseAction implements RulesAction {
 		}
 		// Si es el segundo fantasma y va en el mismo sentido que el primero, cambiar
 		// dirección
-		else if (firstCirclingGhost != ghost &&
-				game.getGhostLastMoveMade(firstCirclingGhost) == lastMove) {
+		else if (firstCirclingGhost != ghost && game.getGhostLastMoveMade(firstCirclingGhost) == lastMove) {
 			isClockwise = !isClockwise;
 		}
 
@@ -193,8 +213,7 @@ public class ChaseAction implements RulesAction {
 			MOVE[] possibleMoves = game.getPossibleMoves(ghostPos, lastMove);
 			// Preferir giro a la derecha para horario, izquierda para antihorario
 			for (MOVE move : possibleMoves) {
-				if (isClockwise && isRightTurn(lastMove, move) ||
-						!isClockwise && isLeftTurn(lastMove, move)) {
+				if (isClockwise && isRightTurn(lastMove, move) || !isClockwise && isLeftTurn(lastMove, move)) {
 					return move;
 				}
 			}
@@ -211,16 +230,16 @@ public class ChaseAction implements RulesAction {
 	// movimiento
 	private boolean isRightTurn(MOVE lastMove, MOVE newMove) {
 		switch (lastMove) {
-			case UP:
-				return newMove == MOVE.RIGHT;
-			case RIGHT:
-				return newMove == MOVE.DOWN;
-			case DOWN:
-				return newMove == MOVE.LEFT;
-			case LEFT:
-				return newMove == MOVE.UP;
-			default:
-				return false;
+		case UP:
+			return newMove == MOVE.RIGHT;
+		case RIGHT:
+			return newMove == MOVE.DOWN;
+		case DOWN:
+			return newMove == MOVE.LEFT;
+		case LEFT:
+			return newMove == MOVE.UP;
+		default:
+			return false;
 		}
 	}
 
@@ -228,16 +247,16 @@ public class ChaseAction implements RulesAction {
 	// movimiento
 	private boolean isLeftTurn(MOVE lastMove, MOVE newMove) {
 		switch (lastMove) {
-			case UP:
-				return newMove == MOVE.LEFT;
-			case LEFT:
-				return newMove == MOVE.DOWN;
-			case DOWN:
-				return newMove == MOVE.RIGHT;
-			case RIGHT:
-				return newMove == MOVE.UP;
-			default:
-				return false;
+		case UP:
+			return newMove == MOVE.LEFT;
+		case LEFT:
+			return newMove == MOVE.DOWN;
+		case DOWN:
+			return newMove == MOVE.RIGHT;
+		case RIGHT:
+			return newMove == MOVE.UP;
+		default:
+			return false;
 		}
 	}
 }

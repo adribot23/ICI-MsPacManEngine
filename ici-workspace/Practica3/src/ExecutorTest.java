@@ -3,6 +3,7 @@
 import pacman.Executor;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
+import es.ucm.fdi.ici.c2526.practica1.grupoF.MsPacMan;
 
 
 public class ExecutorTest {
@@ -16,7 +17,7 @@ public class ExecutorTest {
                 .setScaleFactor(3.0)
                 .build();
 
-        PacmanController pacMan = new PacManRandom();
+        PacmanController pacMan = new es.ucm.fdi.ici.c2526.practica1.grupoF.MsPacMan();
         GhostController ghosts = new es.ucm.fdi.ici.c2526.practica3.grupoYY.Ghosts();
         
         System.out.println( 
