@@ -70,6 +70,16 @@
 	)
 )
 
+(defrule BLINKYrunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(BLINKY (edible true))
+	=>  
+	(assert 
+		(ACTION (id BLINKYrunsAway) (info "Alejarse de la ultima PP") (priority 40) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
+)
 
 (defrule BLINKYchasesNotEdibleGhost
 	(BLINKY (edible true) (nearToNotEdibleGhost true)) 

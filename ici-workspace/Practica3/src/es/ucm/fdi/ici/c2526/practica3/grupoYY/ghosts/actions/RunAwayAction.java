@@ -18,7 +18,7 @@ public class RunAwayAction implements RulesAction {
 	// lejano
 
 	enum STRATEGY {
-		PACMAN, POWERPILL, SCATTER
+		PACMAN, POWERPILL, SCATTER, LASTPOWERPILL
 	};
 
 	STRATEGY runAwayStrategy;
@@ -50,16 +50,18 @@ public class RunAwayAction implements RulesAction {
 		if (game.doesGhostRequireAction(ghost)) // if it requires an action
 		{
 			switch (runAwayStrategy) {
-			case STRATEGY.PACMAN:
+			case PACMAN:
 				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
 						game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case STRATEGY.POWERPILL:
+			case POWERPILL:
 				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
 						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case STRATEGY.SCATTER:
+			case SCATTER:
 				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 						scatterMove(game, ghost), game.getGhostLastMoveMade(ghost), DM.PATH);
-
+			case LASTPOWERPILL:
+				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
+						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + runAwayStrategy.toString());
 			}

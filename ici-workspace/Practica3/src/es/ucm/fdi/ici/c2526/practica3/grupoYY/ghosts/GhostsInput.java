@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import es.ucm.fdi.ici.rules.RulesInput;
-import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
@@ -132,16 +131,17 @@ public class GhostsInput extends RulesInput {
 	
 	private boolean ghostInPowerPill(Game game, GHOST ghost) {
 		
-		if (game.getGhostLairTime(ghost) > 0) {
+		if (game.getGhostLairTime(ghost) > 0 && !ghostsThatTouchedPowerPill.isEmpty()) {
 			ghostsThatTouchedPowerPill.remove(ghost);
 			return false;
 		}
 		
 		int[] powerPills = game.getActivePowerPillsIndices();
+		if(powerPills.length == 0) return false;
 		int target = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 
-		if (ghostPos == target) {
+		if (ghostPos == target && !ghostsThatTouchedPowerPill.contains(ghost)) {
 			ghostsThatTouchedPowerPill.add(ghost);
 		}
 		

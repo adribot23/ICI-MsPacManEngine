@@ -189,92 +189,111 @@ public class ChaseAction implements RulesAction {
 				return true;
 		return false;
 	}
-	
-	private static int[] avoidPath;
+
+	private static int[] avoidPath = null;
 	private static GHOST firstGhost = null;
 	private boolean isClockwise = true;
 
 	private MOVE chaseLastPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
+		if (powerPills.length == 0) {
+			firstGhost = null;
+			avoidPath = null;
+			return MOVE.NEUTRAL;
+		}
 
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
-		
-		// Si es el primer fantasma, guardamos el camino mas cercano a la PP para evitarlo
+
+		// Si es el primer fantasma y aún no se ha establecido
 		if (firstGhost == null) {
 			firstGhost = ghost;
-			avoidPath = game.getShortestPath(ghostPos, targetPill, lastMove);
-			GameView.addPoints(game, Color.CYAN, avoidPath);
+			if (avoidPath == null) {
+				avoidPath = game.getShortestPath(ghostPos, targetPill, lastMove);
+				GameView.addPoints(game, Color.RED, avoidPath);
+			}
 			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
-		}
-		
-		// Si es el primer fantasma, vamos hacia la PP
-		if (firstGhost == ghost) {
-			GameView.addLines(game, Color.RED, ghostPos, targetPill);
-			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
-		}
-		
-		// Si no es el primer fantasma, buscamos un camino alternativo hacia la PP sin pasar por el avoidPath
-		if (firstGhost != ghost && firstGhost != null) {
-			// No esta bien puesto, solo esta asi para comprobar cuando entra
-			GameView.addLines(game, Color.RED, ghostPos, targetPill);
-			return game.getApproximateNextMoveTowardsTarget(ghostPos, game.getGhostInitialNodeIndex(), lastMove, DM.PATH);
 		}
 
+		// Si es el primer fantasma, vamos hacia la PP sin actualizar el avoidPath
+		if (firstGhost == ghost) {
+			GameView.addPoints(game, Color.YELLOW, game.getShortestPath(ghostPos, targetPill, lastMove));
+			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
+		}
+
+		// Si no es el primer fantasma, buscamos un camino alternativo hacia la PP sin
+		// pasar por el avoidPath
+		if (firstGhost != ghost) {
+			int[] alternativePath = findAlternativePath(game, ghostPos, targetPill, avoidPath);
+			GameView.addPoints(game, Color.WHITE, alternativePath);
+
+			int nextNode = alternativePath[0];
+			for (int i = 0; i < alternativePath.length - 1; i++) {
+				if (alternativePath[i] == ghostPos) {
+					nextNode = alternativePath[i + 1];
+					break;
+				}
+			}
+			return game.getNextMoveTowardsTarget(ghostPos, nextNode, lastMove, DM.PATH);
+		}
 		return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 	}
-	/*
+
 	private int[] findAlternativePath(Game game, int start, int target, int[] avoidPath) {
-		// BFS shortest path from start to target, avoiding nodes in avoidPath
-		LinkedList<Integer> empty = new LinkedList<>();
-		if (start == target) {
-			empty.add(start);
-			return empty;
+		// Convertir avoidPath en Set para bfs
+		Set<Integer> avoidSet = new HashSet<>();
+		for (int node : avoidPath) {
+			avoidSet.add(node);
 		}
 
-		Queue<Integer> q = new LinkedList<>();
+		Queue<int[]> queue = new LinkedList<>();
 		Set<Integer> visited = new HashSet<>();
-		java.util.Map<Integer, Integer> parent = new java.util.HashMap<>();
+		int[] parent = new int[game.getNumberOfNodes()];
 
-		q.add(start);
+		// Inicializar
+		queue.add(new int[] { start, 0, -1 });
 		visited.add(start);
 
-		while (!q.isEmpty()) {
-			int curr = q.poll();
-			for (MOVE move : MOVE.values()) {
-				if (move == MOVE.NEUTRAL)
-					continue;
-				int next = game.getNeighbour(curr, move);
-				if (next == -1)
-					continue;
-				if (visited.contains(next))
-					continue;
-				// avoid nodes in avoidPath, but allow target even if it's in avoidPath
-				if (avoidPath != null && avoidPath.contains(next) && next != target)
-					continue;
-				visited.add(next);
-				parent.put(next, curr);
-				if (next == target) {
-					// reconstruct path
-					LinkedList<Integer> path = new LinkedList<>();
-					int node = target;
-					while (node != start) {
-						path.addFirst(node);
-						node = parent.get(node);
-						if (node == 0 && !visited.contains(start))
-							break; // safety
-					}
-					path.addFirst(start);
-					return path;
+		// BFS con contador de intersecciones
+		while (!queue.isEmpty()) {
+			int[] current = queue.poll();
+			int node = current[0];
+			int intersections = current[1];
+			parent[node] = current[2];
+
+			if (node == target) {
+				// Reconstruir el camino
+				LinkedList<Integer> path = new LinkedList<>();
+				int curr = node;
+				while (curr != -1) {
+					path.addFirst(curr);
+					curr = parent[curr];
 				}
-				q.add(next);
+				int[] resultPath = path.stream().mapToInt(Integer::intValue).toArray();
+				GameView.addPoints(game, Color.WHITE, resultPath);
+				return resultPath;
+			}
+
+			// Expandir vecinos
+			for (MOVE move : game.getPossibleMoves(node)) {
+				int next = game.getNeighbour(node, move);
+				if (next != -1 && !visited.contains(next)) {
+					int newIntersections = intersections;
+					if (avoidSet.contains(next)) {
+						newIntersections++;
+						if (newIntersections > 5)
+							continue; // Máximo 5 intersecciones
+					}
+					visited.add(next);
+					queue.add(new int[] { next, newIntersections, node });
+				}
 			}
 		}
 
-		return new LinkedList<>();
+		// Si no se encuentra camino alternativo, usar el camino directo
+		return game.getShortestPath(start, target, game.getGhostLastMoveMade(ghost));
 	}
-	*/
 
 	private MOVE circleAroundLastPowerPill(Game game) {
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);

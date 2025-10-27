@@ -75,6 +75,17 @@
 	)
 )
 
+(defrule SUErunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(SUE (edible true))
+	=>  
+	(assert 
+		(ACTION (id SUErunsAway) (info "Alejarse de la ultima PP") (priority 40) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
+)
+
 (defrule SUEchasesNotEdibleGhost
 	(SUE (edible true) (nearToNotEdibleGhost true))
 	=>  

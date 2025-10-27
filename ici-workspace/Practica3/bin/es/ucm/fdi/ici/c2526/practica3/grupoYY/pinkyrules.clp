@@ -75,6 +75,17 @@
 	)
 )
 
+(defrule PINKYrunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(PINKY (edible true))
+	=>  
+	(assert 
+		(ACTION (id PINKYrunsAway) (info "Alejarse de la ultima PP") (priority 40) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
+)
+
 (defrule PINKYchasesNotEdibleGhost
 	(PINKY (edible true) (nearToNotEdibleGhost true))
 	=>  

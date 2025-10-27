@@ -75,6 +75,17 @@
 	)
 )
 
+(defrule INKYrunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(INKY (edible true))
+	=>  
+	(assert 
+		(ACTION (id INKYrunsAway) (info "Alejarse de la ultima PP") (priority 40) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
+)
+
 (defrule INKYchasesNotEdibleGhost
 	(INKY (edible true) (nearToNotEdibleGhost true))
 	=>  
