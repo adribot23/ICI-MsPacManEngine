@@ -145,7 +145,10 @@
     (test (< ?dpill ?dp))
     (test (< ?dpill ?dj))
     =>
-    (assert (ACTION (id BLINKYchases)(info "Pill más cercana")(priority 20)(chasestrategy PILL)))
+    (assert (ACTION (id BLINKYchases)
+    				(info "Pill más cercana")
+    				(priority 20)
+    				(chasestrategy PILL)))
 )
 
 

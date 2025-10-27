@@ -57,7 +57,6 @@ public class RunAwayAction implements RulesAction {
 				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
 						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case STRATEGY.SCATTER:
-
 				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 						scatterMove(game, ghost), game.getGhostLastMoveMade(ghost), DM.PATH);
 

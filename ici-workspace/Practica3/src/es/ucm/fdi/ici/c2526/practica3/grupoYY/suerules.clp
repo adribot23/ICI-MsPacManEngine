@@ -7,6 +7,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
@@ -16,6 +17,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )	
 	
 (deftemplate PINKY
@@ -26,6 +28,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )
 
 (deftemplate SUE
@@ -36,6 +39,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )
 
 
@@ -97,7 +101,7 @@
 	)
 )
 
-(defrule vspread
+(defrule SUEspread
   (SUE (edible true) (nearToEdibleGhost true))
   =>
   (assert (ACTION (id SUErunsAway)
@@ -106,16 +110,24 @@
                   (runawaystrategy SCATTER)))
 )
 
-(defrule SUEchasesPowerPill
-    (SUE (edible false))
+(defrule SUEcircleAroundLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
+    (SUE (ghostInPowerPIll true))
     => 
     (assert 
-    	(ACTION 
-			(id SUEchases)
-			(info "No comestible y solo queda una PP --> perseguir PowerPill")
-			(priority 15)
+    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
     		(chasestrategy CIRCLE_POWERPILL)
+    	)
+    )
+)
+
+(defrule SUEchasesLastPowerPill
+    (GAME (onlyOnePowerPillLeft true))
+    (SUE (ghostInPowerPIll false))
+    => 
+    (assert 
+    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
+    		(chasestrategy POWERPILL)
     	)
     )
 )

@@ -1,5 +1,6 @@
 package es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions;
 
+import java.awt.Color;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -13,6 +14,7 @@ import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
+import pacman.game.GameView;
 
 public class ChaseAction implements RulesAction {
 
@@ -24,13 +26,10 @@ public class ChaseAction implements RulesAction {
 	// EDIBLE --> Perseguir fantasma comestible mas cercano a Pacman
 	// CIRCLE_POWERPILL --> Dar vueltas alrededor de la última power pill
 	enum STRATEGY {
-		PACMAN, JUNCTION, PILL, GHOST, EDIBLE, CIRCLE_POWERPILL
+		PACMAN, JUNCTION, PILL, GHOST, EDIBLE, POWERPILL, CIRCLE_POWERPILL
 	};
 
 	STRATEGY chaseStrategy;
-	private boolean isClockwise = true; // Por defecto empieza en sentido horario
-	private static GHOST firstCirclingGhost = null; // Para identificar el primer fantasma que circula
-	private int lastPowerPillIndex = -1; // Para detectar cuando pasamos por la power pill
 
 	public ChaseAction(GHOST ghost) {
 		this.ghost = ghost;
@@ -54,25 +53,27 @@ public class ChaseAction implements RulesAction {
 		if (game.doesGhostRequireAction(ghost)) // if it requires an action
 		{
 			switch (chaseStrategy) {
-			case PACMAN:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case JUNCTION:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case PILL:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case GHOST:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case EDIBLE:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case CIRCLE_POWERPILL:
-				return circleAroundLastPowerPill(game);
-			default:
-				throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
+				case PACMAN:
+					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+							game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
+				case JUNCTION:
+					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+							nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+				case PILL:
+					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+							nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+				case GHOST:
+					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+							nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+				case EDIBLE:
+					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+							nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+				case POWERPILL:
+					return chaseLastPowerPill(game);
+				case CIRCLE_POWERPILL:
+					return circleAroundLastPowerPill(game);
+				default:
+					throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
 		}
 		return MOVE.NEUTRAL;
@@ -84,26 +85,27 @@ public class ChaseAction implements RulesAction {
 	}
 
 	private int nearestNotEdibleGhost(Game game) {
-	    int minDist = Integer.MAX_VALUE;
-	    int posNearNotEdible = -1;
+		int minDist = Integer.MAX_VALUE;
+		int posNearNotEdible = -1;
 
-	    int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
-	    if (posCurrGhost == -1) return -1;  // fantasma actual en la guarida
+		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
+		if (posCurrGhost == -1)
+			return -1; // fantasma actual en la guarida
 
-	    for (GHOST g : GHOST.values()) {
-	        if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) { // ignorar fantasmas en guarida
-	            int posGhost = game.getGhostCurrentNodeIndex(g);
-	            if (posGhost != -1) {
-	                int dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
-	                if (dist < minDist) {
-	                    minDist = dist;
-	                    posNearNotEdible = posGhost;
-	                }
-	            }
-	        }
-	    }
+		for (GHOST g : GHOST.values()) {
+			if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) { // ignorar fantasmas en guarida
+				int posGhost = game.getGhostCurrentNodeIndex(g);
+				if (posGhost != -1) {
+					int dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
+					if (dist < minDist) {
+						minDist = dist;
+						posNearNotEdible = posGhost;
+					}
+				}
+			}
+		}
 
-	    return posNearNotEdible;
+		return posNearNotEdible;
 	}
 
 	private int nextPacmanJunction(Game game) {
@@ -187,64 +189,128 @@ public class ChaseAction implements RulesAction {
 				return true;
 		return false;
 	}
+	
+	private static int[] avoidPath;
+	private static GHOST firstGhost = null;
+	private boolean isClockwise = true;
 
-	private MOVE circleAroundLastPowerPill(Game game) {
+	private MOVE chaseLastPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
 
-		// Obtener la última power pill activa
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
-
-		// Si es el primer fantasma que va a circular alrededor de la power pill
-		if (firstCirclingGhost == null) {
-			firstCirclingGhost = ghost;
+		
+		// Si es el primer fantasma, guardamos el camino mas cercano a la PP para evitarlo
+		if (firstGhost == null) {
+			firstGhost = ghost;
+			avoidPath = game.getShortestPath(ghostPos, targetPill, lastMove);
+			GameView.addPoints(game, Color.CYAN, avoidPath);
+			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 		}
-		// Si es el segundo fantasma y va en el mismo sentido que el primero, cambiar
-		// dirección
-		else if (firstCirclingGhost != ghost && game.getGhostLastMoveMade(firstCirclingGhost) == lastMove) {
-			isClockwise = !isClockwise;
+		
+		// Si es el primer fantasma, vamos hacia la PP
+		if (firstGhost == ghost) {
+			GameView.addLines(game, Color.RED, ghostPos, targetPill);
+			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 		}
-
-		// Detectar si acabamos de pasar por la power pill
-		if (ghostPos == targetPill) {
-			lastPowerPillIndex = targetPill;
-			// El siguiente movimiento determinará el sentido
-			return lastMove;
-		}
-
-		// Si ya pasamos por la power pill, ajustar el sentido según el movimiento
-		if (lastPowerPillIndex == targetPill) {
-			MOVE[] possibleMoves = game.getPossibleMoves(ghostPos, lastMove);
-			// Preferir giro a la derecha para horario, izquierda para antihorario
-			for (MOVE move : possibleMoves) {
-				if (isClockwise && isRightTurn(lastMove, move) || !isClockwise && isLeftTurn(lastMove, move)) {
-					return move;
-				}
-			}
-			// Si no podemos girar en la dirección deseada, tomar cualquier movimiento
-			// válido
-			return possibleMoves.length > 0 ? possibleMoves[0] : MOVE.NEUTRAL;
+		
+		// Si no es el primer fantasma, buscamos un camino alternativo hacia la PP sin pasar por el avoidPath
+		if (firstGhost != ghost && firstGhost != null) {
+			// No esta bien puesto, solo esta asi para comprobar cuando entra
+			GameView.addLines(game, Color.RED, ghostPos, targetPill);
+			return game.getApproximateNextMoveTowardsTarget(ghostPos, game.getGhostInitialNodeIndex(), lastMove, DM.PATH);
 		}
 
-		// Si aún no hemos llegado a la power pill, ir hacia ella
 		return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
+	}
+	/*
+	private int[] findAlternativePath(Game game, int start, int target, int[] avoidPath) {
+		// BFS shortest path from start to target, avoiding nodes in avoidPath
+		LinkedList<Integer> empty = new LinkedList<>();
+		if (start == target) {
+			empty.add(start);
+			return empty;
+		}
+
+		Queue<Integer> q = new LinkedList<>();
+		Set<Integer> visited = new HashSet<>();
+		java.util.Map<Integer, Integer> parent = new java.util.HashMap<>();
+
+		q.add(start);
+		visited.add(start);
+
+		while (!q.isEmpty()) {
+			int curr = q.poll();
+			for (MOVE move : MOVE.values()) {
+				if (move == MOVE.NEUTRAL)
+					continue;
+				int next = game.getNeighbour(curr, move);
+				if (next == -1)
+					continue;
+				if (visited.contains(next))
+					continue;
+				// avoid nodes in avoidPath, but allow target even if it's in avoidPath
+				if (avoidPath != null && avoidPath.contains(next) && next != target)
+					continue;
+				visited.add(next);
+				parent.put(next, curr);
+				if (next == target) {
+					// reconstruct path
+					LinkedList<Integer> path = new LinkedList<>();
+					int node = target;
+					while (node != start) {
+						path.addFirst(node);
+						node = parent.get(node);
+						if (node == 0 && !visited.contains(start))
+							break; // safety
+					}
+					path.addFirst(start);
+					return path;
+				}
+				q.add(next);
+			}
+		}
+
+		return new LinkedList<>();
+	}
+	*/
+
+	private MOVE circleAroundLastPowerPill(Game game) {
+		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
+		MOVE lastMove = game.getGhostLastMoveMade(ghost);
+
+		// Asumimos que ya hemos pasado por la power pill
+		MOVE[] possibleMoves = game.getPossibleMoves(ghostPos, lastMove);
+		// Mantener el sentido actual (isClockwise)
+		for (MOVE move : possibleMoves) {
+			if (isClockwise && isRightTurn(lastMove, move) || !isClockwise && isLeftTurn(lastMove, move)) {
+				return move;
+			}
+		}
+		// Si no podemos girar, seguimos recto si es posible
+		for (MOVE move : possibleMoves) {
+			if (move == lastMove) {
+				return move;
+			}
+		}
+		return MOVE.NEUTRAL;
 	}
 
 	// Determina si el nuevo movimiento es un giro a la derecha respecto al último
 	// movimiento
 	private boolean isRightTurn(MOVE lastMove, MOVE newMove) {
 		switch (lastMove) {
-		case UP:
-			return newMove == MOVE.RIGHT;
-		case RIGHT:
-			return newMove == MOVE.DOWN;
-		case DOWN:
-			return newMove == MOVE.LEFT;
-		case LEFT:
-			return newMove == MOVE.UP;
-		default:
-			return false;
+			case UP:
+				return newMove == MOVE.RIGHT;
+			case RIGHT:
+				return newMove == MOVE.DOWN;
+			case DOWN:
+				return newMove == MOVE.LEFT;
+			case LEFT:
+				return newMove == MOVE.UP;
+			default:
+				return false;
 		}
 	}
 
@@ -252,16 +318,16 @@ public class ChaseAction implements RulesAction {
 	// movimiento
 	private boolean isLeftTurn(MOVE lastMove, MOVE newMove) {
 		switch (lastMove) {
-		case UP:
-			return newMove == MOVE.LEFT;
-		case LEFT:
-			return newMove == MOVE.DOWN;
-		case DOWN:
-			return newMove == MOVE.RIGHT;
-		case RIGHT:
-			return newMove == MOVE.UP;
-		default:
-			return false;
+			case UP:
+				return newMove == MOVE.LEFT;
+			case LEFT:
+				return newMove == MOVE.DOWN;
+			case DOWN:
+				return newMove == MOVE.RIGHT;
+			case RIGHT:
+				return newMove == MOVE.UP;
+			default:
+				return false;
 		}
 	}
 }
