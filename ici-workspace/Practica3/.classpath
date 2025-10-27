@@ -6,10 +6,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/MsPacManEngine"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Practica1"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Practica2"/>
-	<classpathentry kind="lib" path="/ICI-Evaluation/.classpath"/>
 	<classpathentry kind="lib" path="/ICI-Evaluation/lib/ici-2425-practica1.jar"/>
 	<classpathentry kind="lib" path="/ICI-Evaluation/lib/ici-2425-practica2.jar"/>
 	<classpathentry kind="lib" path="/ICI-Evaluation/lib/ici-c2021-practica2.jar"/>
@@ -19,5 +15,7 @@
 	<classpathentry kind="lib" path="/ICI-Evaluation/lib/ici-c2223-practica2.jar"/>
 	<classpathentry kind="lib" path="/ICI-Evaluation/lib/ici-c2324-practica1.jar"/>
 	<classpathentry kind="lib" path="/ICI-Evaluation/lib/ici-c2324-practica2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/MsPacManEngine"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Practica1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

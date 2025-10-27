@@ -112,10 +112,10 @@
 
 (defrule PINKYcircleAroundLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (PINKY (ghostInPowerPIll true))
+    (PINKY (edible false)(ghostInPowerPill true))
     => 
     (assert 
-    	(ACTION (id PINKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
+    	(ACTION (id PINKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 15) 
     		(chasestrategy CIRCLE_POWERPILL)
     	)
     )
@@ -123,10 +123,10 @@
 
 (defrule PINKYchasesLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (PINKY (ghostInPowerPIll false))
+    (PINKY (edible false) (ghostInPowerPill false))
     => 
     (assert 
-    	(ACTION (id PINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
+    	(ACTION (id PINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 15) 
     		(chasestrategy POWERPILL)
     	)
     )

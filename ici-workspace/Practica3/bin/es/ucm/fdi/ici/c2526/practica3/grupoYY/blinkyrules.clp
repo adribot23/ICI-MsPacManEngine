@@ -7,6 +7,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
@@ -16,6 +17,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )	
 	
 (deftemplate PINKY
@@ -26,6 +28,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )
 
 (deftemplate SUE
@@ -36,6 +39,7 @@
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPowerPill (type NUMBER))
+	(slot ghostInPowerPill (type SYMBOL))
 )
 
 (deftemplate MSPACMAN 
@@ -43,7 +47,8 @@
  )
     
 (deftemplate GAME
-    (slot onlyOnePowerPillLeft (type SYMBOL)))
+    (slot onlyOnePowerPillLeft (type SYMBOL))
+)
 
     
 ;DEFINITION OF THE ACTION FACT
@@ -96,18 +101,27 @@
                   (runawaystrategy SCATTER)))
 )
 
-
-(defrule BLINKYchasesPowerPill
-    (BLINKY (edible false))
+(defrule BLINKYcircleAroundLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
+    (BLINKY (edible false)(ghostInPowerPill true))
     => 
     (assert 
-    	(ACTION (id BLINKYchases) (info "No comestible y solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
+    	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
     		(chasestrategy CIRCLE_POWERPILL)
     	)
     )
 )
 
+(defrule BLINKYchasesLastPowerPill
+    (GAME (onlyOnePowerPillLeft true))
+    (BLINKY (edible false)(ghostInPowerPill false))
+    => 
+    (assert 
+    	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
+    		(chasestrategy POWERPILL)
+    	)
+    )
+)
 
 (defrule BLINKYchasesPacman
     (BLINKY (edible false)
@@ -151,6 +165,3 @@
     				(chasestrategy PILL)))
 )
 
-
-
-	

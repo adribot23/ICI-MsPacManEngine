@@ -92,28 +92,28 @@ public class GhostsInput extends RulesInput {
 
 		// BLINKY
 		facts.add(String.format(
-				"(BLINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d)) (GAME (ghostInPowerPill %s))",
+				"(BLINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
 				this.BLINKYedible, this.BLINKYnearToNotEdibleGhost, this.BLINKYnearToEdibleGhost,
 				this.BLINKYnearToPacman, this.BLINKYdistToPacman,
 				this.BLINKYdistToJunction, this.BLINKYdistToPowerPill, this.ghostInPowerPill));
 
 		// INKY
 		facts.add(String.format(
-				"(INKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d)) (GAME (ghostInPowerPill %s))",
+				"(INKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
 				this.INKYedible, this.INKYnearToNotEdibleGhost, this.INKYnearToEdibleGhost, this.INKYnearToPacman,
 				this.INKYdistToPacman,
 				this.INKYdistToJunction, this.INKYdistToPowerPill, this.ghostInPowerPill));
 
 		// PINKY
 		facts.add(String.format(
-				"(PINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d)) (GAME (ghostInPowerPill %s))",
+				"(PINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
 				this.PINKYedible, this.PINKYnearToNotEdibleGhost, this.PINKYnearToEdibleGhost, this.PINKYnearToPacman,
 				this.PINKYdistToPacman,
 				this.PINKYdistToJunction, this.PINKYdistToPowerPill, this.ghostInPowerPill));
 
 		// SUE
 		facts.add(String.format(
-				"(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d)) (GAME (ghostInPowerPill %s))",
+				"(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
 				this.SUEedible, this.SUEnearToNotEdibleGhost, this.SUEnearToEdibleGhost, this.SUEnearToPacman,
 				this.SUEdistToPacman,
 				this.SUEdistToJunction, this.SUEdistToPowerPill, this.ghostInPowerPill));
@@ -131,6 +131,7 @@ public class GhostsInput extends RulesInput {
 	private static Set<GHOST> ghostsThatTouchedPowerPill = new HashSet<>();
 	
 	private boolean ghostInPowerPill(Game game, GHOST ghost) {
+		
 		if (game.getGhostLairTime(ghost) > 0) {
 			ghostsThatTouchedPowerPill.remove(ghost);
 			return false;
@@ -145,6 +146,8 @@ public class GhostsInput extends RulesInput {
 		}
 		
 		return ghostsThatTouchedPowerPill.contains(ghost);
+		
+		
 	}
 
 	private int nextPacmanJunction(Game game) {

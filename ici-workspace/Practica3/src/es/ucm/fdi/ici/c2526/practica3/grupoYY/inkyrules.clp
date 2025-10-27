@@ -113,7 +113,7 @@
 
 (defrule INKYcircleAroundLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (INKY (ghostInPowerPIll true))
+    (INKY (edible false)(ghostInPowerPill true))
     => 
     (assert 
     	(ACTION (id INKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
@@ -124,7 +124,7 @@
 
 (defrule INKYchasesLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (INKY (ghostInPowerPIll false))
+    (INKY (edible false) (ghostInPowerPill false))
     => 
     (assert 
     	(ACTION (id INKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 

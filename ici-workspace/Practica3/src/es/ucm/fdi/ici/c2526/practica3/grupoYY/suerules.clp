@@ -112,10 +112,10 @@
 
 (defrule SUEcircleAroundLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (SUE (ghostInPowerPIll true))
+    (SUE (edible false) (ghostInPowerPill true))
     => 
     (assert 
-    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
+    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 15) 
     		(chasestrategy CIRCLE_POWERPILL)
     	)
     )
@@ -123,10 +123,10 @@
 
 (defrule SUEchasesLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (SUE (ghostInPowerPIll false))
+    (SUE (edible false) (ghostInPowerPill false))
     => 
     (assert 
-    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
+    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 15) 
     		(chasestrategy POWERPILL)
     	)
     )

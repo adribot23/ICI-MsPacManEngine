@@ -103,7 +103,7 @@
 
 (defrule BLINKYcircleAroundLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (BLINKY (ghostInPowerPIll true))
+    (BLINKY (edible false)(ghostInPowerPill true))
     => 
     (assert 
     	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
@@ -114,7 +114,7 @@
 
 (defrule BLINKYchasesLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (BLINKY (ghostInPowerPIll false))
+    (BLINKY (edible false)(ghostInPowerPill false))
     => 
     (assert 
     	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
