@@ -9,12 +9,14 @@ import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
+
 public class RunAwayAction implements RulesAction {
 
 	GHOST ghost;
 
 	// PACMAN --> Si fantasma comestible, huye del pacman normal
-	// POWERPILL --> Si Pacman cerca de una PP huir del Pacman o hacia el nodo mas lejano
+	// POWERPILL --> Si Pacman cerca de una PP huir del Pacman o hacia el nodo mas
+	// lejano
 	// SCATTER --> Alejarse de otro fantasma comestible
 	// LASTPOWERPILL --> Alejarse de la power pill si es la ultima
 
@@ -54,8 +56,7 @@ public class RunAwayAction implements RulesAction {
 				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
 						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case SCATTER:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						scatterMove(game, ghost), game.getGhostLastMoveMade(ghost), DM.PATH);
+				return scatterMove(game, ghost);
 			case LASTPOWERPILL:
 				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
 						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
@@ -91,39 +92,23 @@ public class RunAwayAction implements RulesAction {
 		return nearPowerPill;
 	}
 
-	private int scatterMove(Game game, GHOST ghost) {
-		int current = game.getGhostCurrentNodeIndex(ghost);
-		int pacman = game.getPacmanCurrentNodeIndex();
+	private MOVE scatterMove(Game game, GHOST ghost) {
 
-		// Recolectamos nodos “seguros” (distancia suficiente de Pacman y otros
-		// comestibles)
-		int[] allNodes = game.getPillIndices();
-		int safestNode = current;
-		int maxScore = Integer.MIN_VALUE;
+		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = -1;
+		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
 
-		for (int node : allNodes) {
-			int distToPacman = game.getShortestPathDistance(node, pacman, game.getGhostLastMoveMade(ghost));
-			int minDistToEdibleGhost = Integer.MAX_VALUE;
-
-			for (GHOST g : GHOST.values()) {
-				if (g != ghost && game.isGhostEdible(g)) {
-					int d = game.getShortestPathDistance(node, game.getGhostCurrentNodeIndex(g),
-							game.getGhostLastMoveMade(g));
-					if (d < minDistToEdibleGhost)
-						minDistToEdibleGhost = d;
+		for (GHOST g : GHOST.values()) {
+			if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) {
+				int posGhost = game.getGhostCurrentNodeIndex(g);
+				dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(ghost));
+				if (dist < minDist) {
+					minDist = dist;
+					posNearNotEdible = posGhost;
 				}
 			}
-
-			// Calculamos una “puntuación” simple: más lejos de Pacman y de otros fantasmas
-			// comibles
-			int score = distToPacman + minDistToEdibleGhost;
-			if (score > maxScore) {
-				maxScore = score;
-				safestNode = node;
-			}
 		}
+		return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost), posNearNotEdible,
+				game.getGhostLastMoveMade(ghost), DM.PATH);
 
-		// Devuelve el nodo más seguro
-		return safestNode;
 	}
 }

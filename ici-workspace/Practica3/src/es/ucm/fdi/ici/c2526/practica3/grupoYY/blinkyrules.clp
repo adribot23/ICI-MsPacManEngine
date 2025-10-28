@@ -73,6 +73,7 @@
 
 (defrule BLINKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
+	(BLINKY (edible false))
 	=>  
 	(assert 
 		(ACTION (id BLINKYrunsAway) (info "MSPacMan cerca PPill") (priority 50) 

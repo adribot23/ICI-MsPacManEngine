@@ -64,6 +64,7 @@
 
 (defrule PINKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
+	(PINKY (edible false))
 	=>  
 	(assert 
 		(ACTION 
@@ -113,7 +114,7 @@
 (defrule PINKYrunsAwayLastPPill
 	(GAME (onlyOnePowerPillLeft true))
 	(PINKY (nearToLastPowerPill true))
-	(PINKY (edible true))
+	(PINKY (edible false))
 	=>  
 	(assert 
 		(ACTION (id PINKYrunsAway) (info "Alejarse de la ultima PP") (priority 30) 

@@ -75,6 +75,7 @@
 
 (defrule INKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
+	(INKY (edible false))
 	=>  
 	(assert 
 		(ACTION 

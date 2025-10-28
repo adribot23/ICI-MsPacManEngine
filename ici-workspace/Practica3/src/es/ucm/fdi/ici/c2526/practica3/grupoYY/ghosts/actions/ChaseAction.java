@@ -24,11 +24,10 @@ public class ChaseAction implements RulesAction {
 	// JUNCTION --> Perseguir siguiente cruce del Pacman
 	// PILL --> Perseguir Pill mas cercana a Pacman
 	// GHOST --> Huir hacia fantasma no comestible mas cercano
-	// EDIBLE --> Perseguir fantasma comestible mas cercano a Pacman
 	// POWERPILL --> Perseguir ultima power pill por dos caminos distintos
-	
+
 	enum STRATEGY {
-		PACMAN, JUNCTION, PILL, GHOST, EDIBLE, POWERPILL
+		PACMAN, JUNCTION, PILL, GHOST, POWERPILL
 	};
 
 	STRATEGY chaseStrategy;
@@ -55,28 +54,29 @@ public class ChaseAction implements RulesAction {
 		if (game.doesGhostRequireAction(ghost)) // if it requires an action
 		{
 			switch (chaseStrategy) {
-				case PACMAN:
-					GameView.addPoints(game, Color.RED, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex()));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case JUNCTION:
-					GameView.addPoints(game, Color.BLUE, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nextPacmanJunction(game)));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case PILL:
-					GameView.addPoints(game, Color.YELLOW, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPillToPacman(game)));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case GHOST:
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case EDIBLE:
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case POWERPILL:
-					return chaseLastPowerPill(game);
-				default:
-					throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
+			case PACMAN:
+				GameView.addPoints(game, Color.RED,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex()));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case JUNCTION:
+				GameView.addPoints(game, Color.BLUE,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nextPacmanJunction(game)));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case PILL:
+				GameView.addPoints(game, Color.YELLOW,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPillToPacman(game)));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case GHOST:
+				GameView.addLines(game, Color.ORANGE, game.getGhostCurrentNodeIndex(ghost),nearestNotEdibleGhost(game));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case POWERPILL:
+				return chaseLastPowerPill(game);
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
 		}
 		return MOVE.NEUTRAL;
@@ -93,10 +93,10 @@ public class ChaseAction implements RulesAction {
 
 		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
 		if (posCurrGhost == -1)
-			return -1; // fantasma actual en la guarida
+			return -1; 
 
 		for (GHOST g : GHOST.values()) {
-			if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) { // ignorar fantasmas en guarida
+			if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) { 
 				int posGhost = game.getGhostCurrentNodeIndex(g);
 				if (posGhost != -1) {
 					int dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
@@ -139,22 +139,6 @@ public class ChaseAction implements RulesAction {
 			}
 		}
 		return -1;
-	}
-
-	private int nearestGhostToPacman(Game game) {
-		int dist = 0, minDist = Integer.MAX_VALUE, posNearEdible = 0;
-		int posPacman = game.getPacmanCurrentNodeIndex();
-		for (GHOST g : GHOST.values()) {
-			if (g != ghost && game.isGhostEdible(g)) {
-				int posGhost = game.getGhostCurrentNodeIndex(g);
-				dist = game.getShortestPathDistance(posGhost, posPacman, game.getGhostLastMoveMade(g));
-				if (dist < minDist) {
-					minDist = dist;
-					posNearEdible = posGhost;
-				}
-			}
-		}
-		return posNearEdible;
 	}
 
 	private int nearestPillToPacman(Game game) {

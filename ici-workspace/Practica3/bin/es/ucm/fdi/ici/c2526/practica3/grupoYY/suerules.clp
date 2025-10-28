@@ -64,6 +64,7 @@
 
 (defrule SUErunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
+	(SUE (edible false))
 	=>  
 	(assert 
 		(ACTION 
@@ -113,7 +114,7 @@
 (defrule SUErunsAwayLastPPill
 	(GAME (onlyOnePowerPillLeft true))
 	(SUE (nearToLastPowerPill true))
-	(SUE (edible true))
+	(SUE (edible false))
 	=>  
 	(assert 
 		(ACTION (id SUErunsAway) (info "Alejarse de la ultima PP") (priority 30) 
