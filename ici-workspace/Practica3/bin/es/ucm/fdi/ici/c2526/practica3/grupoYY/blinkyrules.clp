@@ -4,7 +4,6 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPill (type NUMBER))
@@ -14,7 +13,6 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPill (type NUMBER))
@@ -25,7 +23,6 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPill (type NUMBER))
@@ -36,7 +33,6 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
     (slot distToPacmanPill (type NUMBER))
@@ -82,6 +78,17 @@
 	)
 )
 
+(defrule BLINKYrunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(BLINKY (edible true))
+	=>  
+	(assert 
+		(ACTION (id BLINKYrunsAway) (info "Alejarse de la ultima PP") (priority 50) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
+)
+
 (defrule BLINKYspread
   (BLINKY (edible true) (nearToEdibleGhost true))
   =>
@@ -107,18 +114,6 @@
 	(assert 
 		(ACTION (id BLINKYrunsAway) (info "Comestible --> huir") (priority 35) 
 			(runawaystrategy PACMAN)
-		)
-	)
-)
-
-(defrule BLINKYrunsAwayLastPPill
-	(GAME (onlyOnePowerPillLeft true))
-	(BLINKY (nearToLastPowerPill true))
-	(BLINKY (edible true))
-	=>  
-	(assert 
-		(ACTION (id BLINKYrunsAway) (info "Alejarse de la ultima PP") (priority 30) 
-			(runawaystrategy LASTPOWERPILL)
 		)
 	)
 )

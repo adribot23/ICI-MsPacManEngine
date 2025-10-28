@@ -178,23 +178,18 @@ public class ChaseAction implements RulesAction {
 	}
 
 	private static int[] avoidPath = null;
-	private static GHOST firstGhost = null;
+	private static GHOST[] ghosts = new GHOST[2];
 
 	private MOVE chaseLastPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
-		if (powerPills.length == 0) {
-			firstGhost = null;
-			avoidPath = null;
-			return MOVE.NEUTRAL;
-		}
-
+		
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
 
 		// Si es el primer fantasma y aún no se ha establecido
-		if (firstGhost == null) {
-			firstGhost = ghost;
+		if (ghosts[0] == null) {
+			ghosts[0] = ghost;
 			if (avoidPath == null) {
 				avoidPath = game.getShortestPath(ghostPos, targetPill, lastMove);
 				GameView.addPoints(game, Color.RED, avoidPath);
@@ -203,14 +198,15 @@ public class ChaseAction implements RulesAction {
 		}
 
 		// Si es el primer fantasma, vamos hacia la PP sin actualizar el avoidPath
-		if (firstGhost == ghost) {
+		if (ghosts[0] == ghost) {
 			GameView.addPoints(game, Color.YELLOW, game.getShortestPath(ghostPos, targetPill, lastMove));
 			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 		}
 
 		// Si no es el primer fantasma, buscamos un camino alternativo hacia la PP sin
 		// pasar por el avoidPath
-		if (firstGhost != ghost) {
+		if (ghosts[0] != ghost) {
+			ghosts[1] = ghost;
 			int[] alternativePath = findAlternativePath(game, ghostPos, targetPill, avoidPath);
 			GameView.addPoints(game, Color.WHITE, alternativePath);
 
@@ -267,7 +263,7 @@ public class ChaseAction implements RulesAction {
 					int newIntersections = intersections;
 					if (avoidSet.contains(next)) {
 						newIntersections++;
-						if (newIntersections > 5)
+						if (newIntersections > 10)
 							continue; // Máximo 5 intersecciones
 					}
 					visited.add(next);

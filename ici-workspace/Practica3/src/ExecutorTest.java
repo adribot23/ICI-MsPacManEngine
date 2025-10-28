@@ -12,7 +12,7 @@ public class ExecutorTest {
 		PacmanController pacMan = new es.ucm.fdi.ici.c2526.practica1.grupoF.MsPacMan();
 		GhostController ghosts = new es.ucm.fdi.ici.c2526.practica3.grupoYY.Ghosts();
 
-		System.out.println(executor.runGame(pacMan, ghosts, 0));
+		System.out.println(executor.runGame(pacMan, ghosts, 10));
 
 	}
 }

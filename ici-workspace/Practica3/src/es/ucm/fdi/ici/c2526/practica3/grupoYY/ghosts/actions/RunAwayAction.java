@@ -1,5 +1,7 @@
 package es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions;
 
+import java.awt.Color;
+
 import es.ucm.fdi.ici.rules.RulesAction;
 import jess.Fact;
 import jess.JessException;
@@ -8,6 +10,7 @@ import pacman.game.Constants.DM;
 import pacman.game.Constants.GHOST;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
+import pacman.game.GameView;
 
 
 public class RunAwayAction implements RulesAction {
@@ -58,8 +61,10 @@ public class RunAwayAction implements RulesAction {
 			case SCATTER:
 				return scatterMove(game, ghost);
 			case LASTPOWERPILL:
-				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
-						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+				GameView.addPoints(game, Color.GREEN,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), getFarthestNodeFromPowerPill(game)));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						getFarthestNodeFromPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + runAwayStrategy.toString());
 			}
@@ -73,8 +78,15 @@ public class RunAwayAction implements RulesAction {
 		return ghost + "runsAway";
 	}
 
+	private int getFarthestNodeFromPowerPill(Game game) {
+		int[] powerPills = game.getActivePowerPillsIndices();
+		int lastPowerPill = powerPills[powerPills.length - 1];
+		int[] options = game.getPillIndices();
+		
+		return game.getFarthestNodeIndexFromNodeIndex(lastPowerPill, options, DM.PATH);
+	}
+	
 	private int getNearPowerPill(Game game) {
-
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int nearPowerPill = -1;
 		int minDistance = Integer.MAX_VALUE;
