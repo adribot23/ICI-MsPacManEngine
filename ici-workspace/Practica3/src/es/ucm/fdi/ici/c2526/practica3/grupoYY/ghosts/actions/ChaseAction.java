@@ -23,10 +23,12 @@ public class ChaseAction implements RulesAction {
 	// PACMAN --> Perseguir Pacman normal
 	// JUNCTION --> Perseguir siguiente cruce del Pacman
 	// PILL --> Perseguir Pill mas cercana a Pacman
+	// GHOST --> Huir hacia fantasma no comestible mas cercano
 	// EDIBLE --> Perseguir fantasma comestible mas cercano a Pacman
-	// CIRCLE_POWERPILL --> Dar vueltas alrededor de la última power pill
+	// POWERPILL --> Perseguir ultima power pill por dos caminos distintos
+	
 	enum STRATEGY {
-		PACMAN, JUNCTION, PILL, GHOST, EDIBLE, POWERPILL, CIRCLE_POWERPILL
+		PACMAN, JUNCTION, PILL, GHOST, EDIBLE, POWERPILL
 	};
 
 	STRATEGY chaseStrategy;
@@ -54,12 +56,15 @@ public class ChaseAction implements RulesAction {
 		{
 			switch (chaseStrategy) {
 				case PACMAN:
+					GameView.addPoints(game, Color.RED, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex()));
 					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 							game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
 				case JUNCTION:
+					GameView.addPoints(game, Color.BLUE, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nextPacmanJunction(game)));
 					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 							nextPacmanJunction(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 				case PILL:
+					GameView.addPoints(game, Color.YELLOW, game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPillToPacman(game)));
 					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
 							nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 				case GHOST:
@@ -70,8 +75,6 @@ public class ChaseAction implements RulesAction {
 							nearestGhostToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 				case POWERPILL:
 					return chaseLastPowerPill(game);
-				case CIRCLE_POWERPILL:
-					return circleAroundLastPowerPill(game);
 				default:
 					throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
@@ -192,7 +195,6 @@ public class ChaseAction implements RulesAction {
 
 	private static int[] avoidPath = null;
 	private static GHOST firstGhost = null;
-	private boolean isClockwise = true;
 
 	private MOVE chaseLastPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
@@ -251,7 +253,6 @@ public class ChaseAction implements RulesAction {
 		Set<Integer> visited = new HashSet<>();
 		int[] parent = new int[game.getNumberOfNodes()];
 
-		// Inicializar
 		queue.add(new int[] { start, 0, -1 });
 		visited.add(start);
 
@@ -293,60 +294,5 @@ public class ChaseAction implements RulesAction {
 
 		// Si no se encuentra camino alternativo, usar el camino directo
 		return game.getShortestPath(start, target, game.getGhostLastMoveMade(ghost));
-	}
-
-	private MOVE circleAroundLastPowerPill(Game game) {
-		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
-		MOVE lastMove = game.getGhostLastMoveMade(ghost);
-
-		// Asumimos que ya hemos pasado por la power pill
-		MOVE[] possibleMoves = game.getPossibleMoves(ghostPos, lastMove);
-		// Mantener el sentido actual (isClockwise)
-		for (MOVE move : possibleMoves) {
-			if (isClockwise && isRightTurn(lastMove, move) || !isClockwise && isLeftTurn(lastMove, move)) {
-				return move;
-			}
-		}
-		// Si no podemos girar, seguimos recto si es posible
-		for (MOVE move : possibleMoves) {
-			if (move == lastMove) {
-				return move;
-			}
-		}
-		return MOVE.NEUTRAL;
-	}
-
-	// Determina si el nuevo movimiento es un giro a la derecha respecto al último
-	// movimiento
-	private boolean isRightTurn(MOVE lastMove, MOVE newMove) {
-		switch (lastMove) {
-			case UP:
-				return newMove == MOVE.RIGHT;
-			case RIGHT:
-				return newMove == MOVE.DOWN;
-			case DOWN:
-				return newMove == MOVE.LEFT;
-			case LEFT:
-				return newMove == MOVE.UP;
-			default:
-				return false;
-		}
-	}
-
-	// Determina si el nuevo movimiento es un giro a la izquierda respecto al último
-	// movimiento
-	private boolean isLeftTurn(MOVE lastMove, MOVE newMove) {
-		switch (lastMove) {
-			case UP:
-				return newMove == MOVE.LEFT;
-			case LEFT:
-				return newMove == MOVE.DOWN;
-			case DOWN:
-				return newMove == MOVE.RIGHT;
-			case RIGHT:
-				return newMove == MOVE.UP;
-			default:
-				return false;
-		}
 	}
 }

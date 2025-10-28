@@ -14,8 +14,9 @@ public class RunAwayAction implements RulesAction {
 	GHOST ghost;
 
 	// PACMAN --> Si fantasma comestible, huye del pacman normal
-	// POWERPILL --> Si Pacman cerca de una PP huir del Pacman o hacia el nodo mas
-	// lejano
+	// POWERPILL --> Si Pacman cerca de una PP huir del Pacman o hacia el nodo mas lejano
+	// SCATTER --> Alejarse de otro fantasma comestible
+	// LASTPOWERPILL --> Alejarse de la power pill si es la ultima
 
 	enum STRATEGY {
 		PACMAN, POWERPILL, SCATTER, LASTPOWERPILL
@@ -43,10 +44,6 @@ public class RunAwayAction implements RulesAction {
 
 	@Override
 	public MOVE execute(Game game) {
-		/*****************************************************************************/
-		// Here you can use the runAwayStrategy value obtained from the asserted fact
-		/*****************************************************************************/
-
 		if (game.doesGhostRequireAction(ghost)) // if it requires an action
 		{
 			switch (runAwayStrategy) {

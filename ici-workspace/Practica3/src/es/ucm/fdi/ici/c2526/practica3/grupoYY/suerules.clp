@@ -4,20 +4,20 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )	
 	
 (deftemplate PINKY
@@ -25,10 +25,10 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )
 
 (deftemplate SUE
@@ -36,10 +36,10 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )
 
 
@@ -75,15 +75,13 @@
 	)
 )
 
-(defrule SUErunsAwayLastPPill
-	(GAME (onlyOnePowerPillLeft true))
-	(SUE (edible true))
-	=>  
-	(assert 
-		(ACTION (id SUErunsAway) (info "Alejarse de la ultima PP") (priority 40) 
-			(runawaystrategy LASTPOWERPILL)
-		)
-	)
+(defrule SUEspread
+  (SUE (edible true) (nearToEdibleGhost true))
+  =>
+  (assert (ACTION (id SUErunsAway)
+                  (info "Comestible --> dispersarse de otro fantasma comestible")
+                  (priority 45)
+                  (runawaystrategy SCATTER)))
 )
 
 (defrule SUEchasesNotEdibleGhost
@@ -106,35 +104,27 @@
 		(ACTION 
 			(id SUErunsAway)
 			(info "Comestible --> huir")
-			(priority 30)
+			(priority 35)
 			(runawaystrategy PACMAN)
 		)
 	)
 )
 
-(defrule SUEspread
-  (SUE (edible true) (nearToEdibleGhost true))
-  =>
-  (assert (ACTION (id SUErunsAway)
-                  (info "Comestible --> dispersarse de otro fantasma comestible")
-                  (priority 25)
-                  (runawaystrategy SCATTER)))
-)
-
-(defrule SUEcircleAroundLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (SUE (edible false) (ghostInPowerPill true))
-    => 
-    (assert 
-    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 15) 
-    		(chasestrategy CIRCLE_POWERPILL)
-    	)
-    )
+(defrule SUErunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(SUE (nearToLastPowerPill true))
+	(SUE (edible true))
+	=>  
+	(assert 
+		(ACTION (id SUErunsAway) (info "Alejarse de la ultima PP") (priority 30) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
 )
 
 (defrule SUEchasesLastPowerPill
     (GAME (onlyOnePowerPillLeft true))
-    (SUE (edible false) (ghostInPowerPill false))
+    (SUE (edible false))
     => 
     (assert 
     	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 15) 
@@ -148,7 +138,7 @@
     (SUE (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dp ?dj))
     (test (< ?dp ?dpill))
     =>
@@ -162,7 +152,7 @@
     (SUE (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dj ?dp))
     (test (< ?dj ?dpill))
     =>
@@ -176,7 +166,7 @@
     (SUE (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dpill ?dp))
     (test (< ?dpill ?dj))
     =>

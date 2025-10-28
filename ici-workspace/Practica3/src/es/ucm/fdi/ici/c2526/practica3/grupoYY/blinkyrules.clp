@@ -4,20 +4,20 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )	
 	
 (deftemplate PINKY
@@ -25,10 +25,10 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )
 
 (deftemplate SUE
@@ -36,10 +36,10 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )
 
 (deftemplate MSPACMAN 
@@ -60,6 +60,17 @@
 
 ;RULES 
 
+(defrule BLINKYchasesLastPowerPill
+    (GAME (onlyOnePowerPillLeft true))
+    (BLINKY (edible false))
+    => 
+    (assert 
+    	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 55) 
+    		(chasestrategy POWERPILL)
+    	)
+    )
+)
+
 (defrule BLINKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
 	=>  
@@ -70,15 +81,13 @@
 	)
 )
 
-(defrule BLINKYrunsAwayLastPPill
-	(GAME (onlyOnePowerPillLeft true))
-	(BLINKY (edible true))
-	=>  
-	(assert 
-		(ACTION (id BLINKYrunsAway) (info "Alejarse de la ultima PP") (priority 40) 
-			(runawaystrategy LASTPOWERPILL)
-		)
-	)
+(defrule BLINKYspread
+  (BLINKY (edible true) (nearToEdibleGhost true))
+  =>
+  (assert (ACTION (id BLINKYrunsAway)
+                  (info "Comestible --> dispersarse de otro fantasma comestible")
+                  (priority 45)
+                  (runawaystrategy SCATTER)))
 )
 
 (defrule BLINKYchasesNotEdibleGhost
@@ -90,54 +99,34 @@
 		)
 	)
 )
-	
-	
+
 (defrule BLINKYrunsAwayPacman
 	(BLINKY (edible true) (nearToPacman true)) 
 	=>  
 	(assert 
-		(ACTION (id BLINKYrunsAway) (info "Comestible --> huir") (priority 30) 
+		(ACTION (id BLINKYrunsAway) (info "Comestible --> huir") (priority 35) 
 			(runawaystrategy PACMAN)
 		)
 	)
 )
 
-(defrule BLINKYspread
-  (BLINKY (edible true) (nearToEdibleGhost true))
-  =>
-  (assert (ACTION (id BLINKYrunsAway)
-                  (info "Comestible --> dispersarse de otro fantasma comestible")
-                  (priority 25)
-                  (runawaystrategy SCATTER)))
-)
-
-(defrule BLINKYcircleAroundLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (BLINKY (edible false)(ghostInPowerPill true))
-    => 
-    (assert 
-    	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
-    		(chasestrategy CIRCLE_POWERPILL)
-    	)
-    )
-)
-
-(defrule BLINKYchasesLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (BLINKY (edible false)(ghostInPowerPill false))
-    => 
-    (assert 
-    	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
-    		(chasestrategy POWERPILL)
-    	)
-    )
+(defrule BLINKYrunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(BLINKY (nearToLastPowerPill true))
+	(BLINKY (edible true))
+	=>  
+	(assert 
+		(ACTION (id BLINKYrunsAway) (info "Alejarse de la ultima PP") (priority 30) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
 )
 
 (defrule BLINKYchasesPacman
     (BLINKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dp ?dj))
     (test (< ?dp ?dpill))
     =>
@@ -151,7 +140,7 @@
     (BLINKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dj ?dp))
     (test (< ?dj ?dpill))
     =>
@@ -165,7 +154,7 @@
     (BLINKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dpill ?dp))
     (test (< ?dpill ?dj))
     =>

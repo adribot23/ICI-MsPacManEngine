@@ -21,12 +21,13 @@ public class GhostsInput extends RulesInput {
 	private boolean BLINKYnearToPacman, INKYnearToPacman, PINKYnearToPacman, SUEnearToPacman;
 	private boolean BLINKYnearToEdibleGhost, INKYnearToEdibleGhost, PINKYnearToEdibleGhost,
 			SUEnearToEdibleGhost;
-	private boolean pacmanNearToPowerPill, onlyOnePowerPIllLeft, ghostInPowerPill;
+	private boolean BLINKYnearToLastPowerPill, INKYnearToLastPowerPill, PINKYnearToLastPowerPill, SUEnearToLastPowerPill;
+	private boolean pacmanNearToPowerPill, onlyOnePowerPIllLeft;
 
 	// DISTANCIAS
 	private int BLINKYdistToPacman, INKYdistToPacman, PINKYdistToPacman, SUEdistToPacman;
 	private int BLINKYdistToJunction, INKYdistToJunction, PINKYdistToJunction, SUEdistToJunction;
-	private int BLINKYdistToPowerPill, INKYdistToPowerPill, PINKYdistToPowerPill, SUEdistToPowerPill;
+	private int BLINKYdistToPill, INKYdistToPill, PINKYdistToPill, SUEdistToPill;
 
 	public GhostsInput(Game game) {
 		super(game);
@@ -52,6 +53,12 @@ public class GhostsInput extends RulesInput {
 		this.INKYnearToPacman = nearToPacman(game, GHOST.INKY);
 		this.PINKYnearToPacman = nearToPacman(game, GHOST.PINKY);
 		this.SUEnearToPacman = nearToPacman(game, GHOST.SUE);
+		
+		// Cercanía a PowerPill
+		this.BLINKYnearToLastPowerPill = nearToLastPowerPill(game, GHOST.BLINKY);
+		this.INKYnearToLastPowerPill = nearToLastPowerPill(game, GHOST.INKY);
+		this.PINKYnearToLastPowerPill = nearToLastPowerPill(game, GHOST.PINKY);
+		this.SUEnearToLastPowerPill = nearToLastPowerPill(game, GHOST.SUE);
 
 		// Cercanía a otros fantasmas comestibles
 		this.BLINKYnearToEdibleGhost = nearToEdibleGhost(game, GHOST.BLINKY);
@@ -61,12 +68,6 @@ public class GhostsInput extends RulesInput {
 
 		// Cercanía a power pill
 		this.pacmanNearToPowerPill = pacmanNearToPowerPill(game);
-
-		// Fantasma en power pill
-		this.ghostInPowerPill = ghostInPowerPill(game, GHOST.BLINKY);
-		this.ghostInPowerPill = ghostInPowerPill(game, GHOST.INKY);
-		this.ghostInPowerPill = ghostInPowerPill(game, GHOST.PINKY);
-		this.ghostInPowerPill = ghostInPowerPill(game, GHOST.SUE);
 
 		// DISTANCIAS pre-calculadas
 		this.BLINKYdistToPacman = distanceToPacman(game, GHOST.BLINKY);
@@ -79,10 +80,10 @@ public class GhostsInput extends RulesInput {
 		this.PINKYdistToJunction = distanceToPacmanJunction(game, GHOST.PINKY);
 		this.SUEdistToJunction = distanceToPacmanJunction(game, GHOST.SUE);
 
-		this.BLINKYdistToPowerPill = distanceToPacmanPill(game, GHOST.BLINKY);
-		this.INKYdistToPowerPill = distanceToPacmanPill(game, GHOST.INKY);
-		this.PINKYdistToPowerPill = distanceToPacmanPill(game, GHOST.PINKY);
-		this.SUEdistToPowerPill = distanceToPacmanPill(game, GHOST.SUE);
+		this.BLINKYdistToPill = distanceToPacmanPill(game, GHOST.BLINKY);
+		this.INKYdistToPill = distanceToPacmanPill(game, GHOST.INKY);
+		this.PINKYdistToPill = distanceToPacmanPill(game, GHOST.PINKY);
+		this.SUEdistToPill = distanceToPacmanPill(game, GHOST.SUE);
 	}
 
 	@Override
@@ -91,31 +92,31 @@ public class GhostsInput extends RulesInput {
 
 		// BLINKY
 		facts.add(String.format(
-				"(BLINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
-				this.BLINKYedible, this.BLINKYnearToNotEdibleGhost, this.BLINKYnearToEdibleGhost,
-				this.BLINKYnearToPacman, this.BLINKYdistToPacman,
-				this.BLINKYdistToJunction, this.BLINKYdistToPowerPill, this.ghostInPowerPill));
+				"(BLINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (nearToLastPowerPill %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPill %d))",
+				this.BLINKYedible, this.BLINKYnearToNotEdibleGhost, this.BLINKYnearToEdibleGhost, this.BLINKYnearToPacman, 
+				this.BLINKYnearToLastPowerPill, this.BLINKYdistToPacman,
+				this.BLINKYdistToJunction, this.BLINKYdistToPill));
 
 		// INKY
 		facts.add(String.format(
-				"(INKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
+				"(INKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (nearToLastPowerPill %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPill %d))",
 				this.INKYedible, this.INKYnearToNotEdibleGhost, this.INKYnearToEdibleGhost, this.INKYnearToPacman,
-				this.INKYdistToPacman,
-				this.INKYdistToJunction, this.INKYdistToPowerPill, this.ghostInPowerPill));
+				this.INKYnearToLastPowerPill, this.INKYdistToPacman,
+				this.INKYdistToJunction, this.INKYdistToPill));
 
 		// PINKY
 		facts.add(String.format(
-				"(PINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
+				"(PINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (nearToLastPowerPill %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPill %d))",
 				this.PINKYedible, this.PINKYnearToNotEdibleGhost, this.PINKYnearToEdibleGhost, this.PINKYnearToPacman,
-				this.PINKYdistToPacman,
-				this.PINKYdistToJunction, this.PINKYdistToPowerPill, this.ghostInPowerPill));
+				this.PINKYnearToLastPowerPill, this.PINKYdistToPacman,
+				this.PINKYdistToJunction, this.PINKYdistToPill));
 
 		// SUE
 		facts.add(String.format(
-				"(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPowerPill %d) (ghostInPowerPill %s))",
+				"(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (nearToLastPowerPill %s) (distToPacman %d) (distToPacmanJunction %d) (distToPacmanPill %d))",
 				this.SUEedible, this.SUEnearToNotEdibleGhost, this.SUEnearToEdibleGhost, this.SUEnearToPacman,
-				this.SUEdistToPacman,
-				this.SUEdistToJunction, this.SUEdistToPowerPill, this.ghostInPowerPill));
+				this.SUEnearToLastPowerPill, this.SUEdistToPacman,
+				this.SUEdistToJunction, this.SUEdistToPill));
 
 		// MSPACMAN
 		facts.add(String.format("(MSPACMAN (nearToPowerPill %s))", this.pacmanNearToPowerPill));
@@ -127,29 +128,17 @@ public class GhostsInput extends RulesInput {
 		return facts;
 	}
 
-	private static Set<GHOST> ghostsThatTouchedPowerPill = new HashSet<>();
-	
-	private boolean ghostInPowerPill(Game game, GHOST ghost) {
-		
-		if (game.getGhostLairTime(ghost) > 0 && !ghostsThatTouchedPowerPill.isEmpty()) {
-			ghostsThatTouchedPowerPill.remove(ghost);
-			return false;
+	private boolean nearToLastPowerPill(Game game, GHOST ghost) {
+		int posGhost = game.getGhostCurrentNodeIndex(ghost);
+		for (int ppill : game.getActivePowerPillsIndices()) {
+			int dist = game.getShortestPathDistance(posGhost, ppill, game.getGhostLastMoveMade(ghost));
+			if (dist < GhostConstants.GHOST_NEAR_PP_DISTANCE) {
+				return true;
+			}
 		}
-		
-		int[] powerPills = game.getActivePowerPillsIndices();
-		if(powerPills.length == 0) return false;
-		int target = powerPills[powerPills.length - 1];
-		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
-
-		if (ghostPos == target && !ghostsThatTouchedPowerPill.contains(ghost)) {
-			ghostsThatTouchedPowerPill.add(ghost);
-		}
-		
-		return ghostsThatTouchedPowerPill.contains(ghost);
-		
-		
+		return false;
 	}
-
+	
 	private int nextPacmanJunction(Game game) {
 		int start = game.getPacmanCurrentNodeIndex();
 		MOVE lastMove = game.getPacmanLastMoveMade();
@@ -198,7 +187,6 @@ public class GhostsInput extends RulesInput {
 			}
 		}
 		return posNearNotEdible;
-
 	}
 
 	private boolean nearToPacman(Game game, GHOST ghost) {
@@ -212,7 +200,7 @@ public class GhostsInput extends RulesInput {
 		int posPacman = game.getPacmanCurrentNodeIndex();
 		for (int ppill : game.getActivePowerPillsIndices()) {
 			int dist = game.getShortestPathDistance(posPacman, ppill, game.getPacmanLastMoveMade());
-			if (dist < GhostConstants.DANGER_PILL_DISTANCE) {
+			if (dist < GhostConstants.DANGER_PACMAN_PP_DISTANCE) {
 				return true;
 			}
 		}

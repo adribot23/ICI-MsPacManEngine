@@ -4,20 +4,20 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )	
 	
 (deftemplate PINKY
@@ -25,10 +25,10 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )
 
 (deftemplate SUE
@@ -36,10 +36,10 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot nearToLastPowerPill (type SYMBOL))
 	(slot distToPacman (type NUMBER))
     (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPowerPill (type NUMBER))
-	(slot ghostInPowerPill (type SYMBOL))
+    (slot distToPacmanPill (type NUMBER))
 )
 
 
@@ -62,6 +62,17 @@
 
 ;RULES 
 
+(defrule INKYchasesLastPowerPill
+    (GAME (onlyOnePowerPillLeft true))
+    (INKY (edible false))
+    => 
+    (assert 
+    	(ACTION (id INKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 55) 
+    		(chasestrategy POWERPILL)
+    	)
+    )
+)
+
 (defrule INKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
 	=>  
@@ -75,15 +86,13 @@
 	)
 )
 
-(defrule INKYrunsAwayLastPPill
-	(GAME (onlyOnePowerPillLeft true))
-	(INKY (edible true))
-	=>  
-	(assert 
-		(ACTION (id INKYrunsAway) (info "Alejarse de la ultima PP") (priority 40) 
-			(runawaystrategy LASTPOWERPILL)
-		)
-	)
+(defrule INKYspread
+  (INKY (edible true) (nearToEdibleGhost true))
+  =>
+  (assert (ACTION (id INKYrunsAway)
+                  (info "Comestible --> dispersarse de otro fantasma comestible")
+                  (priority 45)
+                  (runawaystrategy SCATTER)))
 )
 
 (defrule INKYchasesNotEdibleGhost
@@ -106,50 +115,29 @@
 		(ACTION 
 			(id INKYrunsAway)
 			(info "Comestible --> huir")
-			(priority 30)
+			(priority 35)
 			(runawaystrategy PACMAN)
 		)
 	)
 )
 
-(defrule INKYspread
-  (INKY (edible true) (nearToEdibleGhost true))
-  =>
-  (assert (ACTION (id INKYrunsAway)
-                  (info "Comestible --> dispersarse de otro fantasma comestible")
-                  (priority 25)
-                  (runawaystrategy SCATTER)))
+(defrule INKYrunsAwayLastPPill
+	(GAME (onlyOnePowerPillLeft true))
+	(INKY (nearToLastPowerPill true))
+	(INKY (edible true))
+	=>  
+	(assert 
+		(ACTION (id INKYrunsAway) (info "Alejarse de la ultima PP") (priority 30) 
+			(runawaystrategy LASTPOWERPILL)
+		)
+	)
 )
-
-
-(defrule INKYcircleAroundLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (INKY (edible false)(ghostInPowerPill true))
-    => 
-    (assert 
-    	(ACTION (id INKYchases) (info "Solo 1 queda una PP --> girar alrededor PowerPill")  (priority 25) 
-    		(chasestrategy CIRCLE_POWERPILL)
-    	)
-    )
-)
-
-(defrule INKYchasesLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (INKY (edible false) (ghostInPowerPill false))
-    => 
-    (assert 
-    	(ACTION (id INKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 25) 
-    		(chasestrategy POWERPILL)
-    	)
-    )
-)
-
 
 (defrule INKYchasesPacman
     (INKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dp ?dj))
     (test (< ?dp ?dpill))
     =>
@@ -163,7 +151,7 @@
     (INKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dj ?dp))
     (test (< ?dj ?dpill))
     =>
@@ -177,7 +165,7 @@
     (INKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
-             (distToPacmanPowerPill ?dpill))
+             (distToPacmanPill ?dpill))
     (test (< ?dpill ?dp))
     (test (< ?dpill ?dj))
     =>
