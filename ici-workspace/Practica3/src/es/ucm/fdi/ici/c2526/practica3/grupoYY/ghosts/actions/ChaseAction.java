@@ -26,7 +26,7 @@ public class ChaseAction implements RulesAction {
 	// PILL --> Perseguir Pill mas cercana a Pacman
 	// GHOST --> Huir hacia fantasma no comestible mas cercano
 	// POWERPILL --> Perseguir ultima power pill por dos caminos distintos
-
+	
 	enum STRATEGY {
 		PACMAN, JUNCTION, PILL, GHOST, POWERPILL
 	};
@@ -179,18 +179,22 @@ public class ChaseAction implements RulesAction {
 	}
 
 	private static int[] avoidPath = null;
-	private static GHOST[] ghosts = new GHOST[2];
+	private static GHOST firstGhost = null;
 
 	private MOVE chaseLastPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
-		
+		// Si el pacman pasa de nivel, se vuelve a poner a null todo para seleccionarlo de nuevo
+		if(powerPills.length > 1) {
+			firstGhost = null;
+			avoidPath = null;
+		}
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
 
 		// Si es el primer fantasma y aún no se ha establecido
-		if (ghosts[0] == null) {
-			ghosts[0] = ghost;
+		if (firstGhost == null) {
+			firstGhost = ghost;
 			if (avoidPath == null) {
 				avoidPath = game.getShortestPath(ghostPos, targetPill, lastMove);
 				GameView.addPoints(game, Color.RED, avoidPath);
@@ -199,15 +203,14 @@ public class ChaseAction implements RulesAction {
 		}
 
 		// Si es el primer fantasma, vamos hacia la PP sin actualizar el avoidPath
-		if (ghosts[0] == ghost) {
+		if (firstGhost == ghost) {
 			GameView.addPoints(game, Color.YELLOW, game.getShortestPath(ghostPos, targetPill, lastMove));
 			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 		}
 
 		// Si no es el primer fantasma, buscamos un camino alternativo hacia la PP sin
 		// pasar por el avoidPath
-		if (ghosts[0] != ghost) {
-			ghosts[1] = ghost;
+		if (firstGhost != ghost) {
 			int[] alternativePath = findAlternativePath(game, ghostPos, targetPill, avoidPath);
 			GameView.addPoints(game, Color.WHITE, alternativePath);
 

@@ -159,6 +159,7 @@
 )
 
 (defrule PINKYchasesPill
+	(GAME (lastPills false))
     (PINKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)

@@ -219,13 +219,12 @@ public class GhostsInput extends RulesInput {
 		nearGhostPenalty = ghostPenaltyInPath(game, ghost, path);
 
 		return dist + nearGhostPenalty;
-
 	}
 
 	private int distanceToPacmanJunction(Game game, GHOST ghost) {
 		int ghostNode = game.getGhostCurrentNodeIndex(ghost);
 		int pacmanJunction = nextPacmanJunction(game);
-		if (pacmanJunction == -1 || pacmanJunction == 0)
+		if (pacmanJunction == -1)
 			return Integer.MAX_VALUE;
 
 		int nearGhostPenalty = 0;
