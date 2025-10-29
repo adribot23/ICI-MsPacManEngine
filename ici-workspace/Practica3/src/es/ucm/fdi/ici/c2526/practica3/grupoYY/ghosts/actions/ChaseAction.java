@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.GhostConstants;
 import es.ucm.fdi.ici.rules.RulesAction;
 import jess.Fact;
 import jess.JessException;
@@ -263,8 +264,8 @@ public class ChaseAction implements RulesAction {
 					int newIntersections = intersections;
 					if (avoidSet.contains(next)) {
 						newIntersections++;
-						if (newIntersections > 10)
-							continue; // Máximo 5 intersecciones
+						if (newIntersections > GhostConstants.MAX_INTERSECTIONS)
+							continue; 
 					}
 					visited.add(next);
 					queue.add(new int[] { next, newIntersections, node });

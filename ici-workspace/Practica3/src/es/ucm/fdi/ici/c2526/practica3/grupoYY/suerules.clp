@@ -45,6 +45,7 @@
     
 (deftemplate GAME
     (slot onlyOnePowerPillLeft (type SYMBOL))
+    (slot lastPills (type SYMBOL))
 )
 
 ;DEFINITION OF THE ACTION FACT
@@ -118,18 +119,6 @@
 	)
 )
 
-(defrule SUEchasesLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (SUE (edible false))
-    => 
-    (assert 
-    	(ACTION (id SUEchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 15) 
-    		(chasestrategy POWERPILL)
-    	)
-    )
-)
-
-
 (defrule SUEchasesPacman
     (SUE (edible false)
              (distToPacman ?dp)
@@ -159,6 +148,7 @@
 )
 
 (defrule SUEchasesPill
+	(GAME (lastPills false))
     (SUE (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)

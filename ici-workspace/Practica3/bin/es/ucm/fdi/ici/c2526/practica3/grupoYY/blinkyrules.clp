@@ -44,6 +44,7 @@
     
 (deftemplate GAME
     (slot onlyOnePowerPillLeft (type SYMBOL))
+    (slot lastPills (type SYMBOL))
 )
 
     

@@ -45,6 +45,7 @@
     
 (deftemplate GAME
     (slot onlyOnePowerPillLeft (type SYMBOL))
+    (slot lastPills (type SYMBOL))
 )
 
 ;DEFINITION OF THE ACTION FACT
@@ -57,6 +58,17 @@
 ) 
 
 ;RULES 
+
+(defrule PINKYchasesLastPowerPill
+    (GAME (onlyOnePowerPillLeft true))
+    (PINKY (edible false))
+    => 
+    (assert 
+    	(ACTION (id PINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 55) 
+    		(chasestrategy POWERPILL)
+    	)
+    )
+)
 
 (defrule PINKYrunsAwayMSPACMANclosePPill
 	(MSPACMAN (nearToPowerPill true))
@@ -116,17 +128,6 @@
 			(runawaystrategy PACMAN)
 		)
 	)
-)
-
-(defrule PINKYchasesLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
-    (PINKY (edible false))
-    => 
-    (assert 
-    	(ACTION (id PINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 15) 
-    		(chasestrategy POWERPILL)
-    	)
-    )
 )
 
 (defrule PINKYchasesPacman
