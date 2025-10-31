@@ -70,20 +70,6 @@
     )
 )
 
-(defrule PINKYrunsAwayMSPACMANclosePPill
-	(MSPACMAN (nearToPowerPill true))
-	(PINKY (edible false))
-	=>  
-	(assert 
-		(ACTION 
-			(id PINKYrunsAway)
-			(info "MSPacMan cerca PPill")
-			(priority 50)
-			(runawaystrategy POWERPILL)
-		)
-	)
-)
-
 (defrule PINKYrunsAwayLastPPill
 	(GAME (onlyOnePowerPillLeft true))
 	(PINKY (edible true))
@@ -96,7 +82,7 @@
 )
 
 (defrule PINKYspread
-  (PINKY (edible true) (nearToEdibleGhost true))
+  (PINKY (edible true) (nearToEdibleGhost true) (nearToPacman false))
   =>
   (assert (ACTION (id PINKYrunsAway)
                   (info "Comestible --> dispersarse de otro fantasma comestible")
@@ -135,8 +121,7 @@
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)
              (distToPacmanPill ?dpill))
-    (test (< ?dp ?dj))
-    (test (< ?dp ?dpill))
+    (test (<= ?dp ?dj))
     =>
     (assert (ACTION (id PINKYchases)
                     (info "Pacman es el más cercano")
@@ -150,7 +135,6 @@
              (distToPacmanJunction ?dj)
              (distToPacmanPill ?dpill))
     (test (< ?dj ?dp))
-    (test (< ?dj ?dpill))
     =>
     (assert (ACTION (id PINKYchases)
                     (info "Junction más cercana")
@@ -159,7 +143,7 @@
 )
 
 (defrule PINKYchasesPill
-	(GAME (lastPills false))
+	(GAME (lastPills true))
     (PINKY (edible false)
              (distToPacman ?dp)
              (distToPacmanJunction ?dj)

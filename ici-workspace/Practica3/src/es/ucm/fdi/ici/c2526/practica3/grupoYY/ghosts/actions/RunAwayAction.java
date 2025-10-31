@@ -24,7 +24,7 @@ public class RunAwayAction implements RulesAction {
 	// LASTPOWERPILL --> Alejarse de la power pill si es la ultima
 
 	enum STRATEGY {
-		PACMAN, POWERPILL, SCATTER, LASTPOWERPILL
+		PACMAN, SCATTER, LASTPOWERPILL
 	};
 
 	STRATEGY runAwayStrategy;
@@ -55,9 +55,6 @@ public class RunAwayAction implements RulesAction {
 			case PACMAN:
 				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
 						game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
-			case POWERPILL:
-				return game.getApproximateNextMoveAwayFromTarget(game.getGhostCurrentNodeIndex(ghost),
-						getNearPowerPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case SCATTER:
 				return scatterMove(game, ghost);
 			case LASTPOWERPILL:
@@ -85,7 +82,7 @@ public class RunAwayAction implements RulesAction {
 		
 		return game.getFarthestNodeIndexFromNodeIndex(lastPowerPill, options, DM.PATH);
 	}
-	
+	/*
 	private int getNearPowerPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int nearPowerPill = -1;
@@ -103,7 +100,7 @@ public class RunAwayAction implements RulesAction {
 		}
 		return nearPowerPill;
 	}
-
+*/
 	private MOVE scatterMove(Game game, GHOST ghost) {
 
 		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = -1;
