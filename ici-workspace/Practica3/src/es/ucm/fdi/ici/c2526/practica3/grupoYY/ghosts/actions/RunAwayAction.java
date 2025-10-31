@@ -100,14 +100,14 @@ public class RunAwayAction implements RulesAction {
 		}
 		return nearPowerPill;
 	}
-*/
+	 */
 	private MOVE scatterMove(Game game, GHOST ghost) {
 
 		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = -1;
 		int posCurrGhost = game.getGhostCurrentNodeIndex(ghost);
 
 		for (GHOST g : GHOST.values()) {
-			if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) {
+			if (g != ghost && game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) {
 				int posGhost = game.getGhostCurrentNodeIndex(g);
 				dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(ghost));
 				if (dist < minDist) {

@@ -84,7 +84,7 @@
   =>
   (assert (ACTION (id BLINKYrunsAway)
                   (info "Comestible --> dispersarse de otro fantasma comestible")
-                  (priority 45)
+                  (priority 55)
                   (runawaystrategy SCATTER)))
 )
 

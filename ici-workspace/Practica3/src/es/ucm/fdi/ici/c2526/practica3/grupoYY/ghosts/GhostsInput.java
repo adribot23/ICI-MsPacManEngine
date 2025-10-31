@@ -119,27 +119,26 @@ public class GhostsInput extends RulesInput {
 		return facts;
 	}
 
-	private int nextPacmanJunction(Game game) {
-		int start = game.getPacmanCurrentNodeIndex();
+	private int[] nextPacmanJunctions(Game game) {
+		int pacman = game.getPacmanCurrentNodeIndex();
 		MOVE lastMove = game.getPacmanLastMoveMade();
 
 		Set<Integer> visited = new HashSet<>();
 		Queue<Integer> queue = new LinkedList<>();
 
-		queue.add(start);
-		visited.add(start);
+		queue.add(pacman);
+		visited.add(pacman);
 
+		Integer startJunction = null;
 		while (!queue.isEmpty()) {
 			int current = queue.poll();
-
-			if (current != start && game.isJunction(current)) {
-				return current;
+			if (current != pacman && game.isJunction(current)) {
+				startJunction = current;
+				break;
 			}
 
 			for (MOVE move : MOVE.values()) {
-
-				if (move != MOVE.NEUTRAL && !(current == start && move == lastMove.opposite())) {
-
+				if (move != MOVE.NEUTRAL && !(current == pacman && move == lastMove.opposite())) {
 					int next = game.getNeighbour(current, move);
 					if (next != -1 && !visited.contains(next)) {
 						visited.add(next);
@@ -148,8 +147,74 @@ public class GhostsInput extends RulesInput {
 				}
 			}
 		}
+		// If no junction found near Pacman, return three -1s
+		if (startJunction == null) {
+			return new int[] { -1, -1, -1 };
+		}
 
-		return -1;
+		int[] result = new int[] { -1, -1, -1 };
+		int count = 0;
+
+		// Iterate over possible outgoing moves from startJunction and follow each path
+		for (MOVE m : game.getPossibleMoves(startJunction)) {
+			if (m == MOVE.NEUTRAL) continue;
+
+			int prev = startJunction;
+			int current = game.getNeighbour(startJunction, m);
+			if (current == -1) continue;
+
+			// Track visited on this path to avoid infinite loops
+			Set<Integer> localVisited = new HashSet<>();
+			localVisited.add(prev);
+			localVisited.add(current);
+
+			// Walk forward along the path until we find a junction (different from
+			// startJunction)
+			while (current != -1 && !game.isJunction(current)) {
+				int nextNode = -1;
+				for (MOVE nm : game.getPossibleMoves(current)) {
+					if (nm == MOVE.NEUTRAL) continue;
+					int cand = game.getNeighbour(current, nm);
+					if (cand == -1) continue;
+					// prefer going forward (not back to prev)
+					if (cand != prev && !localVisited.contains(cand)) {
+						nextNode = cand;
+						break;
+					}
+				}
+				if (nextNode == -1)
+					break; // dead end or loop
+				prev = current;
+				current = nextNode;
+				localVisited.add(current);
+			}
+
+			if (current != -1 && game.isJunction(current) && current != startJunction) {
+				result[count++] = current;
+				if (count == 3)
+					break;
+			}
+		}
+
+		return result;
+	}
+
+	private int nearestJunction(Game game, GHOST ghost) {
+		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
+		MOVE lastMove = game.getGhostLastMoveMade(ghost);
+		int[] junctions = nextPacmanJunctions(game);
+
+		int bestNode = -1;
+		int minDist = Integer.MAX_VALUE;
+		for (int j : junctions) {
+			if (j < 0) continue;
+			int distToJunction = game.getShortestPathDistance(ghostPos, j, lastMove);
+			if (distToJunction >= 0 && distToJunction < minDist) {
+				minDist = distToJunction;
+				bestNode = j;
+			}
+		}
+		return bestNode;
 	}
 
 	private int nearestNotEdibleGhost(Game game, GHOST ghost) {
@@ -198,6 +263,7 @@ public class GhostsInput extends RulesInput {
 				}
 			}
 		}
+		
 		return false;
 	}
 
@@ -220,7 +286,7 @@ public class GhostsInput extends RulesInput {
 
 	private int distanceToPacmanJunction(Game game, GHOST ghost) {
 		int ghostNode = game.getGhostCurrentNodeIndex(ghost);
-		int pacmanJunction = nextPacmanJunction(game);
+		int pacmanJunction = nearestJunction(game, ghost);
 		if (pacmanJunction == -1)
 			return Integer.MAX_VALUE;
 

@@ -3,8 +3,6 @@ import pacman.controllers.GhostController;
 //import pacman.controllers.HumanController;
 //import pacman.controllers.KeyBoardInput;
 import pacman.controllers.PacmanController;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.MsPacMan;
-import es.ucm.fdi.ici.c2526.practica2.grupoYY.Ghosts;
 /*	ICI HALL-OF-FAME
 
 --- Best MsPacMan (score) --- 
