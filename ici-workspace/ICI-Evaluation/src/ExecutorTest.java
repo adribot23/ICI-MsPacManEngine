@@ -49,7 +49,7 @@ public class ExecutorTest {
         PacmanController pacMan = new es.ucm.fdi.ici.c2223.practica1.grupo06.MsPacMan();
 
         System.out.println( 
-            executor.runGame(pacMan, ghosts, 20) //last parameter defines speed
+            executor.runGame(pacMan, ghosts, 30) //last parameter defines speed
         );     
     }
 	

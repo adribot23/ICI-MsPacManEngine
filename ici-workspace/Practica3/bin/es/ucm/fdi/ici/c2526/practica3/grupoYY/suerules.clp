@@ -164,3 +164,14 @@
                     (priority 20)
                     (chasestrategy THIRDJUNCTION)))
 )
+
+(defrule SUEnoThirdJunction
+    (SUE (edible false))
+    (GAME (nearestGhostToFirstJunction ?f) (nearestGhostToSecondJunction ?s) (nearestGhostToThirdJunction ?t))
+    (test (or (= ?f -1) (= ?s -1) (= ?t -1)))
+    =>
+    (assert (ACTION (id SUEchases)
+                    (info "Sin Junction --> perseguir objetivo más cercano")
+                    (priority 19)
+                    (chasestrategy NEARESTTARGET)))
+)

@@ -65,6 +65,15 @@
     )
 )
 
+(defrule INKYspread
+  (INKY (edible true) (nearToEdibleGhost true) (nearToPacman false))
+  =>
+  (assert (ACTION (id INKYrunsAway)
+                  (info "Comestible --> dispersarse de otro fantasma comestible")
+                  (priority 55)
+                  (runawaystrategy SCATTER)))
+)
+
 (defrule INKYrunsAwayLastPPill
 	(GAME (onlyOnePowerPillLeft true))
 	(INKY (edible true))
@@ -74,15 +83,6 @@
 			(runawaystrategy LASTPOWERPILL)
 		)
 	)
-)
-
-(defrule INKYspread
-  (INKY (edible true) (nearToEdibleGhost true) (nearToPacman false))
-  =>
-  (assert (ACTION (id INKYrunsAway)
-                  (info "Comestible --> dispersarse de otro fantasma comestible")
-                  (priority 55)
-                  (runawaystrategy SCATTER)))
 )
 
 (defrule INKYchasesNotEdibleGhost
@@ -163,4 +163,15 @@
                     (info "Third Junction más cercana")
                     (priority 20)
                     (chasestrategy THIRDJUNCTION)))
+)
+
+(defrule INKYnoThirdJunction
+    (INKY (edible false))
+    (GAME (nearestGhostToFirstJunction ?f) (nearestGhostToSecondJunction ?s) (nearestGhostToThirdJunction ?t))
+    (test (or (= ?f -1) (= ?s -1) (= ?t -1)))
+    =>
+    (assert (ACTION (id INKYchases)
+                    (info "Sin Junction --> perseguir objetivo más cercano")
+                    (priority 19)
+                    (chasestrategy NEARESTTARGET)))
 )

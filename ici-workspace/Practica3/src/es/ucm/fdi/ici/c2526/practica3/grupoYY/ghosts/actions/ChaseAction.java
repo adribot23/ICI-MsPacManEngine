@@ -56,43 +56,46 @@ public class ChaseAction implements RulesAction {
 		{
 			int[] junctions = nextPacmanJunctions(game);
 			switch (chaseStrategy) {
-				case PACMAN:
-					GameView.addPoints(game, Color.RED,
-							game.getShortestPath(game.getGhostCurrentNodeIndex(ghost),
-									game.getPacmanCurrentNodeIndex()));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case FIRSTJUNCTION:
-					GameView.addPoints(game, Color.BLUE,
-							game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), junctions[0]));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							junctions[0], game.getGhostLastMoveMade(ghost), DM.PATH);
-				case SECONDJUNCTION:
-					GameView.addPoints(game, Color.GREEN,
-							game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), junctions[1]));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							junctions[1], game.getGhostLastMoveMade(ghost), DM.PATH);
-				case THIRDJUNCTION:
-					GameView.addPoints(game, Color.MAGENTA,
-							game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), junctions[2]));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							junctions[2], game.getGhostLastMoveMade(ghost), DM.PATH);
-				case NEARESTTARGET:
-					// funcion que devuelve el objetivo mas cercano a ese fantasma (pacman y las dos junctions que no son -1)
-				case PILL:
-					GameView.addPoints(game, Color.YELLOW,
-							game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPillToPacman(game)));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case GHOST:
-					GameView.addLines(game, Color.PINK, game.getGhostCurrentNodeIndex(ghost),
-							nearestNotEdibleGhost(game));
-					return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-							nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
-				case POWERPILL:
-					return chaseLastPowerPill(game);
-				default:
-					throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
+			case PACMAN:
+				GameView.addPoints(game, Color.RED,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex()));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						game.getPacmanCurrentNodeIndex(), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case FIRSTJUNCTION:
+				GameView.addPoints(game, Color.BLUE,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), junctions[0]));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), junctions[0],
+						game.getGhostLastMoveMade(ghost), DM.PATH);
+			case SECONDJUNCTION:
+				GameView.addPoints(game, Color.GREEN,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), junctions[1]));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), junctions[1],
+						game.getGhostLastMoveMade(ghost), DM.PATH);
+			case THIRDJUNCTION:
+				GameView.addPoints(game, Color.MAGENTA,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), junctions[2]));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), junctions[2],
+						game.getGhostLastMoveMade(ghost), DM.PATH);
+			case NEARESTTARGET:
+				// funcion que devuelve el objetivo mas cercano a ese fantasma (pacman y las dos junctions que no son -1)
+				int target = nearestTarget(game, junctions);
+				GameView.addPoints(game, Color.GRAY,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), target));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), target,
+						game.getGhostLastMoveMade(ghost), DM.PATH);
+			case PILL:
+				GameView.addPoints(game, Color.YELLOW,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPillToPacman(game)));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case GHOST:
+				GameView.addLines(game, Color.PINK, game.getGhostCurrentNodeIndex(ghost), nearestNotEdibleGhost(game));
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+			case POWERPILL:
+				return chaseLastPowerPill(game);
+			default:
+				throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
 		}
 		return MOVE.NEUTRAL;
@@ -115,7 +118,7 @@ public class ChaseAction implements RulesAction {
 			if (g != ghost && !game.isGhostEdible(g) && game.getGhostLairTime(g) <= 0) {
 				int posGhost = game.getGhostCurrentNodeIndex(g);
 				if (posGhost != -1) {
-					int dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(g));
+					int dist = game.getShortestPathDistance(posCurrGhost, posGhost, game.getGhostLastMoveMade(ghost));
 					if (dist < minDist) {
 						minDist = dist;
 						posNearNotEdible = posGhost;
@@ -128,81 +131,79 @@ public class ChaseAction implements RulesAction {
 	}
 
 	private int[] nextPacmanJunctions(Game game) {
-		int pacman = game.getPacmanCurrentNodeIndex();
-		MOVE lastMove = game.getPacmanLastMoveMade();
+	    int pacman = game.getPacmanCurrentNodeIndex();
+	    MOVE lastMove = game.getPacmanLastMoveMade();
 
-		Set<Integer> visited = new HashSet<>();
-		Queue<Integer> queue = new LinkedList<>();
+	    
+	    Set<Integer> visited = new HashSet<>();
+	    Queue<Integer> queue = new LinkedList<>();
+	    queue.add(pacman);
+	    visited.add(pacman);
 
-		queue.add(pacman);
-		visited.add(pacman);
+	    Integer startJunction = null;
+	    while (!queue.isEmpty()) {
+	        int current = queue.poll();
+	        if (current != pacman && game.isJunction(current)) {
+	            startJunction = current;
+	            break;
+	        }
 
-		Integer startJunction = null;
-		while (!queue.isEmpty()) {
-			int current = queue.poll();
-			if (current != pacman && game.isJunction(current)) {
-				startJunction = current;
-				break;
-			}
+	        for (MOVE move : MOVE.values()) {
+	            if (move != MOVE.NEUTRAL && !(current == pacman && move == lastMove.opposite())) {
+	                int next = game.getNeighbour(current, move);
+	                if (next != -1 && !visited.contains(next)) {
+	                    visited.add(next);
+	                    queue.add(next);
+	                }
+	            }
+	        }
+	    }
 
-			for (MOVE move : MOVE.values()) {
-				if (move != MOVE.NEUTRAL && !(current == pacman && move == lastMove.opposite())) {
-					int next = game.getNeighbour(current, move);
-					if (next != -1 && !visited.contains(next)) {
-						visited.add(next);
-						queue.add(next);
-					}
-				}
-			}
-		}
+	    if (startJunction == null) {
+	        return new int[] { -1, -1, -1 };
+	    }
 
-		if (startJunction == null) {
-			return new int[] { -1, -1, -1 };
-		}
+	    
+	    int[] result = new int[] { -1, -1, -1 };
+	    result[0] = startJunction;
+	    int count = 1;
 
-		int[] result = new int[] { -1, -1, -1 };
-		int count = 0;
+	   
+	    for (MOVE move : game.getPossibleMoves(startJunction)) {
+	        if (move == MOVE.NEUTRAL)
+	            continue;
 
-		for (MOVE m : game.getPossibleMoves(startJunction)) {
-			if (m == MOVE.NEUTRAL) continue;
+	        int prev = startJunction;
+	        int current = game.getNeighbour(startJunction, move);
+	        boolean pacmanInPath = false;
 
-			int prev = startJunction;
-			int current = game.getNeighbour(startJunction, m);
-			if (current == -1) continue;
+	       
+	        while (current != -1 && !game.isJunction(current)) {
+	            if (current == pacman) {
+	                pacmanInPath = true; 
+	                break;
+	            }
+	            int next = game.getNeighbour(current, move);
+	            prev = current;
+	            current = next;
+	        }
 
-			Set<Integer> localVisited = new HashSet<>();
-			localVisited.add(prev);
-			localVisited.add(current);
+	        
+	        if (pacmanInPath)
+	            continue;
 
-			while (current != -1 && !game.isJunction(current)) {
-				int nextNode = -1;
-				for (MOVE nm : game.getPossibleMoves(current)) {
-					if (nm == MOVE.NEUTRAL || nm != lastMove.opposite()) continue;
-					int cand = game.getNeighbour(current, nm);
-					if (cand == -1) continue;
-					// prefer going forward (not back to prev)
-					if (cand != prev && !localVisited.contains(cand)) {
-						nextNode = cand;
-						break;
-					}
-				}
-				if (nextNode == -1)
-					break;
-				prev = current;
-				current = nextNode;
-				localVisited.add(current);
-			}
+	       
+	        if (current != -1 && current != startJunction) {
+	            result[count++] = current;
+	            if (count == 3)
+	                break;
+	        }
+	    }
 
-			if (current != -1 && game.isJunction(current) && current != startJunction) {
-				result[count++] = current;
-				if (count == 3)
-					break;
-			}
-		}
-
-		return result;
+	    return result;
 	}
-	
+
+
 	private int nearestPillToPacman(Game game) {
 		Queue<Integer> q = new LinkedList<>();
 		Set<Integer> visited = new HashSet<>();
@@ -239,17 +240,17 @@ public class ChaseAction implements RulesAction {
 		return false;
 	}
 
-    
 	private static int[] avoidPath = null;
 	private static GHOST firstGhost = null;
 
 	private MOVE chaseLastPowerPill(Game game) {
+		
 		int[] powerPills = game.getActivePowerPillsIndices();
 
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
-		
+
 		// Si es el primer fantasma y aún no se ha establecido
 		if (firstGhost == null) {
 			firstGhost = ghost;
@@ -259,7 +260,7 @@ public class ChaseAction implements RulesAction {
 			}
 			return game.getApproximateNextMoveTowardsTarget(ghostPos, targetPill, lastMove, DM.PATH);
 		}
-		
+
 		// Si es el primer fantasma, vamos hacia la PP sin actualizar el avoidPath
 		if (firstGhost == ghost) {
 			GameView.addPoints(game, Color.YELLOW, game.getShortestPath(ghostPos, targetPill, lastMove));
@@ -335,4 +336,25 @@ public class ChaseAction implements RulesAction {
 		// Si no se encuentra camino alternativo, usar el camino directo
 		return game.getShortestPath(start, target, game.getGhostLastMoveMade(ghost));
 	}
+
+	private int nearestTarget(Game game, int[] junctions) {
+		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
+		int pacmanPos = game.getPacmanCurrentNodeIndex();
+
+		int minDist = game.getShortestPathDistance(ghostPos, pacmanPos, game.getGhostLastMoveMade(ghost));
+		int nearestTarget = pacmanPos;
+
+		for (int junction : junctions) {
+			if (junction != -1) {
+				int dist = game.getShortestPathDistance(ghostPos, junction, game.getGhostLastMoveMade(ghost));
+				if (dist < minDist) {
+					minDist = dist;
+					nearestTarget = junction;
+				}
+			}
+		}
+
+		return nearestTarget;
+	}
+	
 }

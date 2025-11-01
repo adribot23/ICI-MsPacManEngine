@@ -16,7 +16,6 @@ import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 import pacman.game.GameView;
 
-
 public class RunAwayAction implements RulesAction {
 
 	GHOST ghost;
@@ -62,8 +61,8 @@ public class RunAwayAction implements RulesAction {
 			case SCATTER:
 				return scatterMove(game, ghost);
 			case ALONE:
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), getNearestPowerPillOrPill(game),
-						 game.getGhostLastMoveMade(ghost), DM.PATH);
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
+						getNearestPowerPillOrPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case LASTPOWERPILL:
 				GameView.addPoints(game, Color.YELLOW,
 						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), getFarthestNodeFromPowerPill(game)));
@@ -86,10 +85,10 @@ public class RunAwayAction implements RulesAction {
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int lastPowerPill = powerPills[powerPills.length - 1];
 		int[] options = game.getPillIndices();
-		
+
 		return game.getFarthestNodeIndexFromNodeIndex(lastPowerPill, options, DM.PATH);
 	}
-	
+
 	private int getNearestPowerPillOrPill(Game game) {
 		int[] powerPills = game.getActivePowerPillsIndices();
 		int nearestPowerPill = -1;
@@ -105,14 +104,14 @@ public class RunAwayAction implements RulesAction {
 				nearestPowerPill = pp;
 			}
 		}
-		
-		if(nearestPowerPill != -1) {
+
+		if (nearestPowerPill != -1) {
 			return nearestPowerPill;
 		}
-		
+
 		return nearestPill(game);
 	}
-	
+
 	private int nearestPill(Game game) {
 		Queue<Integer> q = new LinkedList<>();
 		Set<Integer> visited = new HashSet<>();
@@ -148,7 +147,7 @@ public class RunAwayAction implements RulesAction {
 				return true;
 		return false;
 	}
-	
+
 	private MOVE scatterMove(Game game, GHOST ghost) {
 
 		int dist = 0, minDist = Integer.MAX_VALUE, posNearNotEdible = -1;
