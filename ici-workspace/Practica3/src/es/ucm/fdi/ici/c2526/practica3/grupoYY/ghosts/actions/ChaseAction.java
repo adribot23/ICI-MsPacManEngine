@@ -28,7 +28,7 @@ public class ChaseAction implements RulesAction {
 	// POWERPILL --> Perseguir ultima power pill por dos caminos distintos
 
 	enum STRATEGY {
-		PACMAN, FIRSTJUNCTION, SECONDJUNCTION, THIRDJUNCTION, NEARESTTARGET, PILL, GHOST, POWERPILL
+		PACMAN, FIRSTJUNCTION, SECONDJUNCTION, THIRDJUNCTION, NEARESTTARGET, GHOST, POWERPILL
 	};
 
 	STRATEGY chaseStrategy;
@@ -83,11 +83,6 @@ public class ChaseAction implements RulesAction {
 						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), target));
 				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), target,
 						game.getGhostLastMoveMade(ghost), DM.PATH);
-			case PILL:
-				GameView.addPoints(game, Color.YELLOW,
-						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), nearestPillToPacman(game)));
-				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						nearestPillToPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case GHOST:
 				GameView.addLines(game, Color.PINK, game.getGhostCurrentNodeIndex(ghost), nearestNotEdibleGhost(game));
 				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
@@ -173,7 +168,6 @@ public class ChaseAction implements RulesAction {
 	        if (move == MOVE.NEUTRAL)
 	            continue;
 
-	        int prev = startJunction;
 	        int current = game.getNeighbour(startJunction, move);
 	        boolean pacmanInPath = false;
 
@@ -184,7 +178,6 @@ public class ChaseAction implements RulesAction {
 	                break;
 	            }
 	            int next = game.getNeighbour(current, move);
-	            prev = current;
 	            current = next;
 	        }
 
@@ -202,44 +195,7 @@ public class ChaseAction implements RulesAction {
 
 	    return result;
 	}
-
-
-	private int nearestPillToPacman(Game game) {
-		Queue<Integer> q = new LinkedList<>();
-		Set<Integer> visited = new HashSet<>();
-
-		int pacmanPos = game.getPacmanCurrentNodeIndex();
-		q.add(pacmanPos);
-		visited.add(pacmanPos);
-
-		while (!q.isEmpty()) {
-			int current = q.poll();
-
-			if (isPillNode(game, current)) {
-				return current;
-			}
-
-			for (MOVE m : MOVE.values()) {
-				int next = game.getNeighbour(current, m);
-				if (next != -1 && !visited.contains(next)) {
-					q.add(next);
-					visited.add(next);
-				}
-			}
-		}
-		return -1;
-	}
-
-	private boolean isPillNode(Game game, int node) {
-		for (int p : game.getActivePillsIndices())
-			if (p == node)
-				return true;
-		for (int pp : game.getActivePowerPillsIndices())
-			if (pp == node)
-				return true;
-		return false;
-	}
-
+	
 	private static int[] avoidPath = null;
 	private static GHOST firstGhost = null;
 

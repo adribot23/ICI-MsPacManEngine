@@ -25,11 +25,6 @@
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
 )
-
-
-(deftemplate MSPACMAN 
-    (slot nearToPowerPill (type SYMBOL))
-)
     
 (deftemplate GAME
     (slot onlyOnePowerPillLeft (type SYMBOL))
@@ -116,7 +111,7 @@
  	(PINKY (edible true))
 	=>
 	(assert 
-		(ACTION (id PINKYrunsAway) (info "Comestible y solo --> acercarse a power pill") (priority 30) 
+		(ACTION (id PINKYrunsAway) (info "Comestible y solo --> ir al nodo mas lejano de pacman") (priority 30) 
 			(runawaystrategy ALONE)
 		)
 	)

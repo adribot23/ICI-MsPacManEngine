@@ -20,7 +20,7 @@ public class GhostsInput extends RulesInput {
 			SUEnearToNotEdibleGhost;
 	private boolean BLINKYnearToPacman, INKYnearToPacman, PINKYnearToPacman, SUEnearToPacman;
 	private boolean BLINKYnearToEdibleGhost, INKYnearToEdibleGhost, PINKYnearToEdibleGhost, SUEnearToEdibleGhost;
-	private boolean pacmanNearToPowerPill, onlyOnePowerPIllLeft, lastPills;
+	private boolean onlyOnePowerPIllLeft, lastPills;
 
 	// Fantasmas asignados
 	private int firstGhost, secondGhost;
@@ -68,9 +68,6 @@ public class GhostsInput extends RulesInput {
 		this.nearestGhostToFirstJunction = nearestGhostToFirstJunction(game);
 		this.nearestGhostToSecondJunction = nearestGhostToSecondJunction(game);
 		this.nearestGhostToThirdJunction = nearestGhostToThirdJunction(game);
-
-		// Cercanía a power pill
-		this.pacmanNearToPowerPill = pacmanNearToPowerPill(game);
 	}
 
 	@Override
@@ -95,9 +92,6 @@ public class GhostsInput extends RulesInput {
 		// SUE
 		facts.add(String.format("(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s))",
 				this.SUEedible, this.SUEnearToNotEdibleGhost, this.SUEnearToEdibleGhost, this.SUEnearToPacman));
-
-		// MSPACMAN
-		facts.add(String.format("(MSPACMAN (nearToPowerPill %s))", this.pacmanNearToPowerPill));
 
 		// GAME
 		facts.add(String.format(
@@ -366,17 +360,6 @@ public class GhostsInput extends RulesInput {
 		int posPacman = game.getPacmanCurrentNodeIndex();
 		int dist = game.getShortestPathDistance(posCurrGhost, posPacman, game.getGhostLastMoveMade(ghost));
 		return dist < GhostConstants.DANGER_DISTANCE;
-	}
-
-	private boolean pacmanNearToPowerPill(Game game) {
-		int posPacman = game.getPacmanCurrentNodeIndex();
-		for (int ppill : game.getActivePowerPillsIndices()) {
-			int dist = game.getShortestPathDistance(posPacman, ppill, game.getPacmanLastMoveMade());
-			if (dist < GhostConstants.DANGER_PACMAN_PP_DISTANCE) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private boolean nearToEdibleGhost(Game game, GHOST ghost) {

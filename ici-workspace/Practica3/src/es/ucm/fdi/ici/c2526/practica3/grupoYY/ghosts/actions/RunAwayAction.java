@@ -1,10 +1,6 @@
 package es.ucm.fdi.ici.c2526.practica3.grupoYY.ghosts.actions;
 
 import java.awt.Color;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
 
 import es.ucm.fdi.ici.rules.RulesAction;
 import jess.Fact;
@@ -61,8 +57,10 @@ public class RunAwayAction implements RulesAction {
 			case SCATTER:
 				return scatterMove(game, ghost);
 			case ALONE:
+				GameView.addPoints(game, Color.YELLOW,
+						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), getFarthestNodeFromPacman(game)));
 				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost),
-						getNearestPowerPillOrPill(game), game.getGhostLastMoveMade(ghost), DM.PATH);
+						getFarthestNodeFromPacman(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case LASTPOWERPILL:
 				GameView.addPoints(game, Color.YELLOW,
 						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), getFarthestNodeFromPowerPill(game)));
@@ -89,63 +87,11 @@ public class RunAwayAction implements RulesAction {
 		return game.getFarthestNodeIndexFromNodeIndex(lastPowerPill, options, DM.PATH);
 	}
 
-	private int getNearestPowerPillOrPill(Game game) {
-		int[] powerPills = game.getActivePowerPillsIndices();
-		int nearestPowerPill = -1;
-		int minDistance = Integer.MAX_VALUE;
-		int posGhost = game.getGhostCurrentNodeIndex(ghost);
-		MOVE lastMove = game.getGhostLastMoveMade(ghost);
+	private int getFarthestNodeFromPacman(Game game) {
+		int posPacman = game.getPacmanCurrentNodeIndex();
+		int[] options = game.getPillIndices();
 
-		for (int pp : powerPills) {
-			int distance = game.getShortestPathDistance(posGhost, pp, lastMove);
-
-			if (distance < minDistance) {
-				minDistance = distance;
-				nearestPowerPill = pp;
-			}
-		}
-
-		if (nearestPowerPill != -1) {
-			return nearestPowerPill;
-		}
-
-		return nearestPill(game);
-	}
-
-	private int nearestPill(Game game) {
-		Queue<Integer> q = new LinkedList<>();
-		Set<Integer> visited = new HashSet<>();
-
-		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
-		q.add(ghostPos);
-		visited.add(ghostPos);
-
-		while (!q.isEmpty()) {
-			int current = q.poll();
-
-			if (isPillNode(game, current)) {
-				return current;
-			}
-
-			for (MOVE m : MOVE.values()) {
-				int next = game.getNeighbour(current, m);
-				if (next != -1 && !visited.contains(next)) {
-					q.add(next);
-					visited.add(next);
-				}
-			}
-		}
-		return -1;
-	}
-
-	private boolean isPillNode(Game game, int node) {
-		for (int p : game.getActivePillsIndices())
-			if (p == node)
-				return true;
-		for (int pp : game.getActivePowerPillsIndices())
-			if (pp == node)
-				return true;
-		return false;
+		return game.getFarthestNodeIndexFromNodeIndex(posPacman, options, DM.PATH);
 	}
 
 	private MOVE scatterMove(Game game, GHOST ghost) {
