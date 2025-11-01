@@ -46,6 +46,8 @@
 (deftemplate GAME
     (slot onlyOnePowerPillLeft (type SYMBOL))
     (slot lastPills (type SYMBOL))
+    (slot firstGhost (type INTEGER) (default -1))
+    (slot secondGhost (type INTEGER) (default -1))
 )
 
 ;DEFINITION OF THE ACTION FACT
@@ -58,6 +60,18 @@
 ) 
 
 ;RULES 
+
+(defrule INKYchasesLastPowerPill
+    (GAME (onlyOnePowerPillLeft true) (firstGhost ?f) (secondGhost ?s))
+    (INKY (edible false))
+    (test (or (= ?f 2) (= ?s 2)))
+    => 
+    (assert 
+    	(ACTION (id INKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 55) 
+    		(chasestrategy POWERPILL)
+    	)
+    )
+)
 
 (defrule INKYrunsAwayLastPPill
 	(GAME (onlyOnePowerPillLeft true))

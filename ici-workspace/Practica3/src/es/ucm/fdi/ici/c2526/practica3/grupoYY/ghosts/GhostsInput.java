@@ -26,6 +26,9 @@ public class GhostsInput extends RulesInput {
 	private int BLINKYdistToPacman, INKYdistToPacman, PINKYdistToPacman, SUEdistToPacman;
 	private int BLINKYdistToJunction, INKYdistToJunction, PINKYdistToJunction, SUEdistToJunction;
 	private int BLINKYdistToPill, INKYdistToPill, PINKYdistToPill, SUEdistToPill;
+	
+	// Fantasmas asignados 
+	private int firstGhost, secondGhost;
 
 	public GhostsInput(Game game) {
 		super(game);
@@ -61,6 +64,10 @@ public class GhostsInput extends RulesInput {
 		this.PINKYnearToEdibleGhost = nearToEdibleGhost(game, GHOST.PINKY);
 		this.SUEnearToEdibleGhost = nearToEdibleGhost(game, GHOST.SUE);
 
+		// Fantasmas asignados
+		this.firstGhost = ghostsAssigned(game)[0];
+		this.secondGhost = ghostsAssigned(game)[1];
+		
 		// Cercanía a power pill
 		this.pacmanNearToPowerPill = pacmanNearToPowerPill(game);
 
@@ -113,10 +120,58 @@ public class GhostsInput extends RulesInput {
 		facts.add(String.format("(MSPACMAN (nearToPowerPill %s))", this.pacmanNearToPowerPill));
 
 		// GAME
-		facts.add(String.format("(GAME (onlyOnePowerPillLeft %s) (lastPills %s))", this.onlyOnePowerPIllLeft,
-				this.lastPills));
+		facts.add(String.format("(GAME (onlyOnePowerPillLeft %s) (lastPills %s) (firstGhost %d) (secondGhost %d))", 
+				this.onlyOnePowerPIllLeft, this.lastPills, this.firstGhost, this.secondGhost));
 
 		return facts;
+	}
+	
+	private int[] ghostsAssigned(Game game) {
+		int[] assigned = new int[2];
+		assigned[0] = -1;
+		assigned[1] = -1;
+		
+		// Meter aqui condicion para reiniciarlo, si pacman muere o el numero de pp activas es != 1
+		if(!this.onlyOnePowerPIllLeft || game.wasPacManEaten()) return assigned;
+		
+		int[] powerPills = game.getActivePowerPillsIndices();
+		int lastPowerPill = powerPills[0];
+		
+		GHOST[] ghosts = GHOST.values();
+		int[] distances = new int[ghosts.length];
+		for (int i = 0; i < ghosts.length; i++) {
+			if (game.getGhostLairTime(ghosts[i]) > 0 || game.isGhostEdible(ghosts[i]))
+				distances[i] = Integer.MAX_VALUE;
+			else {
+				int ghostNode = game.getGhostCurrentNodeIndex(ghosts[i]);
+				distances[i] = game.getShortestPathDistance(ghostNode, lastPowerPill, game.getGhostLastMoveMade(ghosts[i]));
+				if (distances[i] == -1)
+					distances[i] = Integer.MAX_VALUE;
+			}
+		}
+		
+		int firstClosest = -1;
+		int secondClosest = -1;
+		int minDist = Integer.MAX_VALUE;
+		int secondMinDist = Integer.MAX_VALUE;
+		
+		for (int i = 0; i < distances.length; i++) {
+			if (distances[i] < minDist) {
+				secondClosest = firstClosest;
+				secondMinDist = minDist;
+				firstClosest = i;
+				minDist = distances[i];
+			}
+			else if (distances[i] < secondMinDist) {
+				secondClosest = i;
+				secondMinDist = distances[i];
+			}
+		}
+		
+		assigned[0] = firstClosest;
+		assigned[1] = secondClosest;
+		
+		return assigned;
 	}
 
 	private int[] nextPacmanJunctions(Game game) {
@@ -147,7 +202,7 @@ public class GhostsInput extends RulesInput {
 				}
 			}
 		}
-		// If no junction found near Pacman, return three -1s
+
 		if (startJunction == null) {
 			return new int[] { -1, -1, -1 };
 		}
@@ -155,7 +210,6 @@ public class GhostsInput extends RulesInput {
 		int[] result = new int[] { -1, -1, -1 };
 		int count = 0;
 
-		// Iterate over possible outgoing moves from startJunction and follow each path
 		for (MOVE m : game.getPossibleMoves(startJunction)) {
 			if (m == MOVE.NEUTRAL) continue;
 
@@ -163,27 +217,23 @@ public class GhostsInput extends RulesInput {
 			int current = game.getNeighbour(startJunction, m);
 			if (current == -1) continue;
 
-			// Track visited on this path to avoid infinite loops
 			Set<Integer> localVisited = new HashSet<>();
 			localVisited.add(prev);
 			localVisited.add(current);
 
-			// Walk forward along the path until we find a junction (different from
-			// startJunction)
 			while (current != -1 && !game.isJunction(current)) {
 				int nextNode = -1;
 				for (MOVE nm : game.getPossibleMoves(current)) {
 					if (nm == MOVE.NEUTRAL) continue;
 					int cand = game.getNeighbour(current, nm);
 					if (cand == -1) continue;
-					// prefer going forward (not back to prev)
 					if (cand != prev && !localVisited.contains(cand)) {
 						nextNode = cand;
 						break;
 					}
 				}
 				if (nextNode == -1)
-					break; // dead end or loop
+					break;
 				prev = current;
 				current = nextNode;
 				localVisited.add(current);

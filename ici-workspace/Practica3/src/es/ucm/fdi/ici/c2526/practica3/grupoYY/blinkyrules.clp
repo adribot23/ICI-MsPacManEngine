@@ -45,6 +45,8 @@
 (deftemplate GAME
     (slot onlyOnePowerPillLeft (type SYMBOL))
     (slot lastPills (type SYMBOL))
+    (slot firstGhost (type INTEGER) (default -1))
+    (slot secondGhost (type INTEGER) (default -1))
 )
 
     
@@ -58,8 +60,9 @@
 ;RULES 
 
 (defrule BLINKYchasesLastPowerPill
-    (GAME (onlyOnePowerPillLeft true))
+    (GAME (onlyOnePowerPillLeft true) (firstGhost ?f) (secondGhost ?s))
     (BLINKY (edible false))
+    (test (or (= ?f 0) (= ?s 0)))
     => 
     (assert 
     	(ACTION (id BLINKYchases) (info "Solo 1 queda una PP --> perseguir PowerPill")  (priority 55) 
