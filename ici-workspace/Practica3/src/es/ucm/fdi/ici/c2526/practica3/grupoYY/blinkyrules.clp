@@ -4,18 +4,12 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot distToPacman (type NUMBER))
-    (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPill (type NUMBER))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot distToPacman (type NUMBER))
-    (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPill (type NUMBER))
 )	
 	
 (deftemplate PINKY
@@ -23,9 +17,6 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot distToPacman (type NUMBER))
-    (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPill (type NUMBER))
 )
 
 (deftemplate SUE
@@ -33,9 +24,6 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
-	(slot distToPacman (type NUMBER))
-    (slot distToPacmanJunction (type NUMBER))
-    (slot distToPacmanPill (type NUMBER))
 )
 
 (deftemplate MSPACMAN 
@@ -47,6 +35,10 @@
     (slot lastPills (type SYMBOL))
     (slot firstGhost (type INTEGER) (default -1))
     (slot secondGhost (type INTEGER) (default -1))
+    (slot nearestGhostToPacman (type INTEGER) (default -1))
+    (slot nearestGhostToFirstJunction (type INTEGER) (default -1))
+    (slot nearestGhostToSecondJunction (type INTEGER) (default -1))
+    (slot nearestGhostToThirdJunction (type INTEGER) (default -1))
 )
 
     
@@ -83,9 +75,9 @@
 )
 
 (defrule BLINKYspread
-  (BLINKY (edible true) (nearToEdibleGhost true) (nearToPacman false))
-  =>
-  (assert (ACTION (id BLINKYrunsAway)
+ 	(BLINKY (edible true) (nearToEdibleGhost true) (nearToPacman false))
+ 	=>
+ 	(assert (ACTION (id BLINKYrunsAway)
                   (info "Comestible --> dispersarse de otro fantasma comestible")
                   (priority 55)
                   (runawaystrategy SCATTER)))
@@ -111,12 +103,20 @@
 	)
 )
 
+(defrule BLINKYalone
+ 	(BLINKY (edible true))
+	=>
+	(assert 
+		(ACTION (id BLINKYrunsAway) (info "Comestible y solo --> acercarse a power pill") (priority 30) 
+			(runawaystrategy ALONE)
+		)
+	)
+)	
+
 (defrule BLINKYchasesPacman
-    (BLINKY (edible false)
-             (distToPacman ?dp)
-             (distToPacmanJunction ?dj)
-             (distToPacmanPill ?dpill))
-    (test (<= ?dp ?dj))
+    (BLINKY (edible false))
+    (GAME (nearestGhostToPacman ?g))
+    (test (= ?g 0))
     =>
     (assert (ACTION (id BLINKYchases)
                     (info "Pacman es el más cercano")
@@ -124,31 +124,47 @@
                     (chasestrategy PACMAN)))
 )
 
-(defrule BLINKYchasesJunction
-    (BLINKY (edible false)
-             (distToPacman ?dp)
-             (distToPacmanJunction ?dj)
-             (distToPacmanPill ?dpill))
-    (test (< ?dj ?dp))
+(defrule BLINKYchasesFirstJunction
+    (BLINKY (edible false))
+    (GAME (nearestGhostToFirstJunction ?g))
+    (test (= ?g 0))
     =>
     (assert (ACTION (id BLINKYchases)
-                    (info "Junction más cercana")
+                    (info "First Junction más cercana")
                     (priority 20)
-                    (chasestrategy JUNCTION)))
+                    (chasestrategy FIRSTJUNCTION)))
 )
 
-(defrule BLINKYchasesPill
-	(GAME (lastPills true))
-    (BLINKY (edible false)
-             (distToPacman ?dp)
-             (distToPacmanJunction ?dj)
-             (distToPacmanPill ?dpill))
-    (test (< ?dpill ?dp))
-    (test (< ?dpill ?dj))
+(defrule BLINKYchasesSecondJunction
+    (BLINKY (edible false))
+    (GAME (nearestGhostToSecondJunction ?g))
+    (test (= ?g 0))
     =>
     (assert (ACTION (id BLINKYchases)
-    				(info "Pill más cercana")
-    				(priority 20)
-    				(chasestrategy PILL)))
+                    (info "Second Junction más cercana")
+                    (priority 20)
+                    (chasestrategy SECONDJUNCTION)))
+)
+
+(defrule BLINKYchasesThirdJunction
+    (BLINKY (edible false))
+    (GAME (nearestGhostToThirdJunction ?g))
+    (test (= ?g 0))
+    =>
+    (assert (ACTION (id BLINKYchases)
+                    (info "Third Junction más cercana")
+                    (priority 20)
+                    (chasestrategy THIRDJUNCTION)))
+)
+
+(defrule BLINKYnoThirdJunction
+    (BLINKY (edible false))
+    (GAME (nearestGhostToFirstJunction ?f) (nearestGhostToSecondJunction ?s) (nearestGhostToThirdJunction ?t))
+    (test (or (= ?f -1) (= ?s -1) (= ?t -1))
+    =>
+    (assert (ACTION (id BLINKYchases)
+                    (info "Third Junction más cercana")
+                    (priority 20)
+                    (chasestrategy NEARESTTARGET)))
 )
 
