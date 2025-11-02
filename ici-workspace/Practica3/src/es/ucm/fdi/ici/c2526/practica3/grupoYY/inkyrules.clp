@@ -4,12 +4,14 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot edibleTime (type NUMBER))
 )	
 (deftemplate INKY
 	(slot edible (type SYMBOL))
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot edibleTime (type NUMBER))
 )	
 	
 (deftemplate PINKY
@@ -17,6 +19,7 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot edibleTime (type NUMBER))
 )
 
 (deftemplate SUE
@@ -24,6 +27,7 @@
 	(slot nearToNotEdibleGhost (type SYMBOL))
 	(slot nearToEdibleGhost (type SYMBOL))
 	(slot nearToPacman (type SYMBOL))
+	(slot edibleTime (type NUMBER))
 )
     
 (deftemplate GAME
@@ -84,25 +88,30 @@
 	(INKY (edible true) (nearToNotEdibleGhost true))
 	=>  
 	(assert 
-		(ACTION 
-			(id INKYchases)
-			(info "Comestible --> huir hacia fantasma no comestible")
-			(priority 40)
+		(ACTION (id INKYchases) (info "Comestible --> huir hacia fantasma no comestible") (priority 45)
 			(chasestrategy GHOST)
 		)
 	)
 )
 
 (defrule INKYrunsAwayPacman
-	(INKY (edible true) (nearToPacman true))
+	(INKY (edible true) (nearToPacman true) (edibleTime ?t))
+	(test (> ?t 30)) 
 	=>  
 	(assert 
-		(ACTION 
-			(id INKYrunsAway)
-			(info "Comestible --> huir")
-			(priority 35)
+		(ACTION (id INKYrunsAway) (info "Comestible --> huir") (priority 40)
 			(runawaystrategy PACMAN)
 		)
+	)
+)
+
+(defrule INKYsemiEdible
+	(INKY (edible true) (edibleTime ?t))
+	(test (<= ?t 30))
+	=>
+	(assert (ACTION (id INKYchases) (info "Comestible y poco tiempo edible --> ir a por pacman") (priority 35) 
+				(chasestrategy SEMIEDIBLE)
+			)
 	)
 )
 

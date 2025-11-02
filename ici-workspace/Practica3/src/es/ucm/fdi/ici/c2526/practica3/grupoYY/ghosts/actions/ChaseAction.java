@@ -28,7 +28,7 @@ public class ChaseAction implements RulesAction {
 	// POWERPILL --> Perseguir ultima power pill por dos caminos distintos
 
 	enum STRATEGY {
-		PACMAN, FIRSTJUNCTION, SECONDJUNCTION, THIRDJUNCTION, NEARESTTARGET, GHOST, POWERPILL
+		PACMAN, FIRSTJUNCTION, SECONDJUNCTION, THIRDJUNCTION, NEARESTTARGET, GHOST, POWERPILL, SEMIEDIBLE
 	};
 
 	STRATEGY chaseStrategy;
@@ -77,7 +77,6 @@ public class ChaseAction implements RulesAction {
 				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), junctions[2],
 						game.getGhostLastMoveMade(ghost), DM.PATH);
 			case NEARESTTARGET:
-				// funcion que devuelve el objetivo mas cercano a ese fantasma (pacman y las dos junctions que no son -1)
 				int target = nearestTarget(game, junctions);
 				GameView.addPoints(game, Color.GRAY,
 						game.getShortestPath(game.getGhostCurrentNodeIndex(ghost), target));
@@ -89,6 +88,10 @@ public class ChaseAction implements RulesAction {
 						nearestNotEdibleGhost(game), game.getGhostLastMoveMade(ghost), DM.PATH);
 			case POWERPILL:
 				return chaseLastPowerPill(game);
+			case SEMIEDIBLE:
+				GameView.addLines(game, Color.RED, game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex());
+				return game.getApproximateNextMoveTowardsTarget(game.getGhostCurrentNodeIndex(ghost), game.getPacmanCurrentNodeIndex(),
+						game.getGhostLastMoveMade(ghost), DM.PATH);
 			default:
 				throw new IllegalArgumentException("Unexpected value: " + chaseStrategy.toString());
 			}
@@ -206,6 +209,11 @@ public class ChaseAction implements RulesAction {
 		int targetPill = powerPills[powerPills.length - 1];
 		int ghostPos = game.getGhostCurrentNodeIndex(ghost);
 		MOVE lastMove = game.getGhostLastMoveMade(ghost);
+		
+		if (game.getNumberOfActivePowerPills() != 1 || game.wasPacManEaten()) {
+			firstGhost = null;
+			avoidPath = null;
+		}
 
 		// Si es el primer fantasma y aún no se ha establecido
 		if (firstGhost == null) {
@@ -289,7 +297,6 @@ public class ChaseAction implements RulesAction {
 			}
 		}
 
-		// Si no se encuentra camino alternativo, usar el camino directo
 		return game.getShortestPath(start, target, game.getGhostLastMoveMade(ghost));
 	}
 

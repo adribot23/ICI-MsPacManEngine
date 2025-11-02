@@ -27,6 +27,9 @@ public class GhostsInput extends RulesInput {
 	private int nearestGhostToPacman, nearestGhostToFirstJunction, nearestGhostToSecondJunction,
 			nearestGhostToThirdJunction;
 
+	// Tiempos
+	private int BLINKYedibleTime, PINKYedibleTime, INKYedibleTime, SUEedibleTime;
+	
 	public GhostsInput(Game game) {
 		super(game);
 	}
@@ -68,6 +71,12 @@ public class GhostsInput extends RulesInput {
 		this.nearestGhostToFirstJunction = nearestGhostToFirstJunction(game);
 		this.nearestGhostToSecondJunction = nearestGhostToSecondJunction(game);
 		this.nearestGhostToThirdJunction = nearestGhostToThirdJunction(game);
+		
+		// Tiempo edible
+		this.BLINKYedibleTime = game.getGhostEdibleTime(GHOST.BLINKY);
+		this.PINKYedibleTime = game.getGhostEdibleTime(GHOST.PINKY);
+		this.INKYedibleTime = game.getGhostEdibleTime(GHOST.INKY);
+		this.SUEedibleTime = game.getGhostEdibleTime(GHOST.SUE);
 	}
 
 	@Override
@@ -76,22 +85,21 @@ public class GhostsInput extends RulesInput {
 
 		// BLINKY
 		facts.add(
-				String.format("(BLINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s))",
-						this.BLINKYedible, this.BLINKYnearToNotEdibleGhost, this.BLINKYnearToEdibleGhost,
-						this.BLINKYnearToPacman));
+				String.format("(BLINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (edibleTime %d))",
+				this.BLINKYedible, this.BLINKYnearToNotEdibleGhost, this.BLINKYnearToEdibleGhost, this.BLINKYnearToPacman, this.BLINKYedibleTime));
 
 		// INKY
-		facts.add(String.format("(INKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s))",
-				this.INKYedible, this.INKYnearToNotEdibleGhost, this.INKYnearToEdibleGhost, this.INKYnearToPacman));
+		facts.add(String.format("(INKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (edibleTime %d))",
+				this.INKYedible, this.INKYnearToNotEdibleGhost, this.INKYnearToEdibleGhost, this.INKYnearToPacman, this.INKYedibleTime));
 
 		// PINKY
 		facts.add(String.format(
-				"(PINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s))",
-				this.PINKYedible, this.PINKYnearToNotEdibleGhost, this.PINKYnearToEdibleGhost, this.PINKYnearToPacman));
+				"(PINKY (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (edibleTime %d))",
+				this.PINKYedible, this.PINKYnearToNotEdibleGhost, this.PINKYnearToEdibleGhost, this.PINKYnearToPacman, this.PINKYedibleTime));
 
 		// SUE
-		facts.add(String.format("(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s))",
-				this.SUEedible, this.SUEnearToNotEdibleGhost, this.SUEnearToEdibleGhost, this.SUEnearToPacman));
+		facts.add(String.format("(SUE (edible %s) (nearToNotEdibleGhost %s) (nearToEdibleGhost %s) (nearToPacman %s) (edibleTime %d))",
+				this.SUEedible, this.SUEnearToNotEdibleGhost, this.SUEnearToEdibleGhost, this.SUEnearToPacman, this.SUEedibleTime));
 
 		// GAME
 		facts.add(String.format(
