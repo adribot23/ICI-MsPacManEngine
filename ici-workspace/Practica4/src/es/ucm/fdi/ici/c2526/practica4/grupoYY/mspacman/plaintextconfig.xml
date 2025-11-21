@@ -1,7 +1,7 @@
 <TextFileConfiguration>
 	<FilePath>not used</FilePath>
 	<Delimiters>,</Delimiters>
-	<DescriptionClassName>es.ucm.fdi.ici.c2425.practica5.grupoYY.mspacman.MsPacManDescription</DescriptionClassName>
+	<DescriptionClassName>es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManDescription</DescriptionClassName>
 	<DescriptionMappings>
 		<Map>id</Map>
 		<Map>score</Map>
@@ -10,12 +10,12 @@
 		<Map>nearestGhost</Map>		
 		<Map>edibleGhost</Map>		
 	</DescriptionMappings>
-	<SolutionClassName>es.ucm.fdi.ici.c2425.practica5.grupoYY.mspacman.MsPacManSolution</SolutionClassName>
+	<SolutionClassName>es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManSolution</SolutionClassName>
 	<SolutionMappings>
 		<Map>id</Map>
 		<Map>action</Map>
 	</SolutionMappings>
-	<ResultClassName>es.ucm.fdi.ici.c2425.practica5.grupoYY.mspacman.MsPacManResult</ResultClassName>
+	<ResultClassName>es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManResult</ResultClassName>
 	<ResultMappings>
 		<Map>id</Map>
 		<Map>score</Map>

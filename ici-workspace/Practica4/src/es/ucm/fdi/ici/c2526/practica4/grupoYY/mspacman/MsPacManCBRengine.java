@@ -36,7 +36,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 	final static String TEAM = "grupoYY";  //Cuidado!! poner el grupo aquí
 	
 	
-	final static String CONNECTOR_FILE_PATH = "es/ucm/fdi/ici/c2425/practica5/"+TEAM+"/mspacman/plaintextconfig.xml";
+	final static String CONNECTOR_FILE_PATH = "es/ucm/fdi/ici/c2526/practica4/"+TEAM+"/mspacman/plaintextconfig.xml";
 	final static String CASE_BASE_PATH = "cbrdata"+File.separator+TEAM+File.separator+"mspacman"+File.separator;
 
 	
@@ -58,6 +58,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		
 		//Do not use default case base path in the xml file. Instead use custom file path for each opponent.
 		//Note that you can create any subfolder of files to store the case base inside your "cbrdata/grupoXX" folder.
+		
 		connector.setCaseBaseFile(CASE_BASE_PATH, opponent+".csv");
 		
 		this.storageManager.setCaseBase(caseBase);

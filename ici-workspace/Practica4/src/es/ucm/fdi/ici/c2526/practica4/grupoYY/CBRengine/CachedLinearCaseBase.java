@@ -72,7 +72,10 @@ public class CachedLinearCaseBase implements CBRCaseBase {
 		originalCases = this.connector.retrieveAllCases();	
 		workingCases = new java.util.ArrayList<CBRCase>(originalCases);
 		casesToRemove = new ArrayList<>();
-		nextId = 1+(Integer)workingCases.get(workingCases.size() - 1).getID();
+		if(workingCases.isEmpty())
+			nextId = 1;
+		else
+			nextId = 1+(Integer)workingCases.get(workingCases.size() - 1).getID();
 	}
 	
 
