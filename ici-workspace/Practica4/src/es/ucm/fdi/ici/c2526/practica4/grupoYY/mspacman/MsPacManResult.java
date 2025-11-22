@@ -7,7 +7,7 @@ public class MsPacManResult implements CaseComponent {
 
 	Integer id;
 	Integer score;
-	
+
 	public Integer getId() {
 		return id;
 	}
@@ -28,12 +28,10 @@ public class MsPacManResult implements CaseComponent {
 	public Attribute getIdAttribute() {
 		return new Attribute("id", MsPacManResult.class);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "MsPacManResult [id=" + id + ", score=" + score + "]";
-	} 
-	
-	
+	}
 
 }

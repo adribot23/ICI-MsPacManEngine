@@ -10,7 +10,7 @@ public class MsPacManInput extends CBRInput {
 
 	public MsPacManInput(Game game) {
 		super(game);
-		
+
 	}
 
 	Integer nearestGhost;
@@ -18,7 +18,7 @@ public class MsPacManInput extends CBRInput {
 	Integer nearestPPill;
 	Integer score;
 	Integer time;
-	
+
 	@Override
 	public void parseInput() {
 		computeNearestGhost(game);
@@ -35,38 +35,37 @@ public class MsPacManInput extends CBRInput {
 		description.setNearestPPill(nearestPPill);
 		description.setScore(score);
 		description.setTime(time);
-		
+
 		CBRQuery query = new CBRQuery();
 		query.setDescription(description);
 		return query;
 	}
-	
+
 	private void computeNearestGhost(Game game) {
 		nearestGhost = Integer.MAX_VALUE;
 		edible = false;
 		GHOST nearest = null;
-		for(GHOST g: GHOST.values()) {
+		for (GHOST g : GHOST.values()) {
 			int pos = game.getGhostCurrentNodeIndex(g);
-			int distance; 
-			if(pos != -1) 
-				distance = (int)game.getDistance(game.getPacmanCurrentNodeIndex(), pos, DM.PATH);
+			int distance;
+			if (pos != -1)
+				distance = (int) game.getDistance(game.getPacmanCurrentNodeIndex(), pos, DM.PATH);
 			else
 				distance = Integer.MAX_VALUE;
-			if(distance < nearestGhost)
-			{
+			if (distance < nearestGhost) {
 				nearestGhost = distance;
 				nearest = g;
 			}
 		}
-		if(nearest!=null)
+		if (nearest != null)
 			edible = game.isGhostEdible(nearest);
 	}
-	
+
 	private void computeNearestPPill(Game game) {
 		nearestPPill = Integer.MAX_VALUE;
-		for(int pos: game.getPowerPillIndices()) {
-			int distance = (int)game.getDistance(game.getPacmanCurrentNodeIndex(), pos, DM.PATH);
-			if(distance < nearestGhost)
+		for (int pos : game.getPowerPillIndices()) {
+			int distance = (int) game.getDistance(game.getPacmanCurrentNodeIndex(), pos, DM.PATH);
+			if (distance < nearestGhost)
 				nearestPPill = distance;
 		}
 	}

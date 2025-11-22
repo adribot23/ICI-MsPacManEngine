@@ -20,12 +20,10 @@ public class Attribute extends es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute {
 
 	private static HashMap<Class<?>, HashMap<String, Function>> getters = new HashMap<Class<?>, HashMap<String, Function>>();
 	private static HashMap<Class<?>, HashMap<String, BiConsumer>> setters = new HashMap<Class<?>, HashMap<String, BiConsumer>>();
-	
-	
-	private static Function findGetter(Class<?> _class, String getterName, Class<?> _type) throws Exception
-	{
+
+	private static Function findGetter(Class<?> _class, String getterName, Class<?> _type) throws Exception {
 		HashMap<String, Function> gettersClass = getters.get(_class);
-		if(gettersClass == null) {
+		if (gettersClass == null) {
 			gettersClass = new HashMap<String, Function>();
 			getters.put(_class, gettersClass);
 		}
@@ -36,12 +34,10 @@ public class Attribute extends es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute {
 		}
 		return f;
 	}
-	
-	
-	private static BiConsumer findSetter(Class<?> _class, String setterName, Class<?> _type) throws Exception
-	{
+
+	private static BiConsumer findSetter(Class<?> _class, String setterName, Class<?> _type) throws Exception {
 		HashMap<String, BiConsumer> gettersClass = setters.get(_class);
-		if(gettersClass == null) {
+		if (gettersClass == null) {
 			gettersClass = new HashMap<String, BiConsumer>();
 			setters.put(_class, gettersClass);
 		}
@@ -52,9 +48,7 @@ public class Attribute extends es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute {
 		}
 		return f;
 	}
-	
-	
-	
+
 	public Attribute(String attributeName, Class<?> _class) {
 		super(attributeName, _class);
 		try {
@@ -66,39 +60,32 @@ public class Attribute extends es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute {
 		}
 	}
 
-	String fieldToGetter(String name)
-	{
-	    return "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
+	String fieldToGetter(String name) {
+		return "get" + name.substring(0, 1).toUpperCase() + name.substring(1);
 	}
-	String fieldToSetter(String name)
-	{
-	    return "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
+
+	String fieldToSetter(String name) {
+		return "set" + name.substring(0, 1).toUpperCase() + name.substring(1);
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object getValue(Object obj) throws AttributeAccessException
-	{
+	public Object getValue(Object obj) throws AttributeAccessException {
 		return getFunction.apply(obj);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public void setValue(Object obj, Object value) throws AttributeAccessException
-	{
+	public void setValue(Object obj, Object value) throws AttributeAccessException {
 		setFunction.accept(obj, value);
-	}	
+	}
 
-	public static BiConsumer createSetter(Class<?> _class, String setterName, Class<?> _type)
-			throws Exception {
-		
+	public static BiConsumer createSetter(Class<?> _class, String setterName, Class<?> _type) throws Exception {
+
 		MethodHandles.Lookup lookup = MethodHandles.lookup();
 		MethodHandle setter = lookup.findVirtual(_class, setterName, MethodType.methodType(void.class, _type));
-	
-		final CallSite site = LambdaMetafactory.metafactory(lookup, 
-				"accept", 
-				MethodType.methodType(BiConsumer.class),
+
+		final CallSite site = LambdaMetafactory.metafactory(lookup, "accept", MethodType.methodType(BiConsumer.class),
 				MethodType.methodType(void.class, Object.class, Object.class), // signature of method BiConsumer.accept
 																				// after type erasure
 				setter, setter.type()); // actual signature of setter
@@ -110,18 +97,13 @@ public class Attribute extends es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute {
 			throw new Error(e);
 		}
 	}
-	
-	
-	
+
 	public static Function createGetter(Class<?> _class, String getterName, Class<?> _type) throws Exception {
-		
+
 		MethodHandles.Lookup lookup = MethodHandles.lookup();
 		MethodHandle getter = lookup.findVirtual(_class, getterName, MethodType.methodType(_type));
-		final CallSite site = 
-				LambdaMetafactory.metafactory(lookup, 
-						"apply", 
-						MethodType.methodType(Function.class),
-						MethodType.methodType(Object.class, Object.class), // signature of method Function.apply after type
+		final CallSite site = LambdaMetafactory.metafactory(lookup, "apply", MethodType.methodType(Function.class),
+				MethodType.methodType(Object.class, Object.class), // signature of method Function.apply after type
 				getter, getter.type()); // actual signature of getter
 		try {
 			return (Function) site.getTarget().invokeExact();
@@ -132,21 +114,19 @@ public class Attribute extends es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute {
 		}
 	}
 
-	
 	public static void main(String[] args) {
 		try {
 			Attribute a = new Attribute("id", MsPacManDescription.class);
-		
+
 			MsPacManDescription d = new MsPacManDescription();
 			d.setId(25);
-			
+
 			System.out.println(a.getValue(d));
-			
+
 			a.setValue(d, 30);
-			
+
 			System.out.println(a.getValue(d));
-		
-		
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

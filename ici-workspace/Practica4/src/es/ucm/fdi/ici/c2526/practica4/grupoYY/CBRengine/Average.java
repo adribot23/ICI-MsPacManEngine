@@ -15,25 +15,24 @@ public class Average implements GlobalSimilarityFunction {
 	/**
 	 * Returns the list of attributes of a class.
 	 */
-	public static Attribute[] getAttributes(Class<?> c)
-	{
+	public static Attribute[] getAttributes(Class<?> c) {
 		Field[] fields = c.getDeclaredFields();
 		Attribute[] res = new Attribute[fields.length];
-		int i=0;
-		for(Field f : fields)
-			res[i++] = new Attribute(f.getName(),c);
+		int i = 0;
+		for (Field f : fields)
+			res[i++] = new Attribute(f.getName(), c);
 		return res;
 	}
-	
+
 	Attribute[] attributes = null;
-	
+
 	@Override
 	public double compute(CaseComponent componentOfCase, CaseComponent componentOfQuery, CBRCase _case, CBRQuery _query,
 			NNConfig numSimConfig) {
 		GlobalSimilarityFunction gsf = null;
 		LocalSimilarityFunction lsf = null;
 
-		if(attributes == null)
+		if (attributes == null)
 			attributes = getAttributes(componentOfCase.getClass());
 
 		double[] values = new double[attributes.length];
@@ -43,7 +42,7 @@ public class Average implements GlobalSimilarityFunction {
 
 		for (int i = 0; i < attributes.length; i++) {
 			Attribute at1 = attributes[i];
-			//Attribute at2 = new Attribute(at1.getName(), componentOfQuery.getClass());
+			// Attribute at2 = new Attribute(at1.getName(), componentOfQuery.getClass());
 
 			try {
 				if ((gsf = numSimConfig.getGlobalSimilFunction(at1)) != null) {

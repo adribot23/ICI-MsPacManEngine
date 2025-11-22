@@ -10,11 +10,11 @@ import es.ucm.fdi.gaia.jcolibri.cbrcore.Connector;
 import es.ucm.fdi.gaia.jcolibri.exception.InitializingException;
 
 /**
- * Cached case base that only persists cases when closing.
- * learn() and forget() are not synchronized with the persistence until close() is invoked.
+ * Cached case base that only persists cases when closing. learn() and forget()
+ * are not synchronized with the persistence until close() is invoked.
  * <p>
- * This class presents better performance that LinelCaseBase as only access to the persistence once.
- * This case base is used for evaluation.
+ * This class presents better performance that LinelCaseBase as only access to
+ * the persistence once. This case base is used for evaluation.
  * 
  * @author Juan A. Recio-García
  */
@@ -24,15 +24,15 @@ public class CachedLinearCaseBase implements CBRCaseBase {
 	private Collection<CBRCase> originalCases;
 	private java.util.ArrayList<CBRCase> workingCases;
 	private Collection<CBRCase> casesToRemove;
-	
+
 	private Integer nextId;
-	
+
 	/**
 	 * Closes the case base saving or deleting the cases of the persistence media
 	 */
 	public void close() {
 		workingCases.removeAll(casesToRemove);
-		
+
 		Collection<CBRCase> casesToStore = new ArrayList<>(workingCases);
 		casesToStore.removeAll(originalCases);
 
@@ -69,21 +69,19 @@ public class CachedLinearCaseBase implements CBRCaseBase {
 	 */
 	public void init(Connector connector) throws InitializingException {
 		this.connector = connector;
-		originalCases = this.connector.retrieveAllCases();	
+		originalCases = this.connector.retrieveAllCases();
 		workingCases = new java.util.ArrayList<CBRCase>(originalCases);
 		casesToRemove = new ArrayList<>();
-		if(workingCases.isEmpty())
+		if (workingCases.isEmpty())
 			nextId = 1;
 		else
-			nextId = 1+(Integer)workingCases.get(workingCases.size() - 1).getID();
+			nextId = 1 + (Integer) workingCases.get(workingCases.size() - 1).getID();
 	}
-	
 
-	public Integer getNextId()
-	{
+	public Integer getNextId() {
 		return nextId;
 	}
-	
+
 	/**
 	 * Learns cases that are only saved when closing the Case Base.
 	 */
@@ -93,4 +91,3 @@ public class CachedLinearCaseBase implements CBRCaseBase {
 	}
 
 }
-

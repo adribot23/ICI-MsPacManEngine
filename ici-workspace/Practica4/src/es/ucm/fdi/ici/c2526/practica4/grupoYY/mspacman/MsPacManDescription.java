@@ -6,17 +6,11 @@ import es.ucm.fdi.gaia.jcolibri.cbrcore.CaseComponent;
 public class MsPacManDescription implements CaseComponent {
 
 	Integer id;
-	
 	Integer score;
 	Integer time;
 	Integer nearestPPill;
 	Integer nearestGhost;
 	Boolean edibleGhost;
-	
-	
-
-
-
 
 	public Integer getId() {
 		return id;
@@ -76,9 +70,5 @@ public class MsPacManDescription implements CaseComponent {
 		return "MsPacManDescription [id=" + id + ", score=" + score + ", time=" + time + ", nearestPPill="
 				+ nearestPPill + ", nearestGhost=" + nearestGhost + ", edibleGhost=" + edibleGhost + "]";
 	}
-
-
-	
-	
 
 }
