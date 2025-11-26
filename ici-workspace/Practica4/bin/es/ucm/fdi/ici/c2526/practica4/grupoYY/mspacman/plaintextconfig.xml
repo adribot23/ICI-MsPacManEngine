@@ -9,6 +9,16 @@
 		<Map>nearestPPill</Map>		
 		<Map>nearestGhost</Map>		
 		<Map>edibleGhost</Map>		
+		
+		<Map>listPosGhost</Map>
+		<Map>ghostDistances</Map>
+		<Map>ghostsLastMoves</Map>
+
+		<Map>numEdibles</Map>
+		<Map>ghostEdibleTime</Map>
+
+		<Map>pacmanPos</Map>
+		<Map>pacmanLastMove</Map>
 	</DescriptionMappings>
 	<SolutionClassName>es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManSolution</SolutionClassName>
 	<SolutionMappings>

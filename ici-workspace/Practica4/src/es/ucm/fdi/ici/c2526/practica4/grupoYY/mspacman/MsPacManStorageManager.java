@@ -36,6 +36,7 @@ public class MsPacManStorageManager {
 	public void setCaseBase(CBRCaseBase caseBase)
 	{
 		this.caseBase = caseBase;
+	
 	}
 	
 	public void reviseAndRetain(CBRCase newCase)
