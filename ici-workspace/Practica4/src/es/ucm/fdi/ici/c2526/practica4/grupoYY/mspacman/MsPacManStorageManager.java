@@ -24,6 +24,7 @@ public class MsPacManStorageManager {
 	
 	public MsPacManStorageManager()
 	{
+		//this.buffer = new Vector<Pair<CBRCase,CBRCASEBASe>();  el profe nos ha dicho esto
 		this.buffer = new Vector<CBRCase>();
 		this.caseMap = new HashMap<CBRCase, CBRCaseBase>();
 		this.typeCont = new HashMap<CBRCaseBase, Integer>();

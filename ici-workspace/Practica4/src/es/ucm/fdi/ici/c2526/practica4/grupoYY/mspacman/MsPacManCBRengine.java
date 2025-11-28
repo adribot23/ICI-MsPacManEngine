@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import es.ucm.fdi.gaia.jcolibri.cbraplications.StandardCBRApplication;
 import es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute;
@@ -22,18 +23,19 @@ import es.ucm.fdi.gaia.jcolibri.util.FileIO;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.Average;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.CachedLinearCaseBase;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.CustomPlainTextConnector;
+import gate.util.Pair;
 import pacman.game.Constants.MOVE;
 
-
 public class MsPacManCBRengine implements StandardCBRApplication {
+
+	private Map<String, Pair> connectorsCaseBases = new HashMap<>();
 
 	private MOVE action;
 	private MsPacManStorageManager storageManager;
 	CustomPlainTextConnector connector;
 	CachedLinearCaseBase caseBase;
 	NNConfig simConfig;
-	
-	  private Map<String, CachedLinearCaseBase> loadedCaseBases = new HashMap<>();
+
 	final static String TEAM = "grupoYY"; // Cuidado!! poner el grupo aquí
 
 	final static String CONNECTOR_FILE_PATH = "es/ucm/fdi/ici/c2526/practica4/" + TEAM
@@ -41,20 +43,37 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 	final static String CASE_BASE_PATH = "cbrdata" + File.separator + TEAM + File.separator + "mspacman"
 			+ File.separator;
 
+	final static String[] DISTANCES = { "lejos", "media", "cerca" };
+
 	public MsPacManCBRengine(MsPacManStorageManager storageManager) {
 		this.storageManager = storageManager;
 	}
 
 	@Override
 	public void configure() throws ExecutionException {
-		connector = new CustomPlainTextConnector();
-		//caseBase = new CachedLinearCaseBase();
 		
-		//si quito esto se queda pillado al principio no se por que
-		connector.initFromXMLfile(FileIO.findFile(CONNECTOR_FILE_PATH)); 
-		
-		//this.storageManager.setCaseBase(caseBase);
 
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 2; j++) {
+				for (String s : DISTANCES) {
+					connector = new CustomPlainTextConnector();
+					connector.initFromXMLfile(FileIO.findFile(CONNECTOR_FILE_PATH));
+
+					String filename = "nivel" + i + File.separator + (j == 0 ? "edible" : "noEdible") + File.separator
+							+ s + ".csv";
+					connector.setCaseBaseFile(CASE_BASE_PATH, filename);
+
+					caseBase = new CachedLinearCaseBase();
+					Pair p = new Pair(connector, caseBase);
+
+					connectorsCaseBases.put(filename, p);
+
+				}
+			}
+		}
+
+		 this.storageManager.setCaseBase(caseBase);
+		 
 		simConfig = new NNConfig();
 		simConfig.setDescriptionSimFunction(new Average());
 		simConfig.addMapping(new Attribute("score", MsPacManDescription.class), new Interval(15000));
@@ -62,74 +81,72 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		simConfig.addMapping(new Attribute("nearestPPill", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("nearestGhost", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("edibleGhost", MsPacManDescription.class), new Equal());
-		
-		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class), new ListNumberSimilarityFunction(650));
-		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class), new ListNumberSimilarityFunction(650));
-		simConfig.addMapping(new Attribute("ghostsLastMoves", MsPacManDescription.class), new ListMoveSimilarityFunction());
-		
+
+		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class),
+				new ListNumberSimilarityFunction(650));
+		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class),
+				new ListNumberSimilarityFunction(650));
+		simConfig.addMapping(new Attribute("ghostsLastMoves", MsPacManDescription.class),
+				new ListMoveSimilarityFunction());
+
 		simConfig.addMapping(new Attribute("numEdibles", MsPacManDescription.class), new Interval(4));
 		simConfig.addMapping(new Attribute("ghostEdibleTime", MsPacManDescription.class), new Interval(2000));
-		
+
 		simConfig.addMapping(new Attribute("pacmanPos", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("pacmanLastMove", MsPacManDescription.class), new Equal());
-	
+
 	}
 
 	@Override
 	public CBRCaseBase preCycle() throws ExecutionException {
-		//caseBase.init(connector);
+		for (Entry<String, Pair> p : connectorsCaseBases.entrySet()) {
+			connector = (CustomPlainTextConnector) p.getValue().first;
+			caseBase = (CachedLinearCaseBase) p.getValue().second;
+			caseBase.init(connector);
+		}
 		return caseBase;
 	}
 
 	@Override
 	public void cycle(CBRQuery query) throws ExecutionException {
 
-		   MsPacManDescription d = (MsPacManDescription) query.getDescription();
-		    int level = storageManager.game.getCurrentLevel();
+		MsPacManDescription d = (MsPacManDescription) query.getDescription();
+		int level = storageManager.game.getCurrentLevel();
 
-		    // Determinar rango de distancia
-		    String distRange;
-		    if (d.getNearestGhost() <= 30)
-		        distRange = "cerca";
-		    else if (d.getNearestGhost() <= 70)
-		        distRange = "media";
-		    else
-		        distRange = "lejos";
+		// Determinar rango de distancia
+		String distRange;
+		if (d.getNearestGhost() <= 30)
+			distRange = "cerca";
+		else if (d.getNearestGhost() <= 70)
+			distRange = "media";
+		else
+			distRange = "lejos";
 
-		    // Construir ruta del CSV correspondiente
-		    String filename = "nivel" + level + File.separator + (d.getEdibleGhost() ? "edible" : "noEdible")
-		            + File.separator + distRange + ".csv";
+		// Construir ruta del CSV correspondiente
+		String filename = "nivel" + level + File.separator + (d.getEdibleGhost() ? "edible" : "noEdible")
+				+ File.separator + distRange + ".csv";
 
-		    // Cargar o recuperar el CachedLinearCaseBase correspondiente
-		  
-		    if (!loadedCaseBases.containsKey(filename)) {
-		    	connector = new CustomPlainTextConnector();
-		    	connector.initFromXMLfile(FileIO.findFile(CONNECTOR_FILE_PATH));
-		    	connector.setCaseBaseFile(CASE_BASE_PATH, filename);
+		// Cargar o recuperar el CachedLinearCaseBase correspondiente
+		Pair p = connectorsCaseBases.get(filename);
+		connector = (CustomPlainTextConnector) p.first;
+		caseBase = (CachedLinearCaseBase) p.second;
 
-		        caseBase = new CachedLinearCaseBase();
-		        caseBase.init(connector);
+		storageManager.setCaseBase(caseBase);
 
-		        loadedCaseBases.put(filename, caseBase);
-		    } else {
-		    	caseBase = loadedCaseBases.get(filename);
-		    }
-
-		    // Asignar el case-base activo al storageManager
-		    storageManager.setCaseBase(caseBase);
-
-		    // Recuperación y reutilización
-		    if (caseBase.getCases().isEmpty()) {
-		        this.action = MOVE.NEUTRAL;
-		    } else {
-		        Collection<RetrievalResult> eval = NNScoringMethod.evaluateSimilarity(caseBase.getCases(), query, simConfig);
-		        this.action = reuse(eval);
-		    }
-
-		    // Crear y retener el nuevo caso
-		    CBRCase newCase = createNewCase(query);
-		    storageManager.reviseAndRetain(newCase);
+		// Recuperación y reutilización
+		if (caseBase.getCases().isEmpty()) {
+			this.action = MOVE.NEUTRAL;
+		} else {
+			Collection<RetrievalResult> eval = NNScoringMethod.evaluateSimilarity(caseBase.getCases(), query,
+					simConfig);
+			this.action = reuse(eval);
 		}
+
+		// Crear y retener el nuevo caso
+		CBRCase newCase = createNewCase(query);
+		//storageManager.reviseAndRetain(newCase,caseBase);  nos lo ha dicho el profe
+		storageManager.reviseAndRetain(newCase);
+	}
 
 	private MOVE reuse(Collection<RetrievalResult> eval) {
 		// This simple implementation only uses 1NN
@@ -168,26 +185,27 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 	 */
 	private CBRCase createNewCase(CBRQuery query) {
 
-	    CBRCase newCase = new CBRCase();
-	    MsPacManDescription newDescription = (MsPacManDescription) query.getDescription();
-	    MsPacManResult newResult = new MsPacManResult();
-	    MsPacManSolution newSolution = new MsPacManSolution();
+		CBRCase newCase = new CBRCase();
+		MsPacManDescription newDescription = (MsPacManDescription) query.getDescription();
+		MsPacManResult newResult = new MsPacManResult();
+		MsPacManSolution newSolution = new MsPacManSolution();
 
-	    // USAR EL CASEBASE ACTIVO
-	    //CachedLinearCaseBase activeCaseBase = (CachedLinearCaseBase) storageManager.getCaseBase();
+		// USAR EL CASEBASE ACTIVO
+		// CachedLinearCaseBase activeCaseBase = (CachedLinearCaseBase)
+		// storageManager.getCaseBase();
 
-	    int newId = caseBase.getNextId()+ storageManager.getTypePendingCases(caseBase);
-	    
-	    newDescription.setId(newId);
-	    newResult.setId(newId);
-	    newSolution.setId(newId);
-	    newSolution.setAction(this.action);
+		int newId = caseBase.getNextId() + storageManager.getTypePendingCases(caseBase);
 
-	    newCase.setDescription(newDescription);
-	    newCase.setResult(newResult);
-	    newCase.setSolution(newSolution);
+		newDescription.setId(newId);
+		newResult.setId(newId);
+		newSolution.setId(newId);
+		newSolution.setAction(this.action);
 
-	    return newCase;
+		newCase.setDescription(newDescription);
+		newCase.setResult(newResult);
+		newCase.setSolution(newSolution);
+
+		return newCase;
 	}
 
 	public MOVE getSolution() {
@@ -197,10 +215,11 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 	@Override
 	public void postCycle() throws ExecutionException {
 		this.storageManager.close();
-		
-		for (CachedLinearCaseBase cb : loadedCaseBases.values()) {
-	        cb.close();
-	    }
+
+		for (Pair p : connectorsCaseBases.values()) {
+			caseBase = (CachedLinearCaseBase) p.second;
+			caseBase.close();
+		}
 	}
 
 }
