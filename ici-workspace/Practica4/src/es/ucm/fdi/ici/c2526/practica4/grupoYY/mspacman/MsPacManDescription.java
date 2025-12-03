@@ -15,9 +15,9 @@ public class MsPacManDescription implements CaseComponent {
 	Integer nearestGhost;
 	Boolean edibleGhost;
 
-	List<Integer> listPosGhost;
-	List<Integer> ghostDistances;
-	List<MOVE> ghostsLastMoves;
+	MyIntegerListType listPosGhost;
+	MyIntegerListType ghostDistances;
+	MyMOVEListType ghostsLastMoves;
 
 	Integer numEdibles;
 	Integer ghostEdibleTime;
@@ -73,28 +73,27 @@ public class MsPacManDescription implements CaseComponent {
 		this.edibleGhost = edibleGhost;
 	}
 	
-	public List<Integer> getListPosGhost() {
+	public MyIntegerListType getListPosGhost() {
 		return listPosGhost;
 	}
 
-	public void setListPosGhost(List<Integer> listPosGhost) {
-		this.listPosGhost = listPosGhost;
-	}
-
-	public List<Integer> getGhostDistances() {
+	public void setListPosGhost(MyIntegerListType listPosGhost) {
+	    this.listPosGhost = listPosGhost;
+		}
+	public MyIntegerListType getGhostDistances() {
 		return ghostDistances;
 	}
 
-	public void setGhostDistances(List<Integer> ghostDistances) {
-		this.ghostDistances = ghostDistances;
+	public void setGhostDistances(MyIntegerListType ghostDistances) {
+	    this.ghostDistances = ghostDistances;
 	}
 
-	public List<MOVE> getGhostsLastMoves() {
+	public MyMOVEListType getGhostsLastMoves() {
 		return ghostsLastMoves;
 	}
 
-	public void setGhostsLastMoves(List<MOVE> ghostsLastMoves) {
-		this.ghostsLastMoves = ghostsLastMoves;
+	public void setGhostsLastMoves(MyMOVEListType ghostsLastMoves) {
+	    this.ghostsLastMoves = ghostsLastMoves;
 	}
 
 	public Integer getNumEdibles() {

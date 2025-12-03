@@ -22,7 +22,7 @@ public class MsPacMan extends PacmanController {
 	public void preCompute(String opponent) {
 		try {
 			cbrEngine.configure();
-			//cbrEngine.preCycle();
+			cbrEngine.preCycle();
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}

@@ -55,9 +55,9 @@ public class MsPacManInput extends CBRInput {
 		description.setScore(score);
 		description.setTime(time);
 		
-		description.setListPosGhost(listPosGhost);
-		description.setGhostDistances(ghostDistances);
-		description.setGhostsLastMoves(ghostsLastMoves);
+		description.setListPosGhost(new MyIntegerListType (listPosGhost));
+		description.setGhostDistances(new MyIntegerListType(ghostDistances));
+		description.setGhostsLastMoves(new MyMOVEListType(ghostsLastMoves));
 		
 		description.setNumEdibles(numEdibles);
 		description.setGhostEdibleTime(ghostEdibleTime);
