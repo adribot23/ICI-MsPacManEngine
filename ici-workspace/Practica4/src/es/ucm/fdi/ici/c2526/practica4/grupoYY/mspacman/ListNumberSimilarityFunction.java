@@ -20,11 +20,11 @@ public class ListNumberSimilarityFunction implements LocalSimilarityFunction {
         if (caseObject == null || queryObject == null)
             return 0;
 
-        if (!(caseObject instanceof List<?>) || !(queryObject instanceof List<?>))
+        if (!(caseObject instanceof MyIntegerListType) || !(queryObject instanceof MyIntegerListType))
             throw new NoApplicableSimilarityFunctionException(this.getClass(), caseObject.getClass());
 
-        List<?> cList = (List<?>) caseObject;
-        List<?> qList = (List<?>) queryObject;
+        List<Integer> cList = ((MyIntegerListType) caseObject).getList();
+        List<Integer> qList = ((MyIntegerListType) queryObject).getList();
 
         if (cList.size() != qList.size())
             throw new NoApplicableSimilarityFunctionException(this.getClass(), caseObject.getClass());
@@ -33,16 +33,10 @@ public class ListNumberSimilarityFunction implements LocalSimilarityFunction {
         double total = 0;
 
         for (int i = 0; i < cList.size(); i++) {
-            Object o1 = cList.get(i);
-            Object o2 = qList.get(i);
+            Integer v1 = cList.get(i);
+            Integer v2 = qList.get(i);
 
-            if (o1 instanceof Number && o2 instanceof Number) {
-                double v1 = ((Number) o1).doubleValue();
-                double v2 = ((Number) o2).doubleValue();
-                total += interval.compute(v1, v2);
-            } else {
-                throw new NoApplicableSimilarityFunctionException(this.getClass(), o1.getClass());
-            }
+            total += interval.compute(v1.doubleValue(), v2.doubleValue());
         }
 
         return total / cList.size();
@@ -50,6 +44,6 @@ public class ListNumberSimilarityFunction implements LocalSimilarityFunction {
 
     @Override
     public boolean isApplicable(Object caseObject, Object queryObject) {
-        return caseObject instanceof List<?> && queryObject instanceof List<?>;
+        return caseObject instanceof MyIntegerListType && queryObject instanceof MyIntegerListType;
     }
 }
