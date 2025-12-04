@@ -6,75 +6,66 @@ import java.util.List;
 import es.ucm.fdi.gaia.jcolibri.connector.TypeAdaptor;
 import pacman.game.Constants.MOVE;
 
-/**
- * Adaptador para listas de MOVE usando jCOLIBRI.
- * Almacena los valores como Strings (por ejemplo: [UP, LEFT, DOWN]).
- */
 public class MyMOVEListType implements TypeAdaptor {
 
-    private List<MOVE> internalList;
+	private List<MOVE> internalList;
 
-    public MyMOVEListType(List<MOVE> l) {
-        internalList = l;
-    }
+	public MyMOVEListType() {
+		internalList = new ArrayList<>();
+	}
 
-    /**
-     * Lee una cadena con formato [UP, LEFT, DOWN]
-     */
-    @Override
-    public void fromString(String content) throws Exception {
-    	internalList = new ArrayList<>();
-        content = content.trim();
-        if (content.startsWith("[")) content = content.substring(1);
-        if (content.endsWith("]")) content = content.substring(0, content.length() - 1);
+	public MyMOVEListType(List<MOVE> l) {
+		internalList = l;
+	}
 
-        if (!content.isEmpty()) {
-            for (String s : content.split(",")) {
-                internalList.add(MOVE.valueOf(s.trim()));
-            }
-        }
-    }
+	@Override
+	public void fromString(String content) throws Exception {
+		internalList = new ArrayList<>();
 
-    /**
-     * Convierte la lista a un String con formato [UP, LEFT, DOWN]
-     */
-    @Override
-    public String toString() {
-        if (internalList == null || internalList.isEmpty())
-            return "[]";
+		// Quitar corchetes
+		String s = content.substring(1, content.length() - 1).trim();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
+		if (s.isEmpty())
+			return;
 
-        for (int i = 0; i < internalList.size(); i++) {
-            sb.append(internalList.get(i).toString());
-            if (i < internalList.size() - 1)
-                sb.append(", ");
-        }
+		for (String x : s.split("/")) {
+			internalList.add(MOVE.valueOf(x.trim()));
+		}
+	}
 
-        sb.append("]");
-        return sb.toString();
-    }
+	@Override
+	public String toString() {
+		if (internalList == null || internalList.isEmpty())
+			return "[]";
 
-    /**
-     * Comparación por contenido (necesario para jCOLIBRI)
-     */
-    @Override
-    public boolean equals(Object o) {
-        try {
-            MyMOVEListType other = (MyMOVEListType) o;
-            return this.internalList.equals(other.internalList);
-        } catch (Exception e) {
-            return false;
-        }
-    }
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
 
-    // getters y setters normales
-    public List<MOVE> getList() {
-        return internalList;
-    }
+		for (int i = 0; i < internalList.size(); i++) {
+			sb.append(internalList.get(i).toString());
+			if (i < internalList.size() - 1)
+				sb.append("/");
+		}
 
-    public void setList(List<MOVE> list) {
-        this.internalList = list;
-    }
+		sb.append("]");
+		return sb.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		try {
+			MyMOVEListType other = (MyMOVEListType) o;
+			return this.internalList.equals(other.internalList);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public List<MOVE> getList() {
+		return internalList;
+	}
+
+	public void setList(List<MOVE> list) {
+		this.internalList = list;
+	}
 }
