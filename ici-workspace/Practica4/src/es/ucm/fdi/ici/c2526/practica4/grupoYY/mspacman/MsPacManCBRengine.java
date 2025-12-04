@@ -51,7 +51,6 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 
 	@Override
 	public void configure() throws ExecutionException {
-		
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 2; j++) {
@@ -72,8 +71,8 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 			}
 		}
 
-		 this.storageManager.setCaseBase(caseBase);
-		 
+		this.storageManager.setCaseBase(caseBase);
+
 		simConfig = new NNConfig();
 		simConfig.setDescriptionSimFunction(new Average());
 		simConfig.addMapping(new Attribute("score", MsPacManDescription.class), new Interval(15000));
@@ -81,7 +80,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		simConfig.addMapping(new Attribute("nearestPPill", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("nearestGhost", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("edibleGhost", MsPacManDescription.class), new Equal());
-		
+
 		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class),
 				new ListNumberSimilarityFunction(650));
 		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class),
@@ -144,7 +143,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 
 		// Crear y retener el nuevo caso
 		CBRCase newCase = createNewCase(query);
-		//storageManager.reviseAndRetain(newCase,caseBase);  nos lo ha dicho el profe
+		// storageManager.reviseAndRetain(newCase,caseBase); nos lo ha dicho el profe
 		storageManager.reviseAndRetain(newCase);
 	}
 

@@ -54,17 +54,17 @@ public class MsPacManInput extends CBRInput {
 		description.setNearestPPill(nearestPPill);
 		description.setScore(score);
 		description.setTime(time);
-		
-		description.setListPosGhost(new MyIntegerListType (listPosGhost));
+
+		description.setListPosGhost(new MyIntegerListType(listPosGhost));
 		description.setGhostDistances(new MyIntegerListType(ghostDistances));
 		description.setGhostsLastMoves(new MyMOVEListType(ghostsLastMoves));
-		
+
 		description.setNumEdibles(numEdibles);
 		description.setGhostEdibleTime(ghostEdibleTime);
-		
+
 		description.setPacmanPos(pacmanPos);
 		description.setPacmanLastMove(pacmanLastMove);
-		
+
 		CBRQuery query = new CBRQuery();
 		query.setDescription(description);
 		return query;

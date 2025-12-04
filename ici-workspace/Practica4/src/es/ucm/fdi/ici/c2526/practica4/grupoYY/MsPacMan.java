@@ -4,11 +4,12 @@ import es.ucm.fdi.gaia.jcolibri.exception.ExecutionException;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManCBRengine;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManInput;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman.MsPacManStorageManager;
+import es.ucm.fdi.ici.cbr.PacManCBRController;
 import pacman.controllers.PacmanController;
 import pacman.game.Constants.MOVE;
 import pacman.game.Game;
 
-public class MsPacMan extends PacmanController {
+public class MsPacMan extends PacmanController implements PacManCBRController {
 
 	MsPacManCBRengine cbrEngine;
 	MsPacManStorageManager storageManager;
@@ -59,4 +60,8 @@ public class MsPacMan extends PacmanController {
 		return MOVE.NEUTRAL;
 	}
 
+	@Override
+	public long getCaseBaseSize() {
+		return storageManager.getTotalCaseBasesSize();
+	}
 }

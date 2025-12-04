@@ -18,6 +18,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import es.ucm.fdi.ici.cbr.PacManCBRController;
 import pacman.controllers.Controller;
 import pacman.controllers.GhostController;
 import pacman.controllers.HumanController;
@@ -56,7 +57,7 @@ public class Executor {
     private final Logger logger = LoggerFactory.getLogger(Executor.class);
 	private boolean pacmanPOvisual;
 	private boolean ghostsPOvisual;
-	private static String VERSION = "4.5.0 (ICI 25-26 stable version)";
+	private static String VERSION = "4.4.0(ICI 24-25 stable version)";
 	
 	private static int ERROR_LOG_LEVEL = 2; //0: no log, 1: error message, 2: error message + stack trace
 
@@ -290,6 +291,80 @@ public class Executor {
 
         
         return new Stats[]{stats, ticks};
+    }
+
+
+    /**
+     * For running multiple games without visuals. This is useful to get a good idea of how well a controller plays
+     * against a chosen opponent: the random nature of the game means that performance can vary from game to game.
+     * Running many games and looking at the average score (and standard deviation/error) helps to get a better
+     * idea of how well the controller is likely to do in the competition.
+     *
+     * @param pacManController The Pac-Man controller
+     * @param ghostController  The Ghosts controller
+     * @param trials           The number of trials to be executed
+     * @param description      Description for the stats
+     * @return Stats[] containing the scores in index 0 and the ticks in position 1
+     */
+    public ArrayList<?>[] runCBRExperiment(Controller<MOVE> pacManController, GhostController ghostController, int trials, String description) {
+        ArrayList<Double> scores = new ArrayList<Double>();
+        ArrayList<Double> cases = new ArrayList<Double>();
+        ArrayList<Double> time = new ArrayList<Double>();
+        ArrayList<Double> ticks = new ArrayList<Double>();
+
+        GhostController ghostControllerCopy = ghostController.copy(ghostPO);
+        Game game;
+
+        PacManCBRController cbr_controller = (PacManCBRController) pacManController;
+        
+        try {
+			precompute(pacManController, ghostControllerCopy);
+		} catch (Exception e) {
+			System.err.println("ERROR runExperiment precompute(): "+pacManController.getClass().getCanonicalName() + " vs "+ghostControllerCopy.getClass().getCanonicalName());
+			e.printStackTrace();
+		}
+
+        for (int i = 0; i < trials; ) {
+            try {
+                game = setupGame();
+                Stats step_times = new Stats("time");
+                int steps = 0;
+                while (!game.gameOver()) {
+                    if (tickLimit != -1 && tickLimit < game.getTotalTime()) {
+                        break;
+                    }
+                    handlePeek(game);
+                    Long startTime = System.currentTimeMillis();
+                    game.advanceGame(
+                            pacManController.getMove(getPacmanCopy(game), System.currentTimeMillis() + timeLimit),
+                            ghostControllerCopy.getMove(getGhostsCopy(game), System.currentTimeMillis() + timeLimit));
+                    Long timeTaken = System.currentTimeMillis() - startTime;
+                    step_times.add(timeTaken);
+                    steps++;
+                }
+                scores.add((double)game.getScore());
+                cases.add((double)cbr_controller.getCaseBaseSize());
+                time.add(step_times.getAverage());
+                ticks.add((double)steps);
+                i++;
+
+                System.out.println("Game finished: " + i + "   " + description);
+            } catch (Exception e) {
+            	System.err.println("ERROR runExperiment: "+pacManController.getClass().getCanonicalName() + " vs "+ghostControllerCopy.getClass().getCanonicalName());
+                e.printStackTrace();
+            }
+        }
+        try {
+        	postcompute(pacManController, ghostController);
+        } catch(Exception e)
+        {
+			System.err.println("ERROR runExperiment precompute(): "+pacManController.getClass().getCanonicalName() + " vs "+ghostControllerCopy.getClass().getCanonicalName());
+			e.printStackTrace();
+
+        }
+        
+        ArrayList<?>[] arrayLists = new ArrayList[]{scores, time, cases, ticks};
+		return arrayLists;
     }
 
     private Game setupGame() {

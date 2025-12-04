@@ -24,7 +24,7 @@ public class MsPacManDescription implements CaseComponent {
 
 	Integer pacmanPos;
 	MOVE pacmanLastMove;
-	
+
 	public Integer getId() {
 		return id;
 	}
@@ -72,20 +72,21 @@ public class MsPacManDescription implements CaseComponent {
 	public void setEdibleGhost(Boolean edibleGhost) {
 		this.edibleGhost = edibleGhost;
 	}
-	
+
 	public MyIntegerListType getListPosGhost() {
 		return listPosGhost;
 	}
 
 	public void setListPosGhost(MyIntegerListType listPosGhost) {
-	    this.listPosGhost = listPosGhost;
-		}
+		this.listPosGhost = listPosGhost;
+	}
+
 	public MyIntegerListType getGhostDistances() {
 		return ghostDistances;
 	}
 
 	public void setGhostDistances(MyIntegerListType ghostDistances) {
-	    this.ghostDistances = ghostDistances;
+		this.ghostDistances = ghostDistances;
 	}
 
 	public MyMOVEListType getGhostsLastMoves() {
@@ -93,7 +94,7 @@ public class MsPacManDescription implements CaseComponent {
 	}
 
 	public void setGhostsLastMoves(MyMOVEListType ghostsLastMoves) {
-	    this.ghostsLastMoves = ghostsLastMoves;
+		this.ghostsLastMoves = ghostsLastMoves;
 	}
 
 	public Integer getNumEdibles() {
@@ -128,7 +129,6 @@ public class MsPacManDescription implements CaseComponent {
 		this.pacmanLastMove = pacmanLastMove;
 	}
 
-	
 	@Override
 	public Attribute getIdAttribute() {
 		return new Attribute("id", MsPacManDescription.class);
