@@ -93,6 +93,19 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 
 		simConfig.addMapping(new Attribute("pacmanPos", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("pacmanLastMove", MsPacManDescription.class), new Equal());
+		
+		simConfig.setWeight(new Attribute("nearestGhost", MsPacManDescription.class), 0.25);
+		simConfig.setWeight(new Attribute("ghostDistances", MsPacManDescription.class), 0.20);
+		simConfig.setWeight(new Attribute("edibleGhost", MsPacManDescription.class), 0.10);
+		simConfig.setWeight(new Attribute("ghostEdibleTime", MsPacManDescription.class), 0.10);
+		simConfig.setWeight(new Attribute("numEdibles", MsPacManDescription.class), 0.07);
+		simConfig.setWeight(new Attribute("nearestPPill", MsPacManDescription.class), 0.08);
+		simConfig.setWeight(new Attribute("ghostsLastMoves", MsPacManDescription.class), 0.07);
+		simConfig.setWeight(new Attribute("pacmanLastMove", MsPacManDescription.class), 0.05);
+		simConfig.setWeight(new Attribute("pacmanPos", MsPacManDescription.class), 0.03);
+		simConfig.setWeight(new Attribute("listPosGhost", MsPacManDescription.class), 0.03);
+		simConfig.setWeight(new Attribute("time", MsPacManDescription.class), 0.005);
+		simConfig.setWeight(new Attribute("score", MsPacManDescription.class), 0.005);
 
 	}
 
@@ -150,32 +163,38 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 	private MOVE reuse(Collection<RetrievalResult> eval) {
 		// This simple implementation only uses 1NN
 		// Consider using kNNs with majority voting
-		RetrievalResult first = SelectCases.selectTopKRR(eval, 1).iterator().next();
-		CBRCase mostSimilarCase = first.get_case();
-		double similarity = first.getEval();
+		Map<MOVE, Integer> moveScores = new HashMap<>();
 
-		/*
-		 * if(Math.random()<.2) { ArrayList<CBRCase> toforget = new
-		 * ArrayList<CBRCase>(); toforget.add(mostSimilarCase);
-		 * this.caseBase.forgetCases(toforget);
-		 * System.out.println(mostSimilarCase.getID()); }
-		 */
-		MsPacManResult result = (MsPacManResult) mostSimilarCase.getResult();
-		MsPacManSolution solution = (MsPacManSolution) mostSimilarCase.getSolution();
+		int k = 5;
+		Collection<RetrievalResult> casos = SelectCases.selectTopKRR(eval, k);
 
-		// Now compute a solution for the query
+		for (RetrievalResult r : casos) {
+		    CBRCase c = r.get_case();
+		    MsPacManSolution s = (MsPacManSolution) c.getSolution();
+		    MsPacManResult res = (MsPacManResult) c.getResult();
 
-		// Here, it simply takes the action of the 1NN
-		MOVE action = solution.getAction();
+		    MOVE move = s.getAction();
+		    int score = res.getScore();
 
-		// But if not enough similarity or bad case, choose another move randomly
-		if ((similarity < 0.7) || (result.getScore() < 100)) {
-			int index = (int) Math.floor(Math.random() * 4);
-			if (MOVE.values()[index] == action)
-				index = (index + 1) % 4;
-			action = MOVE.values()[index];
+		    // Si no existe, inicializa con 0
+		    if (!moveScores.containsKey(move)) {
+		        moveScores.put(move, score);
+		    } else {
+		        // Si ya existe, suma
+		        moveScores.put(move, moveScores.get(move) + score);
+		    }
 		}
-		return action;
+		
+		Integer maxScore= 0;
+		MOVE bestMove= MOVE.NEUTRAL;
+		for(Entry<MOVE, Integer> m :moveScores.entrySet()) {
+			if(m.getValue()>maxScore) {
+				maxScore= m.getValue();
+				bestMove= m.getKey();
+			}
+				
+		}
+		return bestMove;
 	}
 
 	/**
