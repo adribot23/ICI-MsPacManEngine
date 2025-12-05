@@ -14,11 +14,14 @@ import pacman.controllers.PacmanController;
 public class EvaluatorTest {
 
 	public static void main(String[] args) {
-		Executor executor = new Executor.Builder().setTickLimit(1000).setVisual(true).setScaleFactor(2.5).build();
+		Executor executor = new Executor.Builder().setTickLimit(4000).setVisual(true).setScaleFactor(2.5).build();
 
 		PacmanController pacMan = new MsPacMan();
-		GhostController ghosts = new AggressiveGhosts();
-
+		//GhostController ghosts = new AggressiveGhosts();
+		//   GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoB.Ghosts();
+		  GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoC.Ghosts();
+		 //  GhostController ghosts = new es.ucm.fdi.ici.c2526.practica1.grupoM.Ghosts();
+		
 		int trials = 50;
 
 		ArrayList<?>[] stats = executor.runCBRExperiment(pacMan, ghosts, trials,

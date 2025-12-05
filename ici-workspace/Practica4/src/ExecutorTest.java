@@ -2,7 +2,6 @@ import es.ucm.fdi.ici.c2526.practica4.grupoYY.MsPacMan;
 import pacman.Executor;
 import pacman.controllers.GhostController;
 import pacman.controllers.PacmanController;
-
 public class ExecutorTest {
 
 	public static void main(String[] args) {
@@ -10,7 +9,7 @@ public class ExecutorTest {
 
 		PacmanController pacMan = new MsPacMan();
 		GhostController ghosts = new AggressiveGhosts();
-
+       
 		System.out.println(executor.runGame(pacMan, ghosts, 10) // last parameter defines speed
 		);
 	}
