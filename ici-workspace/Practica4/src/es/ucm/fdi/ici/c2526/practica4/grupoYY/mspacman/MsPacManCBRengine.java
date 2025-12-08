@@ -1,7 +1,6 @@
 package es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman;
 
 import java.io.File;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +60,8 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 					String filename = "nivel" + i + File.separator + (j == 0 ? "edible" : "noEdible") + File.separator
 							+ s + ".csv";
 					connector.setCaseBaseFile(CASE_BASE_PATH, filename);
-
+					
+	              
 					caseBase = new CachedLinearCaseBase();
 					Pair p = new Pair(connector, caseBase);
 
@@ -90,7 +90,8 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 
 		simConfig.addMapping(new Attribute("numEdibles", MsPacManDescription.class), new Interval(4));
 		simConfig.addMapping(new Attribute("ghostEdibleTime", MsPacManDescription.class), new Interval(2000));
-
+		
+		simConfig.addMapping(new Attribute("pacmanLives", MsPacManDescription.class), new Interval(3));
 		simConfig.addMapping(new Attribute("pacmanPos", MsPacManDescription.class), new Interval(650));
 		simConfig.addMapping(new Attribute("pacmanLastMove", MsPacManDescription.class), new Equal());
 		
@@ -106,6 +107,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		simConfig.setWeight(new Attribute("listPosGhost", MsPacManDescription.class), 0.03);
 		simConfig.setWeight(new Attribute("time", MsPacManDescription.class), 0.005);
 		simConfig.setWeight(new Attribute("score", MsPacManDescription.class), 0.005);
+		simConfig.setWeight(new Attribute("pacmanLives", MsPacManDescription.class), 0.005);
 
 	}
 
@@ -156,7 +158,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 
 		// Crear y retener el nuevo caso
 		CBRCase newCase = createNewCase(query);
-		// storageManager.reviseAndRetain(newCase,caseBase); nos lo ha dicho el profe
+		
 		storageManager.reviseAndRetain(newCase);
 	}
 
@@ -208,15 +210,15 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		MsPacManResult newResult = new MsPacManResult();
 		MsPacManSolution newSolution = new MsPacManSolution();
 
-		// USAR EL CASEBASE ACTIVO
-		// CachedLinearCaseBase activeCaseBase = (CachedLinearCaseBase)
-		// storageManager.getCaseBase();
-
+		//El id lo asignamaos al retener el caso en el StorageManager
+		
+		/*
 		int newId = caseBase.getNextId() + storageManager.getTypePendingCases(caseBase);
 
 		newDescription.setId(newId);
 		newResult.setId(newId);
 		newSolution.setId(newId);
+		*/
 		newSolution.setAction(this.action);
 
 		newCase.setDescription(newDescription);

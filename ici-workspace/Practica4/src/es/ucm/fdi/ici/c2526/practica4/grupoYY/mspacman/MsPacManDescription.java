@@ -22,6 +22,7 @@ public class MsPacManDescription implements CaseComponent {
 	Integer numEdibles;
 	Integer ghostEdibleTime;
 
+	Integer pacmanLives;
 	Integer pacmanPos;
 	MOVE pacmanLastMove;
 
@@ -113,6 +114,14 @@ public class MsPacManDescription implements CaseComponent {
 		this.ghostEdibleTime = ghostEdibleTime;
 	}
 
+	public Integer getPacmanLives() {
+		return pacmanLives;
+	}
+
+	public void setPacmanLives(Integer pacmanLives) {
+		this.pacmanLives = pacmanLives;
+	}
+
 	public Integer getPacmanPos() {
 		return pacmanPos;
 	}
@@ -137,7 +146,11 @@ public class MsPacManDescription implements CaseComponent {
 	@Override
 	public String toString() {
 		return "MsPacManDescription [id=" + id + ", score=" + score + ", time=" + time + ", nearestPPill="
-				+ nearestPPill + ", nearestGhost=" + nearestGhost + ", edibleGhost=" + edibleGhost + "]";
+				+ nearestPPill + ", nearestGhost=" + nearestGhost + ", edibleGhost=" + edibleGhost + " , listPosGhost="
+				+ listPosGhost + ", ghostDistances=" + ghostDistances + ", ghostsLastMoves=" + ghostsLastMoves
+				+ ", numEdibles=" + numEdibles + ", ghostEdibleTime=" + ghostEdibleTime + ", pacmanLives=" + pacmanLives
+				+ ", pacmanPos=" + pacmanPos + ", pacmanLastMove=" + pacmanLastMove + "]";
+
 	}
 
 }

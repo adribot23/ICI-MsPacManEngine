@@ -7,7 +7,8 @@ public class MsPacManResult implements CaseComponent {
 
 	Integer id;
 	Integer score;
-
+	Boolean pacManDead;
+	
 	public Integer getId() {
 		return id;
 	}
@@ -23,6 +24,14 @@ public class MsPacManResult implements CaseComponent {
 	public void setScore(Integer score) {
 		this.score = score;
 	}
+	
+	public Boolean getPacManDead() {
+		return pacManDead;
+	}
+	
+	public void setPacManDead(Boolean pacManDead) {
+		this.pacManDead = pacManDead;
+	}
 
 	@Override
 	public Attribute getIdAttribute() {
@@ -31,7 +40,7 @@ public class MsPacManResult implements CaseComponent {
 
 	@Override
 	public String toString() {
-		return "MsPacManResult [id=" + id + ", score=" + score + "]";
+		return "MsPacManResult [id=" + id + ", score=" + score + ", pacManDead=" + pacManDead + "]";
 	}
 
 }
