@@ -16,7 +16,9 @@
 
 		<Map>numEdibles</Map>
 		<Map>ghostEdibleTime</Map>
-
+		
+		
+		<Map>pacmanLives</Map>
 		<Map>pacmanPos</Map>
 		<Map>pacmanLastMove</Map>
 	</DescriptionMappings>

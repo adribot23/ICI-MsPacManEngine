@@ -6,6 +6,7 @@ import java.util.Vector;
 import es.ucm.fdi.gaia.jcolibri.cbrcore.CBRCase;
 import es.ucm.fdi.gaia.jcolibri.cbrcore.CBRCaseBase;
 import es.ucm.fdi.gaia.jcolibri.method.retain.StoreCasesMethod;
+import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.CachedLinearCaseBase;
 import pacman.game.Game;
 
 public class MsPacManStorageManager {
@@ -60,9 +61,14 @@ public class MsPacManStorageManager {
 		int oldScore = description.getScore();
 		int currentScore = game.getScore();
 		int resultValue = currentScore - oldScore;
-
+		
+		int oldPacmanLives = description.getPacmanLives();
+		int actualPacmanLives = game.getPacmanNumberOfLivesRemaining();
+		
 		MsPacManResult result = (MsPacManResult) bCase.getResult();
+		
 		result.setScore(resultValue);
+		result.setPacManDead(oldPacmanLives>actualPacmanLives);
 	}
 
 	private void retainCase(CBRCase bCase) {
@@ -72,9 +78,40 @@ public class MsPacManStorageManager {
 		// here you should also check if the case must be stored into persistence (too
 		// similar to existing ones, etc.)
 
-		StoreCasesMethod.storeCase(caseMap.get(bCase), bCase);
-		typeCont.put(caseMap.get(bCase), typeCont.get(caseMap.get(bCase)) - 1);
-		caseMap.remove(bCase);
+	    MsPacManResult result = (MsPacManResult) bCase.getResult();
+
+	   
+	    boolean shouldRetain = false;
+
+	  
+	    if (result.getPacManDead()) 
+	        shouldRetain = false;
+	    else if (result.getScore() >= 0) 
+	    	shouldRetain = true;
+	    
+
+	    if (shouldRetain) {
+	    	CBRCaseBase correctCaseBase = caseMap.get(bCase);
+	    	  int realId = ((CachedLinearCaseBase)correctCaseBase).getNextId();
+
+			// Sobreescribimos los IDs del caso con el ID correcto y secuencial	
+			MsPacManDescription desc = (MsPacManDescription) bCase.getDescription();
+			MsPacManSolution sol = (MsPacManSolution) bCase.getSolution();
+			MsPacManResult res = (MsPacManResult) bCase.getResult();
+
+			desc.setId(realId);
+			sol.setId(realId);
+			res.setId(realId);
+	    	
+	        StoreCasesMethod.storeCase(caseMap.get(bCase), bCase);
+	    } else {
+	     
+	        System.out.println("Caso descartado (Malo): Score=" + result.getScore() + ", Dead=" + result.getPacManDead());
+	    }
+	    
+	   
+	    typeCont.put(caseMap.get(bCase), typeCont.get(caseMap.get(bCase)) - 1);
+	    caseMap.remove(bCase);
 
 	}
 

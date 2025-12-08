@@ -14,7 +14,6 @@ public class MsPacManInput extends CBRInput {
 
 	public MsPacManInput(Game game) {
 		super(game);
-
 	}
 
 	Integer nearestGhost;
@@ -29,7 +28,8 @@ public class MsPacManInput extends CBRInput {
 
 	Integer numEdibles;
 	Integer ghostEdibleTime;
-
+	
+	Integer pacmanLives;
 	Integer pacmanPos;
 	MOVE pacmanLastMove;
 
@@ -39,7 +39,7 @@ public class MsPacManInput extends CBRInput {
 		computeNearestPPill(game);
 		time = game.getTotalTime();
 		score = game.getScore();
-
+		pacmanLives= game.getPacmanNumberOfLivesRemaining();
 		computeLists(game);
 
 		pacmanPos = game.getPacmanCurrentNodeIndex();
@@ -61,7 +61,8 @@ public class MsPacManInput extends CBRInput {
 
 		description.setNumEdibles(numEdibles);
 		description.setGhostEdibleTime(ghostEdibleTime);
-
+		
+		description.setPacmanLives(pacmanLives);
 		description.setPacmanPos(pacmanPos);
 		description.setPacmanLastMove(pacmanLastMove);
 
