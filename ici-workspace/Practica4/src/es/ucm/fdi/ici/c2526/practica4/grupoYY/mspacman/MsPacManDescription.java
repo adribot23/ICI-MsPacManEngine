@@ -1,63 +1,62 @@
 package es.ucm.fdi.ici.c2526.practica4.grupoYY.mspacman;
 
-import java.util.List;
-
 import es.ucm.fdi.gaia.jcolibri.cbrcore.Attribute;
 import es.ucm.fdi.gaia.jcolibri.cbrcore.CaseComponent;
 import pacman.game.Constants.MOVE;
 
 public class MsPacManDescription implements CaseComponent {
 
-	Integer id;
-	Integer score;
-	Integer time;
-	Integer nearestPPill;
-	Integer nearestGhost;
-	Boolean edibleGhost;
-
-	MyIntegerListType listPosGhost;
-	MyIntegerListType ghostDistances;
-	MyMOVEListType ghostsLastMoves;
-
-	Integer numEdibles;
-	Integer ghostEdibleTime;
-
+	// === PACMAN ===
 	Integer pacmanLives;
 	Integer pacmanPos;
 	MOVE pacmanLastMove;
 
-	public Integer getId() {
-		return id;
+	// === GHOSTS ===
+	Integer nearestGhost;
+	Boolean edibleGhost;
+	Integer numEdibles;
+	Integer ghostEdibleTime;
+	MyIntegerListType listPosGhost;
+	MyIntegerListType ghostDistances;
+	MyMOVEListType ghostsLastMoves;
+
+	// === PILLS ===
+	Integer nearestPill;
+	Integer nearestPPill;
+	Integer remainingPills;
+	Integer remainingPowerPills;
+
+	// === OTROS ===
+	Integer score;
+	Integer time;
+	Integer id;
+
+	// --- Pacman ---
+	public Integer getPacmanLives() {
+		return pacmanLives;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public void setPacmanLives(Integer pacmanLives) {
+		this.pacmanLives = pacmanLives;
 	}
 
-	public Integer getScore() {
-		return score;
+	public Integer getPacmanPos() {
+		return pacmanPos;
 	}
 
-	public void setScore(Integer score) {
-		this.score = score;
+	public void setPacmanPos(Integer pacmanPos) {
+		this.pacmanPos = pacmanPos;
 	}
 
-	public Integer getTime() {
-		return time;
+	public MOVE getPacmanLastMove() {
+		return pacmanLastMove;
 	}
 
-	public void setTime(Integer time) {
-		this.time = time;
+	public void setPacmanLastMove(MOVE pacmanLastMove) {
+		this.pacmanLastMove = pacmanLastMove;
 	}
 
-	public Integer getNearestPPill() {
-		return nearestPPill;
-	}
-
-	public void setNearestPPill(Integer nearestPPill) {
-		this.nearestPPill = nearestPPill;
-	}
-
+	// --- Ghosts ---
 	public Integer getNearestGhost() {
 		return nearestGhost;
 	}
@@ -72,6 +71,22 @@ public class MsPacManDescription implements CaseComponent {
 
 	public void setEdibleGhost(Boolean edibleGhost) {
 		this.edibleGhost = edibleGhost;
+	}
+
+	public Integer getNumEdibles() {
+		return numEdibles;
+	}
+
+	public void setNumEdibles(Integer numEdibles) {
+		this.numEdibles = numEdibles;
+	}
+
+	public Integer getGhostEdibleTime() {
+		return ghostEdibleTime;
+	}
+
+	public void setGhostEdibleTime(Integer ghostEdibleTime) {
+		this.ghostEdibleTime = ghostEdibleTime;
 	}
 
 	public MyIntegerListType getListPosGhost() {
@@ -98,44 +113,63 @@ public class MsPacManDescription implements CaseComponent {
 		this.ghostsLastMoves = ghostsLastMoves;
 	}
 
-	public Integer getNumEdibles() {
-		return numEdibles;
+	// --- Pills ---
+	public Integer getNearestPill() {
+		return nearestPill;
 	}
 
-	public void setNumEdibles(Integer numEdibles) {
-		this.numEdibles = numEdibles;
+	public void setNearestPill(Integer nearestPill) {
+		this.nearestPill = nearestPill;
 	}
 
-	public Integer getGhostEdibleTime() {
-		return ghostEdibleTime;
+	public Integer getNearestPPill() {
+		return nearestPPill;
 	}
 
-	public void setGhostEdibleTime(Integer ghostEdibleTime) {
-		this.ghostEdibleTime = ghostEdibleTime;
+	public void setNearestPPill(Integer nearestPPill) {
+		this.nearestPPill = nearestPPill;
 	}
 
-	public Integer getPacmanLives() {
-		return pacmanLives;
+	public Integer getRemainingPills() {
+		return remainingPills;
 	}
 
-	public void setPacmanLives(Integer pacmanLives) {
-		this.pacmanLives = pacmanLives;
+	public void setRemainingPills(Integer remainingPills) {
+		this.remainingPills = remainingPills;
 	}
 
-	public Integer getPacmanPos() {
-		return pacmanPos;
+	public Integer getRemainingPowerPills() {
+		return remainingPowerPills;
 	}
 
-	public void setPacmanPos(Integer pacmanPos) {
-		this.pacmanPos = pacmanPos;
+	public void setRemainingPowerPills(Integer remainingPowerPills) {
+		this.remainingPowerPills = remainingPowerPills;
 	}
 
-	public MOVE getPacmanLastMove() {
-		return pacmanLastMove;
+	// --- Otros ---
+	public Integer getScore() {
+		return score;
 	}
 
-	public void setPacmanLastMove(MOVE pacmanLastMove) {
-		this.pacmanLastMove = pacmanLastMove;
+	public void setScore(Integer score) {
+		this.score = score;
+	}
+
+	public Integer getTime() {
+		return time;
+	}
+
+	public void setTime(Integer time) {
+		this.time = time;
+	}
+
+	// --- ID ---
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	@Override
@@ -145,12 +179,12 @@ public class MsPacManDescription implements CaseComponent {
 
 	@Override
 	public String toString() {
-		return "MsPacManDescription [id=" + id + ", score=" + score + ", time=" + time + ", nearestPPill="
-				+ nearestPPill + ", nearestGhost=" + nearestGhost + ", edibleGhost=" + edibleGhost + " , listPosGhost="
-				+ listPosGhost + ", ghostDistances=" + ghostDistances + ", ghostsLastMoves=" + ghostsLastMoves
-				+ ", numEdibles=" + numEdibles + ", ghostEdibleTime=" + ghostEdibleTime + ", pacmanLives=" + pacmanLives
-				+ ", pacmanPos=" + pacmanPos + ", pacmanLastMove=" + pacmanLastMove + "]";
-
+		return "MsPacManDescription [" + "id=" + id + ", pacmanLives=" + pacmanLives + ", pacmanPos=" + pacmanPos
+				+ ", pacmanLastMove=" + pacmanLastMove + ", nearestGhost=" + nearestGhost + ", edibleGhost="
+				+ edibleGhost + ", numEdibles=" + numEdibles + ", ghostEdibleTime=" + ghostEdibleTime
+				+ ", listPosGhost=" + listPosGhost + ", ghostDistances=" + ghostDistances + ", ghostsLastMoves="
+				+ ghostsLastMoves + ", nearestPill=" + nearestPill + ", nearestPPill=" + nearestPPill
+				+ ", remainingPills=" + remainingPills + ", remainingPowerPills=" + remainingPowerPills + ", score="
+				+ score + ", time=" + time + "]";
 	}
-
 }

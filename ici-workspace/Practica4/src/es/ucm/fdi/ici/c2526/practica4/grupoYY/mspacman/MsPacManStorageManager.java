@@ -84,9 +84,7 @@ public class MsPacManStorageManager {
 	    boolean shouldRetain = false;
 
 	  
-	    if (result.getPacManDead()) 
-	        shouldRetain = false;
-	    else if (result.getScore() >= 0) 
+	    if (!result.getPacManDead() && result.getScore() > 0)
 	    	shouldRetain = true;
 	    
 
@@ -113,6 +111,8 @@ public class MsPacManStorageManager {
 	    typeCont.put(caseMap.get(bCase), typeCont.get(caseMap.get(bCase)) - 1);
 	    caseMap.remove(bCase);
 
+	    
+	   
 	}
 
 	public void close() {

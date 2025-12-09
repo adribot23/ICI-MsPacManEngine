@@ -8,8 +8,8 @@ public class ExecutorTest {
 		Executor executor = new Executor.Builder().setTickLimit(1000).setVisual(true).setScaleFactor(2.5).build();
 
 		PacmanController pacMan = new MsPacMan();
-		GhostController ghosts = new AggressiveGhosts();
-       
+		//GhostController ghosts = new AggressiveGhosts();
+		 GhostController ghosts = new GhostsRandom();
 		System.out.println(executor.runGame(pacMan, ghosts, 10) // last parameter defines speed
 		);
 	}
