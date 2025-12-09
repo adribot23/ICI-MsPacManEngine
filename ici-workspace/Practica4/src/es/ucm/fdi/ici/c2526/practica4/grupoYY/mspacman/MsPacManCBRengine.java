@@ -74,41 +74,48 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		this.storageManager.setCaseBase(caseBase);
 
 		simConfig = new NNConfig();
+		
 		simConfig.setDescriptionSimFunction(new Average());
-		simConfig.addMapping(new Attribute("score", MsPacManDescription.class), new Interval(15000));
-		simConfig.addMapping(new Attribute("time", MsPacManDescription.class), new Interval(4000));
-		simConfig.addMapping(new Attribute("nearestPPill", MsPacManDescription.class), new Interval(650));
-		simConfig.addMapping(new Attribute("nearestGhost", MsPacManDescription.class), new Interval(650));
-		simConfig.addMapping(new Attribute("edibleGhost", MsPacManDescription.class), new Equal());
-
-		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class),
-				new ListNumberSimilarityFunction(650));
-		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class),
-				new ListNumberSimilarityFunction(650));
-		simConfig.addMapping(new Attribute("ghostsLastMoves", MsPacManDescription.class),
-				new ListMoveSimilarityFunction());
-
-		simConfig.addMapping(new Attribute("numEdibles", MsPacManDescription.class), new Interval(4));
-		simConfig.addMapping(new Attribute("ghostEdibleTime", MsPacManDescription.class), new Interval(2000));
-		
+		// === PACMAN ===
 		simConfig.addMapping(new Attribute("pacmanLives", MsPacManDescription.class), new Interval(3));
-		simConfig.addMapping(new Attribute("pacmanPos", MsPacManDescription.class), new Interval(650));
+		simConfig.addMapping(new Attribute("pacmanPos", MsPacManDescription.class), new Interval(300));
 		simConfig.addMapping(new Attribute("pacmanLastMove", MsPacManDescription.class), new Equal());
-		
-		simConfig.setWeight(new Attribute("nearestGhost", MsPacManDescription.class), 0.25);
-		simConfig.setWeight(new Attribute("ghostDistances", MsPacManDescription.class), 0.20);
-		simConfig.setWeight(new Attribute("edibleGhost", MsPacManDescription.class), 0.10);
-		simConfig.setWeight(new Attribute("ghostEdibleTime", MsPacManDescription.class), 0.10);
-		simConfig.setWeight(new Attribute("numEdibles", MsPacManDescription.class), 0.07);
-		simConfig.setWeight(new Attribute("nearestPPill", MsPacManDescription.class), 0.08);
-		simConfig.setWeight(new Attribute("ghostsLastMoves", MsPacManDescription.class), 0.07);
-		simConfig.setWeight(new Attribute("pacmanLastMove", MsPacManDescription.class), 0.05);
-		simConfig.setWeight(new Attribute("pacmanPos", MsPacManDescription.class), 0.03);
-		simConfig.setWeight(new Attribute("listPosGhost", MsPacManDescription.class), 0.03);
-		simConfig.setWeight(new Attribute("time", MsPacManDescription.class), 0.005);
-		simConfig.setWeight(new Attribute("score", MsPacManDescription.class), 0.005);
-		simConfig.setWeight(new Attribute("pacmanLives", MsPacManDescription.class), 0.005);
 
+		// === GHOSTS ===
+		simConfig.addMapping(new Attribute("nearestGhost", MsPacManDescription.class), new Interval(130));
+		simConfig.addMapping(new Attribute("edibleGhost", MsPacManDescription.class), new Equal());
+		simConfig.addMapping(new Attribute("numEdibles", MsPacManDescription.class), new Interval(4));
+		simConfig.addMapping(new Attribute("ghostEdibleTime", MsPacManDescription.class), new Interval(200));
+		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class), new ListNumberSimilarityFunction(1000));
+		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class), new ListNumberSimilarityFunction(130));
+		simConfig.addMapping(new Attribute("ghostsLastMoves", MsPacManDescription.class), new ListMoveSimilarityFunction());
+
+		// === PILLS ===
+		simConfig.addMapping(new Attribute("nearestPill", MsPacManDescription.class), new Interval(300));
+		simConfig.addMapping(new Attribute("nearestPPill", MsPacManDescription.class), new Interval(300));
+		simConfig.addMapping(new Attribute("remainingPills", MsPacManDescription.class), new Interval(10));
+		simConfig.addMapping(new Attribute("remainingPowerPills", MsPacManDescription.class), new Interval(2));
+
+
+		// ==== PESOS ====
+		simConfig.setWeight(new Attribute("pacmanLives", MsPacManDescription.class), 0.0);
+		simConfig.setWeight(new Attribute("pacmanPos", MsPacManDescription.class), 15.0);
+		simConfig.setWeight(new Attribute("pacmanLastMove", MsPacManDescription.class), 5.0);
+
+		simConfig.setWeight(new Attribute("nearestGhost", MsPacManDescription.class), 50.0);
+		simConfig.setWeight(new Attribute("edibleGhost", MsPacManDescription.class), 50.0);
+		simConfig.setWeight(new Attribute("numEdibles", MsPacManDescription.class), 4.0);
+		simConfig.setWeight(new Attribute("ghostEdibleTime", MsPacManDescription.class), 10.0);
+		simConfig.setWeight(new Attribute("listPosGhost", MsPacManDescription.class), 15.0);
+		simConfig.setWeight(new Attribute("ghostDistances", MsPacManDescription.class), 25.0);
+		simConfig.setWeight(new Attribute("ghostsLastMoves", MsPacManDescription.class), 2.0);
+
+		simConfig.setWeight(new Attribute("nearestPill", MsPacManDescription.class), 40.0);
+		simConfig.setWeight(new Attribute("nearestPPill", MsPacManDescription.class), 25.0);
+		simConfig.setWeight(new Attribute("remainingPills", MsPacManDescription.class), 50.0); // evita bucles
+		simConfig.setWeight(new Attribute("remainingPowerPills", MsPacManDescription.class), 15.0);
+
+		
 	}
 
 	@Override
@@ -153,7 +160,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		} else {
 			Collection<RetrievalResult> eval = NNScoringMethod.evaluateSimilarity(caseBase.getCases(), query,
 					simConfig);
-			this.action = reuse(eval);
+			this.action = reuse(eval,query);
 		}
 
 		// Crear y retener el nuevo caso
@@ -162,41 +169,50 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		storageManager.reviseAndRetain(newCase);
 	}
 
-	private MOVE reuse(Collection<RetrievalResult> eval) {
+	private MOVE reuse(Collection<RetrievalResult> eval,CBRQuery query) {
 		// This simple implementation only uses 1NN
 		// Consider using kNNs with majority voting
-		Map<MOVE, Integer> moveScores = new HashMap<>();
+		 Map<MOVE, Integer> moveScores = new HashMap<>();
+		    int k = 10;
 
-		int k = 5;
-		Collection<RetrievalResult> casos = SelectCases.selectTopKRR(eval, k);
+		    Collection<RetrievalResult> topCases = SelectCases.selectTopKRR(eval, k);
 
-		for (RetrievalResult r : casos) {
-		    CBRCase c = r.get_case();
-		    MsPacManSolution s = (MsPacManSolution) c.getSolution();
-		    MsPacManResult res = (MsPacManResult) c.getResult();
+		    MsPacManDescription currentDesc = (MsPacManDescription) query.getDescription();
+		    int nearestPill = currentDesc.getNearestPill();
 
-		    MOVE move = s.getAction();
-		    int score = res.getScore();
+		    for (RetrievalResult r : topCases) {
+		        CBRCase c = r.get_case();
+		        MsPacManSolution s = (MsPacManSolution) c.getSolution();
+		        MsPacManResult res = (MsPacManResult) c.getResult();
 
-		    // Si no existe, inicializa con 0
-		    if (!moveScores.containsKey(move)) {
-		        moveScores.put(move, score);
-		    } else {
-		        // Si ya existe, suma
-		        moveScores.put(move, moveScores.get(move) + score);
+		        MOVE move = s.getAction();
+		        int score = res.getScore();
+
+		        // Penalización: pocas píldoras cerca
+		        if (nearestPill > 20) {
+		            score -= 5; // ajusta según pruebas
+		        }
+
+		        // Penalización: si el movimiento ya se hizo en el último paso (evita bucles)
+		        if (move == currentDesc.getPacmanLastMove()) {
+		            score -= 3;
+		        }
+
+		        // Acumulamos score
+		        moveScores.put(move, moveScores.getOrDefault(move, 0) + score);
 		    }
-		}
-		
-		Integer maxScore= 0;
-		MOVE bestMove= MOVE.NEUTRAL;
-		for(Entry<MOVE, Integer> m :moveScores.entrySet()) {
-			if(m.getValue()>maxScore) {
-				maxScore= m.getValue();
-				bestMove= m.getKey();
-			}
-				
-		}
-		return bestMove;
+
+		    // Elegir el movimiento con mayor score
+		    MOVE bestMove = MOVE.NEUTRAL;
+		    int maxScore = Integer.MIN_VALUE;
+		    for (Map.Entry<MOVE, Integer> entry : moveScores.entrySet()) {
+		        if (entry.getValue() > maxScore) {
+		            maxScore = entry.getValue();
+		            bestMove = entry.getKey();
+		        }
+		    }
+		    
+		    return bestMove;
 	}
 
 	/**
