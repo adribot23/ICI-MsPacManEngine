@@ -93,8 +93,8 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		// === PILLS ===
 		simConfig.addMapping(new Attribute("nearestPill", MsPacManDescription.class), new Interval(300));
 		simConfig.addMapping(new Attribute("nearestPPill", MsPacManDescription.class), new Interval(300));
-		simConfig.addMapping(new Attribute("remainingPills", MsPacManDescription.class), new Interval(10));
-		simConfig.addMapping(new Attribute("remainingPowerPills", MsPacManDescription.class), new Interval(2));
+		simConfig.addMapping(new Attribute("remainingPills", MsPacManDescription.class), new Interval(200));
+		simConfig.addMapping(new Attribute("remainingPowerPills", MsPacManDescription.class), new Interval(4));
 
 
 		// ==== PESOS ====
