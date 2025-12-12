@@ -23,6 +23,7 @@ import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.Average;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.CachedLinearCaseBase;
 import es.ucm.fdi.ici.c2526.practica4.grupoYY.CBRengine.CustomPlainTextConnector;
 import gate.util.Pair;
+import pacman.game.Constants.DM;
 import pacman.game.Constants.MOVE;
 
 public class MsPacManCBRengine implements StandardCBRApplication {
@@ -60,8 +61,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 					String filename = "nivel" + i + File.separator + (j == 0 ? "edible" : "noEdible") + File.separator
 							+ s + ".csv";
 					connector.setCaseBaseFile(CASE_BASE_PATH, filename);
-					
-	              
+
 					caseBase = new CachedLinearCaseBase();
 					Pair p = new Pair(connector, caseBase);
 
@@ -74,7 +74,7 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		this.storageManager.setCaseBase(caseBase);
 
 		simConfig = new NNConfig();
-		
+
 		simConfig.setDescriptionSimFunction(new Average());
 		// === PACMAN ===
 		simConfig.addMapping(new Attribute("pacmanLives", MsPacManDescription.class), new Interval(3));
@@ -86,16 +86,18 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		simConfig.addMapping(new Attribute("edibleGhost", MsPacManDescription.class), new Equal());
 		simConfig.addMapping(new Attribute("numEdibles", MsPacManDescription.class), new Interval(4));
 		simConfig.addMapping(new Attribute("ghostEdibleTime", MsPacManDescription.class), new Interval(200));
-		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class), new ListNumberSimilarityFunction(1000));
-		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class), new ListNumberSimilarityFunction(130));
-		simConfig.addMapping(new Attribute("ghostsLastMoves", MsPacManDescription.class), new ListMoveSimilarityFunction());
+		simConfig.addMapping(new Attribute("listPosGhost", MsPacManDescription.class),
+				new ListNumberSimilarityFunction(1000));
+		simConfig.addMapping(new Attribute("ghostDistances", MsPacManDescription.class),
+				new ListNumberSimilarityFunction(130));
+		simConfig.addMapping(new Attribute("ghostsLastMoves", MsPacManDescription.class),
+				new ListMoveSimilarityFunction());
 
 		// === PILLS ===
 		simConfig.addMapping(new Attribute("nearestPill", MsPacManDescription.class), new Interval(300));
 		simConfig.addMapping(new Attribute("nearestPPill", MsPacManDescription.class), new Interval(300));
 		simConfig.addMapping(new Attribute("remainingPills", MsPacManDescription.class), new Interval(200));
 		simConfig.addMapping(new Attribute("remainingPowerPills", MsPacManDescription.class), new Interval(4));
-
 
 		// ==== PESOS ====
 		simConfig.setWeight(new Attribute("pacmanLives", MsPacManDescription.class), 0.0);
@@ -115,7 +117,6 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		simConfig.setWeight(new Attribute("remainingPills", MsPacManDescription.class), 50.0); // evita bucles
 		simConfig.setWeight(new Attribute("remainingPowerPills", MsPacManDescription.class), 15.0);
 
-		
 	}
 
 	@Override
@@ -156,63 +157,75 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 
 		// Recuperación y reutilización
 		if (caseBase.getCases().isEmpty()) {
-			this.action = MOVE.NEUTRAL;
+
+			int mejorPos = 0, distance = d.getNearestGhost();
+
+			for (Integer pos : d.getListPosGhost().getList()) {
+
+				if (distance == storageManager.game.getDistance(storageManager.game.getPacmanCurrentNodeIndex(), pos,
+						DM.PATH)) {
+					mejorPos = pos;
+				}
+
+			}
+
+			if (d.getEdibleGhost()) {
+				this.action = storageManager.game.getApproximateNextMoveTowardsTarget(d.getPacmanPos(), mejorPos,
+						d.pacmanLastMove, DM.PATH);
+			} else {
+				this.action = storageManager.game.getApproximateNextMoveAwayFromTarget(d.getPacmanPos(), mejorPos,
+						d.pacmanLastMove, DM.PATH);
+			}
 		} else {
 			Collection<RetrievalResult> eval = NNScoringMethod.evaluateSimilarity(caseBase.getCases(), query,
 					simConfig);
-			this.action = reuse(eval,query);
+			this.action = reuse(eval, query);
 		}
 
 		// Crear y retener el nuevo caso
 		CBRCase newCase = createNewCase(query);
-		
+
 		storageManager.reviseAndRetain(newCase);
 	}
 
-	private MOVE reuse(Collection<RetrievalResult> eval,CBRQuery query) {
+	private MOVE reuse(Collection<RetrievalResult> eval, CBRQuery query) {
 		// This simple implementation only uses 1NN
 		// Consider using kNNs with majority voting
-		 Map<MOVE, Integer> moveScores = new HashMap<>();
-		    int k = 10;
+		Map<MOVE, Integer> moveScores = new HashMap<>();
+		int k = 5;
 
-		    Collection<RetrievalResult> topCases = SelectCases.selectTopKRR(eval, k);
+		Collection<RetrievalResult> topCases = SelectCases.selectTopKRR(eval, k);
+		RetrievalResult rr = topCases.iterator().next();
+		double similarity = rr.getEval();
 
-		    MsPacManDescription currentDesc = (MsPacManDescription) query.getDescription();
-		    int nearestPill = currentDesc.getNearestPill();
+		if ((similarity < 0.9)) {
+			int index = (int) Math.floor(Math.random() * 4);
+			if (MOVE.values()[index] == action)
+				index = (index + 1) % 4;
+			action = MOVE.values()[index];
+		} else {
+			for (RetrievalResult r : topCases) {
+				CBRCase c = r.get_case();
+				MsPacManSolution s = (MsPacManSolution) c.getSolution();
+				MsPacManResult res = (MsPacManResult) c.getResult();
 
-		    for (RetrievalResult r : topCases) {
-		        CBRCase c = r.get_case();
-		        MsPacManSolution s = (MsPacManSolution) c.getSolution();
-		        MsPacManResult res = (MsPacManResult) c.getResult();
+				MOVE move = s.getAction();
+				int score = res.getScore();
 
-		        MOVE move = s.getAction();
-		        int score = res.getScore();
+				moveScores.put(move, moveScores.getOrDefault(move, 0) + score);
+			}
 
-		        // Penalización: pocas píldoras cerca
-		        if (nearestPill > 20) {
-		            score -= 5; // ajusta según pruebas
-		        }
-
-		        // Penalización: si el movimiento ya se hizo en el último paso (evita bucles)
-		        if (move == currentDesc.getPacmanLastMove()) {
-		            score -= 3;
-		        }
-
-		        // Acumulamos score
-		        moveScores.put(move, moveScores.getOrDefault(move, 0) + score);
-		    }
-
-		    // Elegir el movimiento con mayor score
-		    MOVE bestMove = MOVE.NEUTRAL;
-		    int maxScore = Integer.MIN_VALUE;
-		    for (Map.Entry<MOVE, Integer> entry : moveScores.entrySet()) {
-		        if (entry.getValue() > maxScore) {
-		            maxScore = entry.getValue();
-		            bestMove = entry.getKey();
-		        }
-		    }
-		    
-		    return bestMove;
+			// Elegir el movimiento con mayor score
+			action = MOVE.NEUTRAL;
+			int maxScore = Integer.MIN_VALUE;
+			for (Map.Entry<MOVE, Integer> entry : moveScores.entrySet()) {
+				if (entry.getValue() > maxScore) {
+					maxScore = entry.getValue();
+					action = entry.getKey();
+				}
+			}
+		}
+		return action;
 	}
 
 	/**
@@ -226,15 +239,15 @@ public class MsPacManCBRengine implements StandardCBRApplication {
 		MsPacManResult newResult = new MsPacManResult();
 		MsPacManSolution newSolution = new MsPacManSolution();
 
-		//El id lo asignamaos al retener el caso en el StorageManager
-		
-		/*
-		int newId = caseBase.getNextId() + storageManager.getTypePendingCases(caseBase);
+		// El id lo asignamaos al retener el caso en el StorageManager
 
-		newDescription.setId(newId);
-		newResult.setId(newId);
-		newSolution.setId(newId);
-		*/
+		/*
+		 * int newId = caseBase.getNextId() +
+		 * storageManager.getTypePendingCases(caseBase);
+		 * 
+		 * newDescription.setId(newId); newResult.setId(newId);
+		 * newSolution.setId(newId);
+		 */
 		newSolution.setAction(this.action);
 
 		newCase.setDescription(newDescription);
